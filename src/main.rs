@@ -735,18 +735,61 @@ impl KskApp {
 
     fn ui_radio_pl_num(ui: &mut egui::Ui, val: &mut i32) {
         ui.horizontal(|ui| {
-            ui.radio_value(val, 1, "Loại I");
-            ui.radio_value(val, 2, "Loại II");
-            ui.radio_value(val, 3, "Loại III");
-            ui.radio_value(val, 4, "Loại IV");
-            ui.radio_value(val, 5, "Loại V");
+            let pls = [
+                (1, "Loại I", egui::Color32::from_rgb(16, 185, 129)),   // Emerald green
+                (2, "Loại II", egui::Color32::from_rgb(14, 165, 233)),  // Sky blue
+                (3, "Loại III", egui::Color32::from_rgb(234, 179, 8)),  // Amber yellow
+                (4, "Loại IV", egui::Color32::from_rgb(249, 115, 22)),  // Orange
+                (5, "Loại V", egui::Color32::from_rgb(239, 68, 68)),    // Red
+            ];
+            for (num, label, active_color) in pls {
+                let is_selected = *val == num;
+                let text = if is_selected {
+                    egui::RichText::new(label).strong().color(egui::Color32::WHITE)
+                } else {
+                    egui::RichText::new(label)
+                };
+                let mut btn = egui::Button::new(text).rounding(12.0);
+                if is_selected {
+                    btn = btn.fill(active_color);
+                }
+                if ui.add(btn).clicked() {
+                    *val = num;
+                }
+            }
         });
     }
 
     fn ui_radio_yn(ui: &mut egui::Ui, val: &mut i32) {
         ui.horizontal(|ui| {
-            ui.radio_value(val, 0, "Không");
-            ui.radio_value(val, 1, "Có");
+            let is_no = *val == 0;
+            let is_yes = *val == 1;
+
+            let no_txt = if is_no {
+                egui::RichText::new(" Không ").strong().color(egui::Color32::WHITE)
+            } else {
+                egui::RichText::new(" Không ")
+            };
+            let mut btn_no = egui::Button::new(no_txt).rounding(10.0);
+            if is_no {
+                btn_no = btn_no.fill(egui::Color32::from_rgb(100, 116, 139)); // Slate
+            }
+            if ui.add(btn_no).clicked() {
+                *val = 0;
+            }
+
+            let yes_txt = if is_yes {
+                egui::RichText::new(" Có ").strong().color(egui::Color32::WHITE)
+            } else {
+                egui::RichText::new(" Có ")
+            };
+            let mut btn_yes = egui::Button::new(yes_txt).rounding(10.0);
+            if is_yes {
+                btn_yes = btn_yes.fill(egui::Color32::from_rgb(239, 68, 68)); // Red highlight for disease history
+            }
+            if ui.add(btn_yes).clicked() {
+                *val = 1;
+            }
         });
     }
 
@@ -1825,6 +1868,8 @@ fn multi_icd(ui: &mut egui::Ui, id: &str, value: &mut String, icds: &[(String, S
     if let Some(i) = remove { sel.remove(i); }
     *value = sel.join(";");
 }
+
+
 
 
 
