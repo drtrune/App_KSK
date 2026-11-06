@@ -1597,79 +1597,88 @@ impl KskApp {
                     continue;
                 }
 
-                // Thẻ bệnh tiêu chuẩn với Accordion
-                let is_expanded = self.expanded_diseases.contains(&disease.id);
-                let current_sel_cid = self.form.selected_classifications.get(&disease.id);
-                let current_sel = current_sel_cid.and_then(|cid| clss.iter().find(|c| &c.id == cid)).unwrap_or(&clss[0]);
-                let cur_score = calc_classification_score(current_sel, base_vision, base_hearing);
+                // Thẻ bệnh tiêu chuẩn với Accordion (Được bọc push_id để tránh trùng widget ID)
+                ui.push_id(&disease.id, |ui| {
+                    let is_expanded = self.expanded_diseases.contains(&disease.id);
+                    let current_sel_cid = self.form.selected_classifications.get(&disease.id);
+                    let current_sel = current_sel_cid.and_then(|cid| clss.iter().find(|c| &c.id == cid)).unwrap_or(&clss[0]);
+                    let cur_score = calc_classification_score(current_sel, base_vision, base_hearing);
 
-                egui::Frame::group(ui.style())
-                    .fill(if self.dark_mode {
-                        if cur_score > 1 { egui::Color32::from_rgb(35, 30, 45) } else { egui::Color32::from_rgb(24, 30, 42) }
-                    } else {
-                        if cur_score > 1 { egui::Color32::from_rgb(254, 242, 242) } else { egui::Color32::from_rgb(248, 250, 252) }
-                    })
-                    .stroke(egui::Stroke::new(1.0_f32, if cur_score > 1 { egui::Color32::from_rgb(248, 113, 113) } else { egui::Color32::from_rgb(226, 232, 240) }))
-                    .inner_margin(10.0)
-                    .show(ui, |ui| {
-                        // Header có thể click để bung ra / thu gọn
-                        let resp = ui.horizontal(|ui| {
-                            let chevron = if is_expanded { "▼" } else { "▶" };
-                            ui.label(egui::RichText::new(chevron).monospace().size(12.0));
-                            ui.vertical(|ui| {
-                                ui.strong(egui::RichText::new(&disease.name).size(13.5));
-                                ui.colored_label(egui::Color32::from_rgb(100, 116, 139), egui::RichText::new(&current_sel.name).size(11.5));
-                            });
-                            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                ui_score_badge(ui, cur_score, current_sel.ref_disease_id.is_some());
-                            });
-                        }).response;
+                    egui::Frame::group(ui.style())
+                        .fill(if self.dark_mode {
+                            if cur_score > 1 { egui::Color32::from_rgb(35, 30, 45) } else { egui::Color32::from_rgb(24, 30, 42) }
+                        } else {
+                            if cur_score > 1 { egui::Color32::from_rgb(254, 242, 242) } else { egui::Color32::from_rgb(248, 250, 252) }
+                        })
+                        .stroke(egui::Stroke::new(1.0_f32, if cur_score > 1 { egui::Color32::from_rgb(248, 113, 113) } else { egui::Color32::from_rgb(226, 232, 240) }))
+                        .inner_margin(10.0)
+                        .show(ui, |ui| {
+                            // Header có thể click để bung ra / thu gọn
+                            let header_id = ui.id().with("card_hdr");
+                            let header_resp = ui.horizontal(|ui| {
+                                let chevron = if is_expanded { "▼" } else { "▶" };
+                                ui.label(egui::RichText::new(chevron).monospace().size(12.0));
+                                ui.vertical(|ui| {
+                                    ui.strong(egui::RichText::new(&disease.name).size(13.5));
+                                    ui.colored_label(egui::Color32::from_rgb(100, 116, 139), egui::RichText::new(&current_sel.name).size(11.5));
+                                });
+                                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                    ui_score_badge(ui, cur_score, current_sel.ref_disease_id.is_some());
+                                });
+                            }).response;
 
-                        if resp.interact(egui::Sense::click()).clicked() {
-                            if is_expanded {
-                                self.expanded_diseases.remove(&disease.id);
-                            } else {
-                                self.expanded_diseases.insert(disease.id.clone());
-                            }
-                        }
-
-                        // Nội dung bung ra: các tiêu chuẩn phân loại lựa chọn
-                        if is_expanded {
-                            ui.separator();
-                            ui.vertical(|ui| {
-                                for c in &clss {
-                                    let is_checked = current_sel.id == c.id;
-                                    let c_score = calc_classification_score(c, base_vision, base_hearing);
-                                    let is_dyn = c.ref_disease_id.is_some();
-
-                                    ui.horizontal(|ui| {
-                                        let radio_resp = ui.radio(is_checked, "");
-                                        let text_resp = ui.vertical(|ui| {
-                                            ui.label(if is_checked {
-                                                egui::RichText::new(&c.name).strong().color(egui::Color32::from_rgb(14, 165, 233))
-                                            } else {
-                                                egui::RichText::new(&c.name)
-                                            });
-                                            if let Some(ref r) = c.ref_rule {
-                                                ui.colored_label(egui::Color32::from_rgb(180, 83, 9), egui::RichText::new(format!("↳ {}", r)).italics().size(11.0));
-                                            }
-                                        }).response;
-
-                                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                            ui_score_badge(ui, c_score, is_dyn);
-                                        });
-
-                                        if radio_resp.clicked() || text_resp.interact(egui::Sense::click()).clicked() {
-                                            self.form.selected_classifications.insert(disease.id.clone(), c.id.clone());
-                                            self.sync_specialty_result(spec_id);
-                                        }
-                                    });
-                                    ui.add_space(2.0);
+                            let click_area = ui.interact(header_resp.rect, header_id, egui::Sense::click());
+                            if click_area.clicked() {
+                                if is_expanded {
+                                    self.expanded_diseases.remove(&disease.id);
+                                } else {
+                                    self.expanded_diseases.insert(disease.id.clone());
                                 }
-                            });
-                        }
-                    });
-                ui.add_space(4.0);
+                            }
+
+                            // Nội dung bung ra: các tiêu chuẩn phân loại lựa chọn
+                            if is_expanded {
+                                ui.separator();
+                                ui.vertical(|ui| {
+                                    for c in &clss {
+                                        ui.push_id(&c.id, |ui| {
+                                            let is_checked = current_sel.id == c.id;
+                                            let c_score = calc_classification_score(c, base_vision, base_hearing);
+                                            let is_dyn = c.ref_disease_id.is_some();
+
+                                            let row_resp = ui.horizontal(|ui| {
+                                                let r_btn = ui.radio(is_checked, "");
+                                                ui.vertical(|ui| {
+                                                    ui.label(if is_checked {
+                                                        egui::RichText::new(&c.name).strong().color(egui::Color32::from_rgb(14, 165, 233))
+                                                    } else {
+                                                        egui::RichText::new(&c.name)
+                                                    });
+                                                    if let Some(ref r) = c.ref_rule {
+                                                        ui.colored_label(egui::Color32::from_rgb(180, 83, 9), egui::RichText::new(format!("↳ {}", r)).italics().size(11.0));
+                                                    }
+                                                });
+
+                                                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                                    ui_score_badge(ui, c_score, is_dyn);
+                                                });
+
+                                                r_btn
+                                            });
+
+                                            let row_click = ui.interact(row_resp.response.rect, ui.id().with("opt_click"), egui::Sense::click());
+                                            if row_resp.inner.clicked() || row_click.clicked() {
+                                                self.form.selected_classifications.insert(disease.id.clone(), c.id.clone());
+                                                self.sync_specialty_result(spec_id);
+                                            }
+                                        });
+                                        ui.add_space(2.0);
+                                    }
+                                });
+                            }
+                        });
+                    ui.add_space(4.0);
+                });
             }
         }
 
