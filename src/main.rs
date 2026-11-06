@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 use eframe::egui;
+use chrono::Datelike;
 use sha2::{Digest, Sha256};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
@@ -1346,62 +1347,47 @@ impl eframe::App for KskApp {
                         let enabled = self.can_edit_dept("hchinh");
                         ui.add_enabled_ui(enabled, |ui| {
                             egui::Grid::new("grid_hc_detail").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
-                                ui.label("1. Họ và tên:"); ui.text_edit_singleline(&mut self.form.ho_ten);
-                                ui.label("2. Giới tính:");
+                                ui.strong("1. Họ và tên *:"); ui.text_edit_singleline(&mut self.form.ho_ten);
+                                ui.strong("2. Giới tính:");
                                 egui::ComboBox::from_id_source("cb_gt").selected_text(if self.form.gioi_tinh == 1 { "1 - Nam" } else { "2 - Nữ" }).show_ui(ui, |ui| {
                                     ui.selectable_value(&mut self.form.gioi_tinh, 1, "1 - Nam");
                                     ui.selectable_value(&mut self.form.gioi_tinh, 2, "2 - Nữ");
                                 });
                                 ui.end_row();
 
-                                ui.label("3. Ngày sinh:"); ui.text_edit_singleline(&mut self.form.ngay_sinh);
+                                ui.strong("3. Ngày sinh *:");
+                                date_input_picker(ui, "dp_ngay_sinh", &mut self.form.ngay_sinh);
+
                                 ui.label("4. Dân tộc:");
                                 let eths = Self::cat_items(&self.catalogs, "ethnicity", None);
                                 search_combo(ui, "cb_eth", &mut self.form.ma_dan_toc, &eths);
                                 ui.end_row();
 
-                                ui.label("5. Số CCCD:"); ui.text_edit_singleline(&mut self.form.so_cccd);
-                                ui.label("6. Ngày cấp CCCD:"); ui.text_edit_singleline(&mut self.form.ngaycap_cccd);
+                                ui.strong("5. Số CMND/CCCD/ĐD *:"); ui.text_edit_singleline(&mut self.form.so_cccd);
+                                ui.label("6. Ngày cấp CCCD:");
+                                date_input_picker(ui, "dp_ngaycap_cccd", &mut self.form.ngaycap_cccd);
                                 ui.end_row();
 
                                 ui.label("7. Nơi cấp CCCD:"); ui.text_edit_singleline(&mut self.form.noicap_cccd);
-                                ui.label("8. Tỉnh / TP:");
-                                let provs = Self::cat_items(&self.catalogs, "province", None);
-                                let prov_changed = search_combo(ui, "cb_prov", &mut self.form.matinh_cu_tru, &provs);
-                                ui.end_row();
-
-                                if prov_changed {
-                                    if let Some(first_w) = self.catalogs.iter().find(|c| c.cat_type == "ward" && c.parent_code == self.form.matinh_cu_tru) {
-                                        self.form.maxa_cu_tru = first_w.code.clone();
-                                    }
-                                }
-
-                                ui.label("9. Phường / Xã:");
-                                let wards = Self::cat_items(&self.catalogs, "ward", Some(&self.form.matinh_cu_tru));
-                                search_combo(ui, "cb_ward", &mut self.form.maxa_cu_tru, &wards);
-
-                                ui.label("10. Nghề nghiệp:");
+                                ui.label("8. Nghề nghiệp:");
                                 let occs = Self::cat_items(&self.catalogs, "occupation", None);
                                 search_combo(ui, "cb_occ", &mut self.form.ma_nghe_nghiep, &occs);
                                 ui.end_row();
 
-                                ui.label("11. Điện thoại:"); ui.text_edit_singleline(&mut self.form.dien_thoai);
-                                ui.label("12. Nhóm máu:"); ui.text_edit_singleline(&mut self.form.nhom_mau);
+                                ui.label("9. Điện thoại:"); ui.text_edit_singleline(&mut self.form.dien_thoai);
+                                ui.label("10. Nhóm máu:"); ui.text_edit_singleline(&mut self.form.nhom_mau);
                                 ui.end_row();
 
-                                ui.label("13. Mã Lượt khám (MA_LK):"); ui.text_edit_singleline(&mut self.form.ma_lk);
-                                ui.label("14. Ngày khám (NGAY_VAO):"); ui.text_edit_singleline(&mut self.form.ngay_vao);
+                                ui.label("11. Mã Y Tế / Lượt khám:"); ui.text_edit_singleline(&mut self.form.ma_lk);
+                                ui.strong("12. Ngày khám KSK *:");
+                                date_input_picker(ui, "dp_ngay_vao", &mut self.form.ngay_vao);
                                 ui.end_row();
 
-                                ui.label("15. Mã CSKCB:"); ui.text_edit_singleline(&mut self.form.ma_cskcb);
-                                ui.label("16. Mã GLN CSKCB (13 số):"); ui.text_edit_singleline(&mut self.form.ma_gtin_cskcb);
-                                ui.end_row();
-
-                                ui.label("17. Đối tượng (QĐ 3176):");
+                                ui.label("13. Đối tượng khám:");
                                 let pris = Self::cat_items(&self.catalogs, "priority", None);
                                 search_combo(ui, "cb_pri", &mut self.form.doi_tuong, &pris);
 
-                                ui.label("18. Nguồn chi trả:");
+                                ui.label("14. Nguồn chi trả:");
                                 let pays = Self::cat_items(&self.catalogs, "payment", None);
                                 let mut pay_s = self.form.nguon_chi_tra.to_string();
                                 if search_combo(ui, "cb_pay", &mut pay_s, &pays) {
@@ -1411,7 +1397,32 @@ impl eframe::App for KskApp {
                             });
 
                             ui.add_space(8.0);
-                            Self::ui_multiline(ui, "Nơi ở hiện tại (DIA_CHI chi tiết):", &mut self.form.dia_chi);
+                            // COMBO ĐỊA CHỈ: SỐ NHÀ/THÔN XÓM + TỈNH/TP + PHƯỜNG/XÃ
+                            egui::Frame::group(ui.style()).fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(241, 245, 249) }).rounding(8.0).show(ui, |ui| {
+                                ui.strong("🏠 ĐỊA CHỈ NƠI Ở HIỆN TẠI (Tỉnh, Xã & Địa chỉ chi tiết):");
+                                egui::Grid::new("grid_addr_combo").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
+                                    ui.strong("Tỉnh / Thành phố *:");
+                                    let provs = Self::cat_items(&self.catalogs, "province", None);
+                                    let prov_changed = search_combo(ui, "cb_prov", &mut self.form.matinh_cu_tru, &provs);
+
+                                    if prov_changed {
+                                        if let Some(first_w) = self.catalogs.iter().find(|c| c.cat_type == "ward" && c.parent_code == self.form.matinh_cu_tru) {
+                                            self.form.maxa_cu_tru = first_w.code.clone();
+                                        }
+                                    }
+
+                                    ui.strong("Xã / Phường *:");
+                                    let wards = Self::cat_items(&self.catalogs, "ward", Some(&self.form.matinh_cu_tru));
+                                    search_combo(ui, "cb_ward", &mut self.form.maxa_cu_tru, &wards);
+                                    ui.end_row();
+
+                                    ui.strong("Số nhà, thôn/xóm:");
+                                    ui.add(egui::TextEdit::singleline(&mut self.form.dia_chi).desired_width(320.0).hint_text("VD: Số 12, Thôn A, Phố B"));
+                                    ui.end_row();
+                                });
+                            });
+
+                            ui.add_space(8.0);
                             Self::ui_multiline(ui, "Nơi làm việc, học tập hiện tại:", &mut self.form.noi_lam_viec_hoc_tap);
                             Self::ui_multiline(ui, "Lý do khám sức khỏe (LY_DO_VV):", &mut self.form.ly_do_vv);
                         });
@@ -1421,69 +1432,119 @@ impl eframe::App for KskApp {
                     1 => {
                         let enabled = self.can_edit_dept("hchinh");
                         ui.add_enabled_ui(enabled, |ui| {
-                            ui.strong("A. Tiền sử gia đình mắc bệnh truyền nhiễm, tim mạch, ĐTĐ, hen, ung thư, tâm thần:");
-                            Self::ui_radio_yn(ui, &mut self.form.tsgd_mac_benh);
-                            ui.label("Mã bệnh ICD-10 tiền sử gia đình (chọn nhiều):");
-                            let icds = Self::cat_items(&self.catalogs, "icd10", None);
-                            multi_icd(ui, "icd_tsgd", &mut self.form.tsgd_ma_benh, &icds);
-
-                            ui.separator();
-                            ui.strong("B. Tiền sử bản thân (22 chỉ số):");
-                            egui::Grid::new("grid_tsbt").num_columns(4).spacing([14.0, 6.0]).show(ui, |ui| {
-                                ui.label("1. Bệnh hay bị thương trong 5 năm qua:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_trong_5_nam_qua);
-                                ui.label("2. Bệnh thần kinh hay bị thương ở đầu:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_than_kinh);
-                                ui.end_row();
-
-                                ui.label("3. Bệnh mắt hoặc giảm thị lực:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_mat);
-                                ui.label("4. Bệnh ở tai, giảm sức nghe, thăng bằng:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tai);
-                                ui.end_row();
-
-                                ui.label("5. Bệnh ở tim, nhồi máu cơ tim:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tim);
-                                ui.label("6. Phẫu thuật can thiệp tim mạch:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_phau_thuat_tim);
-                                ui.end_row();
-
-                                ui.label("7. Tăng huyết áp:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_tang_huyet_ap);
-                                ui.label("8. Khó thở:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_kho_tho);
-                                ui.end_row();
-
-                                ui.label("9. Bệnh phổi, hen, viêm phế quản mạn:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_phoi);
-                                ui.label("10. Bệnh thận, lọc máu:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_than);
-                                ui.end_row();
-
-                                ui.label("11. Nghiện rượu, bia:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_nghien_ruou);
-                                ui.label("12. Đái tháo đường:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_dai_thao_duong);
-                                ui.end_row();
-
-                                ui.label("13. Bệnh tâm thần:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tam_than);
-                                ui.label("14. Mất ý thức, rối loạn ý thức:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_mat_y_thuc);
-                                ui.end_row();
-
-                                ui.label("15. Ngất, chóng mặt:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_ngat);
-                                ui.label("16. Bệnh tiêu hóa:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tieu_hoa);
-                                ui.end_row();
-
-                                ui.label("17. Rối loạn giấc ngủ, ngáy to:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_roi_loan_giac_ngu);
-                                ui.label("18. Tai biến mạch máu não / liệt:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_tai_bien);
-                                ui.end_row();
-
-                                ui.label("19. Bệnh hoặc tổn thương cột sống:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_cot_song);
-                                ui.label("20. Sử dụng rượu thường xuyên:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_ruou_thuong_xuyen);
-                                ui.end_row();
-
-                                ui.label("21. Sử dụng ma túy, chất gây nghiện:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_ma_tuy);
-                                ui.label("22. Mắc bệnh khác:"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_khac);
-                                ui.end_row();
+                            // 1. TIỀN SỬ GIA ĐÌNH
+                            ui.heading("1. Tiền sử gia đình:");
+                            ui.horizontal(|ui| {
+                                ui.strong("Có ai trong gia đình mắc một trong các bệnh: truyền nhiễm, tim mạch, ĐTĐ, lao, hen, ung thư, động kinh, tâm thần?");
+                                Self::ui_radio_yn(ui, &mut self.form.tsgd_mac_benh);
                             });
 
-                            ui.add_space(8.0);
-                            ui.strong("Mã bệnh khác (ICD-10, chọn nhiều):");
-                            let icds_bt = Self::cat_items(&self.catalogs, "icd10", None);
-                            multi_icd(ui, "icd_tsbt", &mut self.form.tsbt_ma_benh_khac, &icds_bt);
-                            Self::ui_multiline(ui, "Thuốc đang sử dụng và liều lượng:", &mut self.form.tsbt_ten_thuoc_lieu_luong);
-                            Self::ui_multiline(ui, "Tiền sử thai sản & thuốc điều trị thai sản:", &mut self.form.tsbt_ten_thuoc_thai_san);
+                            // CHỈ HIỆN CHỌN ICD GIA ĐÌNH KHI CHỌN "CÓ"
+                            if self.form.tsgd_mac_benh == 1 {
+                                ui.add_space(4.0);
+                                egui::Frame::group(ui.style()).fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(254, 242, 242) }).rounding(8.0).show(ui, |ui| {
+                                    ui.strong("👉 Tiền sử bệnh, tật của gia đình (Mã ICD-10, chọn nhiều):");
+                                    let icds = Self::cat_items(&self.catalogs, "icd10", None);
+                                    multi_icd(ui, "icd_tsgd", &mut self.form.tsgd_ma_benh, &icds);
+                                });
+                            }
+
+                            ui.separator();
+                            ui.heading("2. Tiền sử bản thân (22 chỉ số bệnh lý):");
+                            ui.horizontal(|ui| {
+                                // CỘT 1 (STT 1 -> 11)
+                                ui.vertical(|ui| {
+                                    ui.set_width(ui.available_width() / 2.0 - 15.0);
+                                    egui::Grid::new("grid_tsbt_col1").num_columns(3).spacing([8.0, 6.0]).show(ui, |ui| {
+                                        ui.strong("STT"); ui.strong("Tiền sử bệnh lý"); ui.strong("Chọn"); ui.end_row();
+
+                                        ui.label("1"); ui.label("Có bệnh hay bị thương trong 5 năm qua"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_trong_5_nam_qua); ui.end_row();
+                                        ui.label("2"); ui.label("Có bệnh thần kinh hay bị thương ở đầu"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_than_kinh); ui.end_row();
+                                        ui.label("3"); ui.label("Bệnh mắt hoặc giảm thị lực (trừ đeo kính)"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_mat); ui.end_row();
+                                        ui.label("4"); ui.label("Bệnh ở tai, giảm sức nghe hoặc thăng bằng"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tai); ui.end_row();
+                                        ui.label("5"); ui.label("Bệnh ở tim, nhồi máu cơ tim, tim mạch khác"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tim); ui.end_row();
+                                        ui.label("6"); ui.label("Phẫu thuật can thiệp tim - mạch"); Self::ui_radio_yn(ui, &mut self.form.tsbt_phau_thuat_tim); ui.end_row();
+                                        ui.label("7"); ui.label("Tăng huyết áp"); Self::ui_radio_yn(ui, &mut self.form.tsbt_tang_huyet_ap); ui.end_row();
+                                        ui.label("8"); ui.label("Khó thở"); Self::ui_radio_yn(ui, &mut self.form.tsbt_kho_tho); ui.end_row();
+                                        ui.label("9"); ui.label("Bệnh phổi, hen, khí phế thũng, phế quản mạn"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_phoi); ui.end_row();
+                                        ui.label("10"); ui.label("Bệnh thận, lọc máu"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_than); ui.end_row();
+                                        ui.label("11"); ui.label("Nghiện rượu, bia"); Self::ui_radio_yn(ui, &mut self.form.tsbt_nghien_ruou); ui.end_row();
+                                    });
+                                });
+
+                                ui.separator();
+
+                                // CỘT 2 (STT 12 -> 22)
+                                ui.vertical(|ui| {
+                                    egui::Grid::new("grid_tsbt_col2").num_columns(3).spacing([8.0, 6.0]).show(ui, |ui| {
+                                        ui.strong("STT"); ui.strong("Tiền sử bệnh lý"); ui.strong("Chọn"); ui.end_row();
+
+                                        ui.label("12"); ui.label("Đái tháo đường hoặc tăng đường huyết"); Self::ui_radio_yn(ui, &mut self.form.tsbt_dai_thao_duong); ui.end_row();
+                                        ui.label("13"); ui.label("Bệnh tâm thần"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tam_than); ui.end_row();
+                                        ui.label("14"); ui.label("Mất ý thức, rối loạn ý thức"); Self::ui_radio_yn(ui, &mut self.form.tsbt_mat_y_thuc); ui.end_row();
+                                        ui.label("15"); ui.label("Ngất, chóng mặt"); Self::ui_radio_yn(ui, &mut self.form.tsbt_ngat); ui.end_row();
+                                        ui.label("16"); ui.label("Bệnh tiêu hóa"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tieu_hoa); ui.end_row();
+                                        ui.label("17"); ui.label("Rối loạn giấc ngủ, ngừng thở, ngáy to"); Self::ui_radio_yn(ui, &mut self.form.tsbt_roi_loan_giac_ngu); ui.end_row();
+                                        ui.label("18"); ui.label("Tai biến mạch máu não hoặc liệt"); Self::ui_radio_yn(ui, &mut self.form.tsbt_tai_bien); ui.end_row();
+                                        ui.label("19"); ui.label("Bệnh hoặc tổn thương cột sống"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_cot_song); ui.end_row();
+                                        ui.label("20"); ui.label("Sử dụng rượu thường xuyên, liên tục"); Self::ui_radio_yn(ui, &mut self.form.tsbt_ruou_thuong_xuyen); ui.end_row();
+                                        ui.label("21"); ui.label("Sử dụng ma túy và chất gây nghiện"); Self::ui_radio_yn(ui, &mut self.form.tsbt_ma_tuy); ui.end_row();
+                                        ui.label("22"); ui.label("Bệnh khác (ghi rõ)"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_khac); ui.end_row();
+                                    });
+
+                                    // CHỈ HIỆN MÃ BỆNH KHÁC KHI CHỌN "CÓ"
+                                    if self.form.tsbt_benh_khac == 1 {
+                                        ui.add_space(4.0);
+                                        egui::Frame::group(ui.style()).fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(254, 242, 242) }).rounding(8.0).show(ui, |ui| {
+                                            ui.strong("👉 Ghi rõ tên bệnh khác (Mã ICD-10, chọn nhiều):");
+                                            let icds_bt = Self::cat_items(&self.catalogs, "icd10", None);
+                                            multi_icd(ui, "icd_tsbt", &mut self.form.tsbt_ma_benh_khac, &icds_bt);
+                                        });
+                                    }
+                                });
+                            });
+
+                            ui.separator();
+                            ui.heading("3. Các câu hỏi khác (nếu có):");
+
+                            // a. Hiện tại có đang điều trị bệnh gì không?
+                            ui.horizontal(|ui| {
+                                ui.strong("a. Hiện tại có đang điều trị bệnh gì không?");
+                                Self::ui_radio_yn(ui, &mut self.form.tsbt_dang_dieu_tri_benh);
+                            });
+                            if self.form.tsbt_dang_dieu_tri_benh == 1 {
+                                egui::Grid::new("grid_dang_dt").num_columns(2).spacing([12.0, 6.0]).show(ui, |ui| {
+                                    ui.label("Tên bệnh đang điều trị (Mã ICD-10):");
+                                    let icds_dt = Self::cat_items(&self.catalogs, "icd10", None);
+                                    multi_icd(ui, "icd_tsbt_dt", &mut self.form.tsbt_ma_benh, &icds_dt);
+                                    ui.end_row();
+
+                                    ui.label("Thuốc đang sử dụng và liều lượng:");
+                                    ui.text_edit_singleline(&mut self.form.tsbt_ten_thuoc_lieu_luong);
+                                    ui.end_row();
+                                });
+                            }
+
+                            ui.add_space(6.0);
+                            // b. Tiền sử thai sản
+                            ui.horizontal(|ui| {
+                                ui.strong("b. Tiền sử thai sản (đối với nữ):");
+                                Self::ui_radio_yn(ui, &mut self.form.tsbt_thai_san);
+                            });
+                            if self.form.tsbt_thai_san == 1 {
+                                egui::Grid::new("grid_thai_san").num_columns(2).spacing([12.0, 6.0]).show(ui, |ui| {
+                                    ui.label("Cụ thể tên bệnh thai sản (Mã ICD-10):");
+                                    let icds_ts = Self::cat_items(&self.catalogs, "icd10", None);
+                                    multi_icd(ui, "icd_tsbt_ts", &mut self.form.tsbt_ma_benh_thai_san, &icds_ts);
+                                    ui.end_row();
+
+                                    ui.label("Thuốc đang sử dụng điều trị thai sản:");
+                                    ui.text_edit_singleline(&mut self.form.tsbt_ten_thuoc_thai_san);
+                                    ui.end_row();
+                                });
+                            }
                         });
                     }
-
                     // 2: KHÁM BỆNH (GỒM THỂ LỰC, CÁC KHOA LÂM SÀNG VÀ CẬN LÂM SÀNG)
                     2 => {
                         ui.horizontal_wrapped(|ui| {
@@ -1826,6 +1887,33 @@ fn apply_theme(ctx: &egui::Context, dark: bool) {
     ctx.set_style(style);
 }
 
+/// Widget nhập ngày có định dạng sẵn (dd/mm/yyyy) kèm nút chọn nhanh (Hôm nay, Bớt 1 ngày, Bớt 1 năm)
+fn date_input_picker(ui: &mut egui::Ui, id: &str, val: &mut String) {
+    ui.horizontal(|ui| {
+        ui.add(egui::TextEdit::singleline(val).hint_text("dd/mm/yyyy").desired_width(100.0));
+        egui::ComboBox::from_id_source(id)
+            .width(18.0)
+            .selected_text("📅")
+            .show_ui(ui, |ui| {
+                let now = chrono::Local::now();
+                if ui.button(" Hôm nay ").clicked() {
+                    *val = now.format("%d/%m/%Y").to_string();
+                }
+                if ui.button(" Hôm qua ").clicked() {
+                    let d = now - chrono::Duration::days(1);
+                    *val = d.format("%d/%m/%Y").to_string();
+                }
+                ui.separator();
+                ui.weak("Chọn nhanh năm sinh:");
+                for years_ago in [18, 20, 25, 30, 35, 40, 45, 50, 55, 60] {
+                    let yr = now.year() - years_ago;
+                    if ui.button(format!("{} tuổi ({})", years_ago, yr)).clicked() {
+                        *val = format!("01/01/{}", yr);
+                    }
+                }
+            });
+    });
+}
 /// Dropdown có ô tìm kiếm (không phân biệt dấu). Trả về true nếu giá trị đổi.
 fn search_combo(ui: &mut egui::Ui, id: &str, value: &mut String, items: &[(String, String)]) -> bool {
     let cur = items.iter().find(|(c, _)| c == value).map(|(_, n)| n.clone()).unwrap_or_else(|| "Chọn...".to_string());
