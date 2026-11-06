@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+﻿#![windows_subsystem = "windows"]
 
 use eframe::egui;
 use sha2::{Digest, Sha256};
@@ -337,6 +337,8 @@ struct RecordItem {
 
 struct KskApp {
     conn: Connection,
+    config: AppConfig,
+    dark_mode: bool,
     logged_in: bool,
     login_user: String,
     login_pass: String,
@@ -347,8 +349,22 @@ struct KskApp {
     form: KskRecordPayload,
     records: Vec<RecordItem>,
     status_msg: String,
-    active_tab: usize, // 0: Form, 1: Danh sách, 2: Quản lý Danh mục
+    active_tab: usize, // 0: Form, 1: Danh sách, 2: Quản lý Danh mục, 3: Quản lý Users, 4: Cài đặt hệ thống
     dept_tab: usize,   // 0: Hành chính, 1: Thể lực, 2: Nội, 3: Ngoại, 4: Da liễu, 5: Sản, 6: Mắt, 7: TMH, 8: RHM, 9: Cận lâm sàng, 10: Kết luận
+
+    // Quản lý Users
+    user_list: Vec<UserRecord>,
+    new_username: String,
+    new_password: String,
+    new_user_role: String,
+    change_old_pass: String,
+    change_new_pass: String,
+
+    // Cài đặt Settings
+    setting_cskcb: String,
+    setting_gtin: String,
+    setting_prov: String,
+    setting_ward: String,
 
     // Danh mục
     catalogs: Vec<CatalogRecord>,
@@ -415,6 +431,12 @@ impl KskApp {
 
         let mut app = Self {
             conn,
+            setting_cskcb: cfg.default_cskcb.clone(),
+            setting_gtin: cfg.default_gtin_cskcb.clone(),
+            setting_prov: cfg.default_province_code.clone(),
+            setting_ward: cfg.default_ward_code.clone(),
+            config: cfg,
+            dark_mode: false,
             logged_in: false,
             login_user: "client".into(),
             login_pass: "123456".into(),
@@ -427,6 +449,12 @@ impl KskApp {
             status_msg: "Sẵn sàng".into(),
             active_tab: 0,
             dept_tab: 0,
+            user_list: vec![],
+            new_username: "".into(),
+            new_password: "".into(),
+            new_user_role: "reception".into(),
+            change_old_pass: "".into(),
+            change_new_pass: "".into(),
             catalogs: vec![],
             cur_cat_tab: "priority".into(),
             import_tsv_text: "".into(),
@@ -438,6 +466,7 @@ impl KskApp {
         app.seed_default_catalogs();
         app.reload_catalogs();
         app.reload_records();
+        app.reload_users();
         app
     }
 
@@ -512,6 +541,29 @@ impl KskApp {
             })
         }).unwrap();
         self.catalogs = rows.flatten().collect();
+    }
+
+    fn reload_users(&mut self) {
+        let mut stmt = self.conn.prepare("SELECT id, username, role FROM users ORDER BY id ASC").unwrap();
+        let rows = stmt.query_map([], |r| {
+            Ok(UserRecord {
+                id: r.get(0)?,
+                username: r.get(1)?,
+                role: r.get(2)?,
+            })
+        }).unwrap();
+        self.user_list = rows.filter_map(Result::ok).collect();
+    }
+
+    fn new_record_with_defaults(&mut self) {
+        let mut f = KskRecordPayload::default();
+        f.ma_cskcb = self.config.default_cskcb.clone();
+        f.ma_gtin_cskcb = self.config.default_gtin_cskcb.clone();
+        f.matinh_cu_tru = self.config.default_province_code.clone();
+        f.maxa_cu_tru = self.config.default_ward_code.clone();
+        self.current_id = None;
+        self.current_status = 0;
+        self.form = f;
     }
 
     fn reload_records(&mut self) {
@@ -747,8 +799,26 @@ impl eframe::App for KskApp {
                         });
                         ui.add_space(10.0);
                         if ui.button("   ĐĂNG NHẬP HỆ THỐNG   ").clicked() {
-                            let mut stmt = self.conn.prepare("SELECT role FROM users WHERE username = ?1 AND password = ?2").unwrap();
-                            if let Ok(role) = stmt.query_row(params![self.login_user, self.login_pass], |r| r.get::<_, String>(0)) {
+                            let hashed = hash_pass(&self.login_pass);
+                            let mut stmt = self.conn.prepare("SELECT role, password FROM users WHERE username = ?1").unwrap();
+                            let auth_result = stmt.query_row(params![self.login_user], |r| {
+                                let role: String = r.get(0)?;
+                                let pass_db: String = r.get(1)?;
+                                Ok((role, pass_db))
+                            });
+
+                            let authenticated = match auth_result {
+                                Ok((role, pass_db)) => {
+                                    if pass_db == self.login_pass || pass_db == hashed {
+                                        Some(role)
+                                    } else {
+                                        None
+                                    }
+                                }
+                                Err(_) => None,
+                            };
+
+                            if let Some(role) = authenticated {
                                 self.current_user = self.login_user.clone();
                                 self.current_role = role.clone();
                                 self.logged_in = true;
@@ -782,14 +852,18 @@ impl eframe::App for KskApp {
         // TOP BAR
         egui::TopBottomPanel::top("top_bar").show(ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.strong("PHẦN MỀM KSK QĐ 3176");
+                ui.strong("🏥 PHẦN MỀM KSK QĐ 3176");
                 ui.separator();
-                ui.selectable_value(&mut self.active_tab, 0, "Phiếu Nhập Liệu");
-                ui.selectable_value(&mut self.active_tab, 1, format!("Hồ Sơ ({})", self.records.len()));
-                ui.selectable_value(&mut self.active_tab, 2, "Quản Lý Danh Mục");
+                ui.selectable_value(&mut self.active_tab, 0, "📝 Phiếu Nhập Liệu");
+                ui.selectable_value(&mut self.active_tab, 1, format!("📋 Hồ Sơ ({})", self.records.len()));
+                ui.selectable_value(&mut self.active_tab, 2, "📚 Danh Mục");
+                if self.current_role == "admin" {
+                    ui.selectable_value(&mut self.active_tab, 3, "👥 Quản Lý Users");
+                    ui.selectable_value(&mut self.active_tab, 4, "⚙ Cài Đặt Hệ Thống");
+                }
                 ui.separator();
 
-                if ui.button(" Xuất CSV (Chuẩn 3176)").clicked() {
+                if ui.button("📥 Xuất CSV (Chuẩn 3176)").clicked() {
                     self.export_csv();
                 }
 
@@ -797,6 +871,12 @@ impl eframe::App for KskApp {
                     if ui.button("Đăng xuất").clicked() {
                         self.logged_in = false;
                     }
+                    ui.separator();
+                    if ui.button(if self.dark_mode { "☀ Sáng" } else { "🌙 Tối" }).clicked() {
+                        self.dark_mode = !self.dark_mode;
+                        apply_theme(ctx, self.dark_mode);
+                    }
+                    ui.separator();
                     ui.label(format!("BS: {} [{}]", self.current_user, self.current_role));
                 });
             });
@@ -810,6 +890,209 @@ impl eframe::App for KskApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
+            // TAB 3: QUẢN LÝ TÀI KHOẢN VÀ PHÂN QUYỀN (DÀNH CHO ADMIN)
+            if self.active_tab == 3 {
+                ui.heading("👥 QUẢN TRỊ TÀI KHOẢN & PHÂN QUYỀN HỆ THỐNG");
+                ui.add_space(8.0);
+
+                egui::Grid::new("grid_add_user").num_columns(2).spacing([12.0, 8.0]).show(ui, |ui| {
+                    ui.strong("Tên đăng nhập mới:");
+                    ui.text_edit_singleline(&mut self.new_username);
+                    ui.end_row();
+
+                    ui.strong("Mật khẩu ban đầu:");
+                    ui.add(egui::TextEdit::singleline(&mut self.new_password).password(true));
+                    ui.end_row();
+
+                    ui.strong("Vai trò / Chuyên khoa:");
+                    egui::ComboBox::from_id_source("cb_new_role")
+                        .selected_text(match self.new_user_role.as_str() {
+                            "admin" => "admin (Quản trị toàn quyền)",
+                            "reception" => "reception (Hành chính / Tiếp đón)",
+                            "bs_theluc" => "bs_theluc (Bác sĩ Thể lực)",
+                            "bs_noi" => "bs_noi (Bác sĩ Nội khoa)",
+                            "bs_ngoai" => "bs_ngoai (Bác sĩ Ngoại khoa)",
+                            "bs_dalieu" => "bs_dalieu (Bác sĩ Da liễu)",
+                            "bs_san" => "bs_san (Bác sĩ Sản phụ khoa)",
+                            "bs_mat" => "bs_mat (Bác sĩ Mắt)",
+                            "bs_tmh" => "bs_tmh (Bác sĩ Tai Mũi Họng)",
+                            "bs_rhm" => "bs_rhm (Bác sĩ Răng Hàm Mặt)",
+                            "bs_cls" => "bs_cls (Bác sĩ Cận lâm sàng)",
+                            "bs_ketluan" => "bs_ketluan (Bác sĩ Kết luận)",
+                            _ => "Chọn vai trò",
+                        })
+                        .show_ui(ui, |ui| {
+                            ui.selectable_value(&mut self.new_user_role, "admin".into(), "admin (Quản trị toàn quyền)");
+                            ui.selectable_value(&mut self.new_user_role, "reception".into(), "reception (Hành chính / Tiếp đón)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_theluc".into(), "bs_theluc (Bác sĩ Thể lực)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_noi".into(), "bs_noi (Bác sĩ Nội khoa)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_ngoai".into(), "bs_ngoai (Bác sĩ Ngoại khoa)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_dalieu".into(), "bs_dalieu (Bác sĩ Da liễu)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_san".into(), "bs_san (Bác sĩ Sản phụ khoa)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_mat".into(), "bs_mat (Bác sĩ Mắt)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_tmh".into(), "bs_tmh (Bác sĩ Tai Mũi Họng)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_rhm".into(), "bs_rhm (Bác sĩ Răng Hàm Mặt)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_cls".into(), "bs_cls (Bác sĩ Cận lâm sàng)");
+                            ui.selectable_value(&mut self.new_user_role, "bs_ketluan".into(), "bs_ketluan (Bác sĩ Kết luận)");
+                        });
+                    ui.end_row();
+                });
+
+                if ui.button("＋ Tạo Tài Khoản Mới").clicked() {
+                    if self.new_username.trim().is_empty() || self.new_password.trim().is_empty() {
+                        self.status_msg = "Lỗi: Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!".into();
+                    } else {
+                        let hashed = hash_pass(&self.new_password);
+                        let res = self.conn.execute(
+                            "INSERT INTO users (username, password, role) VALUES (?1, ?2, ?3)",
+                            params![self.new_username.trim(), hashed, self.new_user_role],
+                        );
+                        match res {
+                            Ok(_) => {
+                                self.status_msg = format!("Đã tạo thành công tài khoản: {}", self.new_username);
+                                self.new_username.clear();
+                                self.new_password.clear();
+                                self.reload_users();
+                            }
+                            Err(e) => {
+                                self.status_msg = format!("Lỗi tạo tài khoản (có thể trùng tên): {}", e);
+                            }
+                        }
+                    }
+                }
+
+                ui.separator();
+                ui.strong("Danh sách tài khoản trong hệ thống:");
+                let mut delete_id: Option<i64> = None;
+                let mut reset_id: Option<(i64, String)> = None;
+
+                egui::ScrollArea::vertical().max_height(350.0).show(ui, |ui| {
+                    egui::Grid::new("grid_users").striped(true).min_col_width(100.0).show(ui, |ui| {
+                        ui.strong("ID");
+                        ui.strong("Tên đăng nhập");
+                        ui.strong("Vai trò phân quyền");
+                        ui.strong("Hành động");
+                        ui.end_row();
+
+                        for u in &self.user_list {
+                            ui.label(u.id.to_string());
+                            ui.label(&u.username);
+                            ui.label(&u.role);
+                            ui.horizontal(|ui| {
+                                if u.username != "admin" {
+                                    if ui.button("Đặt lại MK (123456)").clicked() {
+                                        reset_id = Some((u.id, u.username.clone()));
+                                    }
+                                    if ui.button("🗑 Xóa").clicked() {
+                                        delete_id = Some(u.id);
+                                    }
+                                } else {
+                                    ui.weak("(Admin mặc định)");
+                                }
+                            });
+                            ui.end_row();
+                        }
+                    });
+                });
+
+                if let Some(id) = delete_id {
+                    let _ = self.conn.execute("DELETE FROM users WHERE id = ?", params![id]);
+                    self.reload_users();
+                    self.status_msg = "Đã xóa tài khoản thành công!".into();
+                }
+                if let Some((id, uname)) = reset_id {
+                    let hashed = hash_pass("123456");
+                    let _ = self.conn.execute("UPDATE users SET password = ? WHERE id = ?", params![hashed, id]);
+                    self.status_msg = format!("Đã đặt lại mật khẩu của '{}' về '123456'!", uname);
+                }
+
+                return;
+            }
+
+            // TAB 4: CÀI ĐẶT HỆ THỐNG (SETTINGS)
+            if self.active_tab == 4 {
+                ui.heading("⚙ CÀI ĐẶT HỆ THỐNG & CƠ SỞ KHÁM CHỮA BỆNH");
+                ui.add_space(8.0);
+
+                egui::Grid::new("grid_settings").num_columns(2).spacing([16.0, 10.0]).show(ui, |ui| {
+                    ui.strong("Mã cơ sở KCB (MA_CSKCB):");
+                    ui.text_edit_singleline(&mut self.setting_cskcb);
+                    ui.end_row();
+
+                    ui.strong("Mã định danh GLN/GTIN CSKCB (13 số):");
+                    ui.text_edit_singleline(&mut self.setting_gtin);
+                    ui.end_row();
+
+                    ui.strong("Mã Tỉnh / TP mặc định:");
+                    let provs = Self::cat_items(&self.catalogs, "province", None);
+                    search_combo(ui, "cb_setting_prov", &mut self.setting_prov, &provs);
+                    ui.end_row();
+
+                    ui.strong("Mã Phường / Xã mặc định:");
+                    let wards = Self::cat_items(&self.catalogs, "ward", Some(&self.setting_prov));
+                    search_combo(ui, "cb_setting_ward", &mut self.setting_ward, &wards);
+                    ui.end_row();
+
+                    ui.strong("Đường dẫn CSDL SQLite:");
+                    ui.label(&self.config.db_path);
+                    ui.end_row();
+                });
+
+                ui.add_space(12.0);
+                ui.horizontal(|ui| {
+                    if ui.button("💾 Lưu Cài Đặt (Lưu vào config.toml)").clicked() {
+                        self.config.default_cskcb = self.setting_cskcb.clone();
+                        self.config.default_gtin_cskcb = self.setting_gtin.clone();
+                        self.config.default_province_code = self.setting_prov.clone();
+                        self.config.default_ward_code = self.setting_ward.clone();
+                        if let Err(e) = self.config.save() {
+                            self.status_msg = format!("Lỗi lưu config.toml: {}", e);
+                        } else {
+                            self.status_msg = "Đã lưu cài đặt hệ thống thành công vào config.toml!".into();
+                        }
+                    }
+
+                    if ui.button("📦 Sao Lưu CSDL (Backup .db)").clicked() {
+                        let now = chrono::Local::now();
+                        let backup_name = format!("backup_ksk_{}.db", now.format("%Y%m%d_%H%M%S"));
+                        match fs::copy(&self.config.db_path, &backup_name) {
+                            Ok(_) => self.status_msg = format!("Đã tạo bản sao lưu thành công: {}", backup_name),
+                            Err(e) => self.status_msg = format!("Lỗi sao lưu CSDL: {}", e),
+                        }
+                    }
+                });
+
+                ui.separator();
+                ui.heading("🔑 ĐỔI MẬT KHẨU TÀI KHOẢN CỦA BẠN");
+                egui::Grid::new("grid_change_pass").num_columns(2).spacing([12.0, 8.0]).show(ui, |ui| {
+                    ui.label("Mật khẩu hiện tại:");
+                    ui.add(egui::TextEdit::singleline(&mut self.change_old_pass).password(true));
+                    ui.end_row();
+
+                    ui.label("Mật khẩu mới:");
+                    ui.add(egui::TextEdit::singleline(&mut self.change_new_pass).password(true));
+                    ui.end_row();
+                });
+
+                if ui.button("Cập Nhật Mật Khẩu").clicked() {
+                    let hashed_old = hash_pass(&self.change_old_pass);
+                    let mut stmt = self.conn.prepare("SELECT password FROM users WHERE username = ?1").unwrap();
+                    if let Ok(cur_pass_db) = stmt.query_row(params![self.current_user], |r| r.get::<_, String>(0)) {
+                        if cur_pass_db == self.change_old_pass || cur_pass_db == hashed_old {
+                            let hashed_new = hash_pass(&self.change_new_pass);
+                            let _ = self.conn.execute("UPDATE users SET password = ? WHERE username = ?", params![hashed_new, self.current_user]);
+                            self.change_old_pass.clear();
+                            self.change_new_pass.clear();
+                            self.status_msg = "Đổi mật khẩu thành công!".into();
+                        } else {
+                            self.status_msg = "Mật khẩu cũ không chính xác!".into();
+                        }
+                    }
+                }
+
+                return;
+            }
+
             // TAB 2: QUẢN LÝ DANH MỤC RIÊNG BIỆT (IMPORT HÀNG LOẠT EXCEL / TSV)
             if self.active_tab == 2 {
                 ui.heading("QUẢN LÝ VÀ CẤU HÌNH DANH MỤC HỆ THỐNG");
@@ -967,9 +1250,7 @@ impl eframe::App for KskApp {
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if ui.button("+ Hồ Sơ Mới").clicked() {
-                        self.current_id = None;
-                        self.current_status = 0;
-                        self.form = KskRecordPayload::default();
+                        self.new_record_with_defaults();
                     }
                     if self.current_status == 0 || self.current_role == "admin" {
                         if ui.button("Ký / Khóa Hồ Sơ").clicked() {
@@ -1544,4 +1825,8 @@ fn multi_icd(ui: &mut egui::Ui, id: &str, value: &mut String, icds: &[(String, S
     if let Some(i) = remove { sel.remove(i); }
     *value = sel.join(";");
 }
+
+
+
+
 
