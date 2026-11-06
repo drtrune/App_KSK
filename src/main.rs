@@ -1,4 +1,4 @@
-﻿#![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 
 use eframe::egui;
 use sha2::{Digest, Sha256};
@@ -350,7 +350,8 @@ struct KskApp {
     records: Vec<RecordItem>,
     status_msg: String,
     active_tab: usize, // 0: Form, 1: Danh sách, 2: Quản lý Danh mục, 3: Quản lý Users, 4: Cài đặt hệ thống
-    dept_tab: usize,   // 0: Hành chính, 1: Thể lực, 2: Nội, 3: Ngoại, 4: Da liễu, 5: Sản, 6: Mắt, 7: TMH, 8: RHM, 9: Cận lâm sàng, 10: Kết luận
+    dept_tab: usize,   // 0: Hành chính, 1: Tiền sử, 2: Khám bệnh, 3: Kết luận
+    kham_sub_tab: usize, // 0: Thể lực, 1: Nội, 2: Ngoại, 3: Da liễu, 4: Sản, 5: Mắt, 6: TMH, 7: RHM, 8: Cận lâm sàng
 
     // Quản lý Users
     user_list: Vec<UserRecord>,
@@ -449,6 +450,7 @@ impl KskApp {
             status_msg: "Sẵn sàng".into(),
             active_tab: 0,
             dept_tab: 0,
+            kham_sub_tab: 0,
             user_list: vec![],
             new_username: "".into(),
             new_password: "".into(),
@@ -865,18 +867,18 @@ impl eframe::App for KskApp {
                                 self.current_user = self.login_user.clone();
                                 self.current_role = role.clone();
                                 self.logged_in = true;
-                                self.dept_tab = match role.as_str() {
-                                    "bs_theluc" => 1,
-                                    "bs_noi" => 2,
-                                    "bs_ngoai" => 3,
-                                    "bs_dalieu" => 4,
-                                    "bs_san" => 5,
-                                    "bs_mat" => 6,
-                                    "bs_tmh" => 7,
-                                    "bs_rhm" => 8,
-                                    "bs_cls" => 9,
-                                    "bs_ketluan" => 10,
-                                    _ => 0,
+                                match role.as_str() {
+                                    "bs_theluc" => { self.dept_tab = 2; self.kham_sub_tab = 0; }
+                                    "bs_noi" => { self.dept_tab = 2; self.kham_sub_tab = 1; }
+                                    "bs_ngoai" => { self.dept_tab = 2; self.kham_sub_tab = 2; }
+                                    "bs_dalieu" => { self.dept_tab = 2; self.kham_sub_tab = 3; }
+                                    "bs_san" => { self.dept_tab = 2; self.kham_sub_tab = 4; }
+                                    "bs_mat" => { self.dept_tab = 2; self.kham_sub_tab = 5; }
+                                    "bs_tmh" => { self.dept_tab = 2; self.kham_sub_tab = 6; }
+                                    "bs_rhm" => { self.dept_tab = 2; self.kham_sub_tab = 7; }
+                                    "bs_cls" => { self.dept_tab = 2; self.kham_sub_tab = 8; }
+                                    "bs_ketluan" => { self.dept_tab = 3; }
+                                    _ => { self.dept_tab = 0; }
                                 };
                                 self.status_msg = format!("Chào mừng {}", self.current_user);
                             } else {
@@ -1316,26 +1318,18 @@ impl eframe::App for KskApp {
 
             // MENU PHÂN KHOA
             ui.horizontal_wrapped(|ui| {
-                let tabs = [
-                    (0, "I. Hành Chính & II. Lần Khám", "hchinh"),
-                    (1, "III. Tiền Sử Bệnh Tật", "hchinh"),
-                    (2, "IV. Đo Thể Lực", "theluc"),
-                    (3, "V.A. Nội Khoa", "noi"),
-                    (4, "V.B. Ngoại Khoa", "ngoai"),
-                    (5, "V.C. Da Liễu", "dalieu"),
-                    (6, "V.D. Sản Phụ Khoa", "san"),
-                    (7, "V.E. Khám Mắt", "mat"),
-                    (8, "V.F. Tai Mũi Họng", "tmh"),
-                    (9, "V.G. Răng Hàm Mặt", "rhm"),
-                    (10, "VI. Cận Lâm Sàng", "cls"),
-                    (11, "VII. Kết Luận", "ketluan"),
+                let main_tabs = [
+                    (0, "📋 1. HÀNH CHÍNH", "hchinh"),
+                    (1, "🩺 2. TIỀN SỬ", "hchinh"),
+                    (2, "🏥 3. KHÁM BỆNH", "noi"),
+                    (3, "⚖ 4. KẾT LUẬN", "ketluan"),
                 ];
 
-                for (idx, title, role_key) in tabs {
-                    let can_edit = self.can_edit_dept(role_key);
-                    let mut btn_text = egui::RichText::new(title);
+                for (idx, title, role_key) in main_tabs {
+                    let can_edit = self.can_edit_dept(role_key) || (idx == 2 && self.current_role != "reception" && self.current_role != "client");
+                    let mut btn_text = egui::RichText::new(title).size(15.0);
                     if can_edit {
-                        btn_text = btn_text.strong().color(egui::Color32::from_rgb(0, 180, 255));
+                        btn_text = btn_text.strong().color(egui::Color32::from_rgb(14, 165, 233));
                     }
                     if ui.selectable_label(self.dept_tab == idx, btn_text).clicked() {
                         self.dept_tab = idx;
@@ -1490,8 +1484,35 @@ impl eframe::App for KskApp {
                         });
                     }
 
-                    // IV. KHÁM THỂ LỰC
+                    // 2: KHÁM BỆNH (GỒM THỂ LỰC, CÁC KHOA LÂM SÀNG VÀ CẬN LÂM SÀNG)
                     2 => {
+                        ui.horizontal_wrapped(|ui| {
+                            let sub_depts = [
+                                (0, "Thể Lực", "theluc"),
+                                (1, "Nội Khoa", "noi"),
+                                (2, "Ngoại Khoa", "ngoai"),
+                                (3, "Da Liễu", "dalieu"),
+                                (4, "Sản Phụ Khoa", "san"),
+                                (5, "Mắt", "mat"),
+                                (6, "Tai Mũi Họng", "tmh"),
+                                (7, "Răng Hàm Mặt", "rhm"),
+                                (8, "Cận Lâm Sàng", "cls"),
+                            ];
+                            for (s_idx, s_title, s_role) in sub_depts {
+                                let can_edit = self.can_edit_dept(s_role);
+                                let mut text = egui::RichText::new(s_title);
+                                if can_edit {
+                                    text = text.strong().color(egui::Color32::from_rgb(16, 185, 129));
+                                }
+                                if ui.selectable_label(self.kham_sub_tab == s_idx, text).clicked() {
+                                    self.kham_sub_tab = s_idx;
+                                }
+                            }
+                        });
+                        ui.separator();
+
+                        match self.kham_sub_tab {
+                            0 => {
                         let enabled = self.can_edit_dept("theluc");
                         ui.add_enabled_ui(enabled, |ui| {
                             egui::Grid::new("grid_tl").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
@@ -1522,7 +1543,7 @@ impl eframe::App for KskApp {
                     }
 
                     // V.A. NỘI KHOA
-                    3 => {
+                            1 => {
                         let enabled = self.can_edit_dept("noi");
                         ui.add_enabled_ui(enabled, |ui| {
                             egui::Grid::new("grid_noi").num_columns(3).spacing([14.0, 8.0]).show(ui, |ui| {
@@ -1573,7 +1594,7 @@ impl eframe::App for KskApp {
                     }
 
                     // V.B. NGOẠI KHOA
-                    4 => {
+                            2 => {
                         let enabled = self.can_edit_dept("ngoai");
                         ui.add_enabled_ui(enabled, |ui| {
                             Self::ui_multiline(ui, "Kết quả khám Ngoại khoa (Mô tả chi tiết tổn thương):", &mut self.form.ket_qua_kham_ngoai_khoa);
@@ -1585,7 +1606,7 @@ impl eframe::App for KskApp {
                     }
 
                     // V.C. DA LIỄU
-                    5 => {
+                            3 => {
                         let enabled = self.can_edit_dept("dalieu");
                         ui.add_enabled_ui(enabled, |ui| {
                             Self::ui_multiline(ui, "Kết quả khám Da liễu:", &mut self.form.ket_qua_kham_da_lieu);
@@ -1597,7 +1618,7 @@ impl eframe::App for KskApp {
                     }
 
                     // V.D. SẢN PHỤ KHOA
-                    6 => {
+                            4 => {
                         let enabled = self.can_edit_dept("san");
                         ui.add_enabled_ui(enabled, |ui| {
                             Self::ui_multiline(ui, "Kết quả khám Sản phụ khoa (theo Phụ lục XXV TT 32/2023):", &mut self.form.ket_qua_kham_san_phu_khoa);
@@ -1609,7 +1630,7 @@ impl eframe::App for KskApp {
                     }
 
                     // V.E. MẮT
-                    7 => {
+                            5 => {
                         let enabled = self.can_edit_dept("mat");
                         ui.add_enabled_ui(enabled, |ui| {
                             egui::Grid::new("grid_mat").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
@@ -1630,7 +1651,7 @@ impl eframe::App for KskApp {
                     }
 
                     // V.F. TAI MŨI HỌNG
-                    8 => {
+                            6 => {
                         let enabled = self.can_edit_dept("tmh");
                         ui.add_enabled_ui(enabled, |ui| {
                             egui::Grid::new("grid_tmh").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
@@ -1651,7 +1672,7 @@ impl eframe::App for KskApp {
                     }
 
                     // V.G. RĂNG HÀM MẶT
-                    9 => {
+                            7 => {
                         let enabled = self.can_edit_dept("rhm");
                         ui.add_enabled_ui(enabled, |ui| {
                             egui::Grid::new("grid_rhm").num_columns(2).spacing([14.0, 8.0]).show(ui, |ui| {
@@ -1669,7 +1690,7 @@ impl eframe::App for KskApp {
                     }
 
                     // VI. CẬN LÂM SÀNG (LƯỚI ĐỘNG CÁC CHỈ SỐ)
-                    10 => {
+                            8 => {
                         let enabled = self.can_edit_dept("cls");
                         ui.add_enabled_ui(enabled, |ui| {
                             ui.horizontal(|ui| {
@@ -1706,8 +1727,12 @@ impl eframe::App for KskApp {
                         });
                     }
 
+
+                            _ => {}
+                        }
+                    }
                     // VII. KẾT LUẬN & ICD-10
-                    11 => {
+                    3 => {
                         let enabled = self.can_edit_dept("ketluan");
                         ui.add_enabled_ui(enabled, |ui| {
                             ui.horizontal(|ui| {
