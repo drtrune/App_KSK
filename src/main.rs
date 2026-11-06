@@ -1346,9 +1346,9 @@ impl eframe::App for KskApp {
                     0 => {
                         let enabled = self.can_edit_dept("hchinh");
                         ui.add_enabled_ui(enabled, |ui| {
-                            egui::Grid::new("grid_hc_detail").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
+                            egui::Grid::new("grid_hc_detail").num_columns(4).spacing([16.0, 9.0]).show(ui, |ui| {
                                 ui.strong("1. Họ và tên *:"); ui.text_edit_singleline(&mut self.form.ho_ten);
-                                ui.strong("2. Giới tính:");
+                                ui.strong("2. Giới tính *:");
                                 egui::ComboBox::from_id_source("cb_gt").selected_text(if self.form.gioi_tinh == 1 { "1 - Nam" } else { "2 - Nữ" }).show_ui(ui, |ui| {
                                     ui.selectable_value(&mut self.form.gioi_tinh, 1, "1 - Nam");
                                     ui.selectable_value(&mut self.form.gioi_tinh, 2, "2 - Nữ");
@@ -1374,52 +1374,47 @@ impl eframe::App for KskApp {
                                 search_combo(ui, "cb_occ", &mut self.form.ma_nghe_nghiep, &occs);
                                 ui.end_row();
 
-                                ui.label("9. Điện thoại:"); ui.text_edit_singleline(&mut self.form.dien_thoai);
-                                ui.label("10. Nhóm máu:"); ui.text_edit_singleline(&mut self.form.nhom_mau);
+                                // NƠI Ở HIỆN TẠI (ĐẶT LIÊN TIẾP, KHÔNG BỌC KHUNG)
+                                ui.strong("9. Tỉnh / TP nơi ở *:");
+                                let provs = Self::cat_items(&self.catalogs, "province", None);
+                                let prov_changed = search_combo(ui, "cb_prov", &mut self.form.matinh_cu_tru, &provs);
+                                if prov_changed {
+                                    if let Some(first_w) = self.catalogs.iter().find(|c| c.cat_type == "ward" && c.parent_code == self.form.matinh_cu_tru) {
+                                        self.form.maxa_cu_tru = first_w.code.clone();
+                                    }
+                                }
+
+                                ui.strong("10. Xã / Phường nơi ở *:");
+                                let wards = Self::cat_items(&self.catalogs, "ward", Some(&self.form.matinh_cu_tru));
+                                search_combo(ui, "cb_ward", &mut self.form.maxa_cu_tru, &wards);
                                 ui.end_row();
 
-                                ui.label("11. Mã Y Tế / Lượt khám:"); ui.text_edit_singleline(&mut self.form.ma_lk);
-                                ui.strong("12. Ngày khám KSK *:");
+                                ui.strong("11. Nơi ở hiện tại (số nhà, thôn/xóm):");
+                                ui.text_edit_singleline(&mut self.form.dia_chi);
+
+                                ui.label("12. Điện thoại:"); ui.text_edit_singleline(&mut self.form.dien_thoai);
+                                ui.end_row();
+
+                                ui.label("13. Nhóm máu:"); ui.text_edit_singleline(&mut self.form.nhom_mau);
+                                ui.label("14. Mã Y Tế / Lượt khám:"); ui.text_edit_singleline(&mut self.form.ma_lk);
+                                ui.end_row();
+
+                                ui.strong("15. Ngày khám KSK *:");
                                 date_input_picker(ui, "dp_ngay_vao", &mut self.form.ngay_vao);
-                                ui.end_row();
 
-                                ui.label("13. Đối tượng khám:");
+                                ui.label("16. Đối tượng khám:");
                                 let pris = Self::cat_items(&self.catalogs, "priority", None);
                                 search_combo(ui, "cb_pri", &mut self.form.doi_tuong, &pris);
+                                ui.end_row();
 
-                                ui.label("14. Nguồn chi trả:");
+                                ui.label("17. Nguồn chi trả:");
                                 let pays = Self::cat_items(&self.catalogs, "payment", None);
                                 let mut pay_s = self.form.nguon_chi_tra.to_string();
                                 if search_combo(ui, "cb_pay", &mut pay_s, &pays) {
                                     if let Ok(n) = pay_s.parse::<i32>() { self.form.nguon_chi_tra = n; }
                                 }
+                                ui.label("18. Loại hình KCB:"); ui.label("15 - KSK định kỳ");
                                 ui.end_row();
-                            });
-
-                            ui.add_space(8.0);
-                            // COMBO ĐỊA CHỈ: SỐ NHÀ/THÔN XÓM + TỈNH/TP + PHƯỜNG/XÃ
-                            egui::Frame::group(ui.style()).fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(241, 245, 249) }).rounding(8.0).show(ui, |ui| {
-                                ui.strong("🏠 ĐỊA CHỈ NƠI Ở HIỆN TẠI (Tỉnh, Xã & Địa chỉ chi tiết):");
-                                egui::Grid::new("grid_addr_combo").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
-                                    ui.strong("Tỉnh / Thành phố *:");
-                                    let provs = Self::cat_items(&self.catalogs, "province", None);
-                                    let prov_changed = search_combo(ui, "cb_prov", &mut self.form.matinh_cu_tru, &provs);
-
-                                    if prov_changed {
-                                        if let Some(first_w) = self.catalogs.iter().find(|c| c.cat_type == "ward" && c.parent_code == self.form.matinh_cu_tru) {
-                                            self.form.maxa_cu_tru = first_w.code.clone();
-                                        }
-                                    }
-
-                                    ui.strong("Xã / Phường *:");
-                                    let wards = Self::cat_items(&self.catalogs, "ward", Some(&self.form.matinh_cu_tru));
-                                    search_combo(ui, "cb_ward", &mut self.form.maxa_cu_tru, &wards);
-                                    ui.end_row();
-
-                                    ui.strong("Số nhà, thôn/xóm:");
-                                    ui.add(egui::TextEdit::singleline(&mut self.form.dia_chi).desired_width(320.0).hint_text("VD: Số 12, Thôn A, Phố B"));
-                                    ui.end_row();
-                                });
                             });
 
                             ui.add_space(8.0);
@@ -1525,23 +1520,28 @@ impl eframe::App for KskApp {
                                 });
                             }
 
-                            ui.add_space(6.0);
-                            // b. Tiền sử thai sản
-                            ui.horizontal(|ui| {
-                                ui.strong("b. Tiền sử thai sản (đối với nữ):");
-                                Self::ui_radio_yn(ui, &mut self.form.tsbt_thai_san);
-                            });
-                            if self.form.tsbt_thai_san == 1 {
-                                egui::Grid::new("grid_thai_san").num_columns(2).spacing([12.0, 6.0]).show(ui, |ui| {
-                                    ui.label("Cụ thể tên bệnh thai sản (Mã ICD-10):");
-                                    let icds_ts = Self::cat_items(&self.catalogs, "icd10", None);
-                                    multi_icd(ui, "icd_tsbt_ts", &mut self.form.tsbt_ma_benh_thai_san, &icds_ts);
-                                    ui.end_row();
-
-                                    ui.label("Thuốc đang sử dụng điều trị thai sản:");
-                                    ui.text_edit_singleline(&mut self.form.tsbt_ten_thuoc_thai_san);
-                                    ui.end_row();
+                            // b. Tiền sử thai sản (CHỈ HIỂN THỊ KHI LÀ NỮ: gioi_tinh == 2)
+                            if self.form.gioi_tinh == 2 {
+                                ui.add_space(6.0);
+                                ui.horizontal(|ui| {
+                                    ui.strong("b. Tiền sử thai sản:");
+                                    Self::ui_radio_yn(ui, &mut self.form.tsbt_thai_san);
                                 });
+                                if self.form.tsbt_thai_san == 1 {
+                                    egui::Grid::new("grid_thai_san").num_columns(2).spacing([12.0, 6.0]).show(ui, |ui| {
+                                        ui.label("Cụ thể tên bệnh thai sản (Mã ICD-10):");
+                                        let icds_ts = Self::cat_items(&self.catalogs, "icd10", None);
+                                        multi_icd(ui, "icd_tsbt_ts", &mut self.form.tsbt_ma_benh_thai_san, &icds_ts);
+                                        ui.end_row();
+
+                                        ui.label("Thuốc đang sử dụng điều trị thai sản:");
+                                        ui.text_edit_singleline(&mut self.form.tsbt_ten_thuoc_thai_san);
+                                        ui.end_row();
+                                    });
+                                }
+                            } else {
+                                // Nếu là nam, tự reset tiền sử thai sản về 0
+                                self.form.tsbt_thai_san = 0;
                             }
                         });
                     }
@@ -1887,31 +1887,140 @@ fn apply_theme(ctx: &egui::Context, dark: bool) {
     ctx.set_style(style);
 }
 
-/// Widget nhập ngày có định dạng sẵn (dd/mm/yyyy) kèm nút chọn nhanh (Hôm nay, Bớt 1 ngày, Bớt 1 năm)
+/// Widget nhập ngày tháng: chỉ cho nhập số và gạch chéo (/), kiểm tra tính hợp lệ dd/mm/yyyy kèm Calendar popup chọn ngày trực quan
 fn date_input_picker(ui: &mut egui::Ui, id: &str, val: &mut String) {
     ui.horizontal(|ui| {
-        ui.add(egui::TextEdit::singleline(val).hint_text("dd/mm/yyyy").desired_width(100.0));
-        egui::ComboBox::from_id_source(id)
-            .width(18.0)
-            .selected_text("📅")
-            .show_ui(ui, |ui| {
-                let now = chrono::Local::now();
-                if ui.button(" Hôm nay ").clicked() {
-                    *val = now.format("%d/%m/%Y").to_string();
+        let mut text = val.clone();
+        let resp = ui.add(egui::TextEdit::singleline(&mut text).hint_text("dd/mm/yyyy").desired_width(95.0));
+        if resp.changed() {
+            // Chỉ giữ lại ký tự số và dấu gạch chéo /
+            let mut filtered: String = text.chars().filter(|c| c.is_ascii_digit() || *c == '/').take(10).collect();
+            // Tự động thêm dấu / sau ngày (2 ký tự) và tháng (5 ký tự) khi người dùng gõ thuần số
+            if filtered.len() == 2 && !filtered.contains('/') {
+                filtered.push('/');
+            } else if filtered.len() == 5 && filtered.chars().filter(|c| *c == '/').count() == 1 {
+                filtered.push('/');
+            }
+            *val = filtered;
+        }
+
+        // Kiểm tra định dạng ngày
+        let is_valid = if val.is_empty() {
+            true
+        } else if val.len() == 10 {
+            chrono::NaiveDate::parse_from_str(val, "%d/%m/%Y").is_ok()
+        } else {
+            false
+        };
+
+        if !is_valid && !val.is_empty() {
+            ui.colored_label(egui::Color32::from_rgb(239, 68, 68), "⚠ Sai ngày");
+        }
+
+        // Popup Date-Picker (Lịch trực quan & Chọn nhanh)
+        let popup_id = ui.make_persistent_id(id);
+        let btn_resp = ui.small_button("📅");
+        if btn_resp.clicked() {
+            ui.memory_mut(|mem| mem.toggle_popup(popup_id));
+        }
+
+        egui::popup_below_widget(ui, popup_id, &btn_resp, |ui| {
+            ui.set_min_width(240.0);
+            let now = chrono::Local::now().date_naive();
+            let parsed_cur = chrono::NaiveDate::parse_from_str(val, "%d/%m/%Y").ok().unwrap_or(now);
+
+            // Lưu tháng và năm đang duyệt trong UI state
+            let view_state_id = ui.make_persistent_id(format!("{}_view", id));
+            let (mut view_year, mut view_month): (i32, u32) = ui.data_mut(|d| {
+                d.get_temp(view_state_id).unwrap_or((parsed_cur.year(), parsed_cur.month()))
+            });
+
+            ui.horizontal(|ui| {
+                if ui.button("◀").clicked() {
+                    if view_month == 1 { view_month = 12; view_year -= 1; } else { view_month -= 1; }
                 }
-                if ui.button(" Hôm qua ").clicked() {
-                    let d = now - chrono::Duration::days(1);
-                    *val = d.format("%d/%m/%Y").to_string();
+                ui.strong(format!("Tháng {:02} / {}", view_month, view_year));
+                if ui.button("▶").clicked() {
+                    if view_month == 12 { view_month = 1; view_year += 1; } else { view_month += 1; }
                 }
-                ui.separator();
-                ui.weak("Chọn nhanh năm sinh:");
-                for years_ago in [18, 20, 25, 30, 35, 40, 45, 50, 55, 60] {
-                    let yr = now.year() - years_ago;
-                    if ui.button(format!("{} tuổi ({})", years_ago, yr)).clicked() {
-                        *val = format!("01/01/{}", yr);
+            });
+
+            ui.separator();
+
+            // Hiển thị thứ trong tuần
+            egui::Grid::new(format!("{}_cal_grid", id)).num_columns(7).spacing([6.0, 4.0]).show(ui, |ui| {
+                for day_name in ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] {
+                    ui.weak(day_name);
+                }
+                ui.end_row();
+
+                if let Some(first_day) = chrono::NaiveDate::from_ymd_opt(view_year, view_month, 1) {
+                    let weekday_offset = first_day.weekday().num_days_from_monday();
+                    for _ in 0..weekday_offset {
+                        ui.label(" ");
+                    }
+                    let mut cur_col = weekday_offset;
+
+                    let days_in_month = match view_month {
+                        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+                        4 | 6 | 9 | 11 => 30,
+                        2 => if (view_year % 4 == 0 && view_year % 100 != 0) || (view_year % 400 == 0) { 29 } else { 28 },
+                        _ => 30,
+                    };
+
+                    for d in 1..=days_in_month {
+                        let is_selected = parsed_cur.year() == view_year && parsed_cur.month() == view_month && parsed_cur.day() == d;
+                        let text = if is_selected {
+                            egui::RichText::new(format!("{}", d)).strong().color(egui::Color32::WHITE)
+                        } else {
+                            egui::RichText::new(format!("{}", d))
+                        };
+                        let mut btn = egui::Button::new(text);
+                        if is_selected {
+                            btn = btn.fill(egui::Color32::from_rgb(14, 116, 144));
+                        }
+                        if ui.add(btn).clicked() {
+                            *val = format!("{:02}/{:02}/{}", d, view_month, view_year);
+                            ui.memory_mut(|mem| mem.close_popup());
+                        }
+                        cur_col += 1;
+                        if cur_col % 7 == 0 {
+                            ui.end_row();
+                        }
+                    }
+                    if cur_col % 7 != 0 {
+                        ui.end_row();
                     }
                 }
             });
+
+            ui.data_mut(|d| d.insert_temp(view_state_id, (view_year, view_month)));
+
+            ui.separator();
+            ui.horizontal(|ui| {
+                if ui.button(" Hôm nay ").clicked() {
+                    *val = now.format("%d/%m/%Y").to_string();
+                    ui.memory_mut(|mem| mem.close_popup());
+                }
+                if ui.button(" Hôm qua ").clicked() {
+                    let y = now - chrono::Duration::days(1);
+                    *val = y.format("%d/%m/%Y").to_string();
+                    ui.memory_mut(|mem| mem.close_popup());
+                }
+            });
+
+            ui.separator();
+            ui.weak("Chọn nhanh độ tuổi (Năm sinh):");
+            ui.horizontal_wrapped(|ui| {
+                for age in [18, 20, 25, 30, 35, 40, 45, 50, 55, 60] {
+                    let yr = now.year() - age;
+                    if ui.small_button(format!("{}t ({})", age, yr)).clicked() {
+                        *val = format!("01/01/{}", yr);
+                        ui.memory_mut(|mem| mem.close_popup());
+                    }
+                }
+            });
+        });
     });
 }
 /// Dropdown có ô tìm kiếm (không phân biệt dấu). Trả về true nếu giá trị đổi.
