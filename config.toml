@@ -1,0 +1,5 @@
+db_path = "ksk_qd3176.db"
+default_cskcb = "77005"
+default_gtin_cskcb = "8934286053806"
+default_province_code = "64"
+default_ward_code = "23992"

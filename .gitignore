@@ -1,0 +1,19 @@
+# Build output
+/target
+
+# Database files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Export files
+*.csv
+*.xlsx
+
+# Logs
+crash_log.txt
+*.log
+
+# Antigravity artifacts
+.antigravity/
