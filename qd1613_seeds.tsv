@@ -1,0 +1,222 @@
+﻿CT_TL_01	BT_MAT_THI_LUC	CK_MAT	1 mắt 10/10, tổng 2 mắt 19-20/10	1	Dùng thuật toán tự phân loại theo thị lực
+CT_TL_02	BT_MAT_THI_LUC	CK_MAT	1 mắt 9-10/10, tổng 2 mắt 16-18/10	2	
+CT_TL_03	BT_MAT_THI_LUC	CK_MAT	1 mắt 7-9/10, tổng 2 mắt 14-15/10	3	
+CT_TL_04	BT_MAT_THI_LUC	CK_MAT	1 mắt 6-7/10, tổng 2 mắt 11-13/10	4	
+CT_TL_05	BT_MAT_THI_LUC	CK_MAT	1 mắt dưới 6/10, tổng 2 mắt dưới 11/10	5	
+CT_MT_01	BT_MAT_MONG_THIT	CK_MAT	Không có mộng thịt	1	
+CT_MT_02	BT_MAT_MONG_THIT	CK_MAT	Mộng thịt độ I, II, III	1	Theo thị lực chuẩn 2 mắt
+CT_MT_03	BT_MAT_MONG_THIT	CK_MAT	Mộng thịt độ III, 1 mắt thị lực dưới 6/10	3	
+CT_MT_04	BT_MAT_MONG_THIT	CK_MAT	Mộng thịt đã mổ, tái phát gây dính	3	
+CT_SGM_01	BT_MAT_SEO_GIAC_MAC	CK_MAT	Không có sẹo giác mạc	1	
+CT_SGM_02	BT_MAT_SEO_GIAC_MAC	CK_MAT	Sẹo đơn thuần, mỏng, nhỏ, ngoài vùng trung tâm	2	Theo thị lực chuẩn hạ 1 loại
+CT_SGM_03	BT_MAT_SEO_GIAC_MAC	CK_MAT	Sẹo giác mạc có dính mống mắt: Tổng thị lực cả 2 mắt >= 16/10	4	
+CT_SGM_04	BT_MAT_SEO_GIAC_MAC	CK_MAT	Sẹo giác mạc có dính mống mắt: Thị lực 1 mắt <= 6/10	5	
+CT_MATHOT_01	BT_MAT_MAT_HOT	CK_MAT	Không có mắt hột	1	
+CT_MATHOT_02	BT_MAT_MAT_HOT	CK_MAT	Mắt hột chưa có biến chứng	2	
+CT_MATHOT_03	BT_MAT_MAT_HOT	CK_MAT	Biến chứng lông quặm: Không ảnh hưởng thị lực	2	
+CT_MH_04	BT_MAT_MAT_HOT	CK_MAT	Biến chứng lông quặm: Có ảnh hưởng thị lực	3	
+CT_LD_01	BT_MAT_LE_DAO	CK_MAT	Không viêm tắc lệ đạo	1	
+CT_LD_02	BT_MAT_LE_DAO	CK_MAT	Viêm tắc lệ đạo mạn tính hoặc điều trị nhiều lần không khỏi	3	
+CT_LAC_01	BT_MAT_LAC	CK_MAT	Không lác mắt	1	
+CT_LAC_02	BT_MAT_LAC	CK_MAT	Lác mắt không ảnh hưởng tới chức năng thị giác	2	
+CT_LAC_03	BT_MAT_LAC	CK_MAT	Lác mắt có ảnh hưởng tới chức năng thị lực	3	
+CT_HMM_00	BT_MAT_HONG_MOT_MAT	CK_MAT	Không hỏng mắt	1	
+CT_HMM_01	BT_MAT_HONG_MOT_MAT	CK_MAT	Hỏng một mắt, mắt kia thị lực 10/10	4	
+CT_HMM_02	BT_MAT_HONG_MOT_MAT	CK_MAT	Hỏng một mắt, mắt kia thị lực dưới 10/10	5	
+CT_CT_01	BT_MAT_CAN_THI	CK_MAT	Không cận thị	1	
+CT_CT_02	BT_MAT_CAN_THI	CK_MAT	Có cận thị	2	Theo thị lực khi có kính hạ 1 loại
+CT_VT_01	BT_MAT_VIEN_THI	CK_MAT	Không viễn thị	1	
+CT_VT_02	BT_MAT_VIEN_THI	CK_MAT	Có viễn thị	2	Theo thị lực khi có kính hạ 1 loại
+CT_LOANTHI_00	BT_MAT_LOAN_THI	CK_MAT	Không loạn thị	1	
+CT_LOANTHI_01	BT_MAT_LOAN_THI	CK_MAT	Loạn thị đơn thuần hoặc phối hợp	2	
+CT_SG_01	BT_MAT_SAC_GIAC	CK_MAT	Không rối loạn sắc giác	1	
+CT_SG_02	BT_MAT_SAC_GIAC	CK_MAT	Có rối loạn sắc giác	3	
+CT_DM_00	BT_MAT_DAY_MAT	CK_MAT	Không có bệnh đáy mắt	1	
+CT_DM_01	BT_MAT_DAY_MAT	CK_MAT	Viêm võng mạc do bệnh thận, tăng huyết áp, viêm võng mạc sắc tố	5	
+CT_MK_01	BT_MAT_KHAC	CK_MAT	Không có bệnh khác về mắt	1	
+CT_MK_02	BT_MAT_KHAC	CK_MAT	Bệnh bong võng mạc, teo gai thị	5	
+CT_MK_03	BT_MAT_KHAC	CK_MAT	Bệnh đã điều trị ổn định (Tăng nhãn áp, đục TTT, lệch TTT, viêm màng bồ đào)	2	
+CT_TN_01	BT_TMH_TAI_NGOAI	CK_TMH	Tai ngoài bình thường	1	
+CT_TN_02	BT_TMH_TAI_NGOAI	CK_TMH	Rách hoặc viêm teo sụn vành tai	2	
+CT_TN_03	BT_TMH_TAI_NGOAI	CK_TMH	Viêm ống tai ngoài mạn tính hoặc hẹp, dị dạng ống tai	3	
+CT_TG_01	BT_TMH_TAI_GIUA	CK_TMH	Tai giữa bình thường	1	
+CT_TG_02	BT_TMH_TAI_GIUA	CK_TMH	Viêm mạn tính có mủ nhầy hoặc thủng nhĩ trước dưới, sau dưới	3	
+CT_TG_03	BT_TMH_TAI_GIUA	CK_TMH	Viêm mạn tính có mủ nhầy hoặc thủng nhĩ trên và sau trên	4	
+CT_TG_04	BT_TMH_TAI_GIUA	CK_TMH	Viêm tai giữa mạn tính, tai khô hoàn toàn	2	
+CT_TT_01	BT_TMH_TAI_TRONG	CK_TMH	Tiếng nói thầm: 1 bên 5m, tai kia 5m	1	
+CT_TT_02	BT_TMH_TAI_TRONG	CK_TMH	Tiếng nói thầm: 1 bên 4m, tai kia 2m	2	
+CT_TT_03	BT_TMH_TAI_TRONG	CK_TMH	Tiếng nói thầm: 1 bên 3m, tai kia 1m	3	
+CT_TT_04	BT_TMH_TAI_TRONG	CK_TMH	Tiếng nói thầm: 1 bên 2m, tai kia 0.5m	4	
+CT_TT_05	BT_TMH_TAI_TRONG	CK_TMH	Tiếng nói thầm: 1 bên 1m, tai kia 0.1m	5	
+CT_TT_06	BT_TMH_TAI_TRONG	CK_TMH	Thính lực kế: Không giảm hoặc giảm dưới 15 dBA	1	
+CT_TT_07	BT_TMH_TAI_TRONG	CK_TMH	Thính lực kế: Giảm cả 2 tai từ 15-35 dBA	2	
+CT_TT_08	BT_TMH_TAI_TRONG	CK_TMH	Thính lực kế: Giảm cả 2 tai từ 36-45 dBA	3	
+CT_TT_09	BT_TMH_TAI_TRONG	CK_TMH	Thính lực kế: Giảm cả 2 tai từ 46-65 dBA	4	
+CT_TT_10	BT_TMH_TAI_TRONG	CK_TMH	Thính lực kế: Giảm cả 2 tai trên 65 dBA	5	
+CT_XC_01	BT_TMH_XUONG_CHUM	CK_TMH	Xương chũm bình thường	1	
+CT_XC_02	BT_TMH_XUONG_CHUM	CK_TMH	Viêm xương chũm mạn tính	2	
+CT_XC_03	BT_TMH_XUONG_CHUM	CK_TMH	Đã phẫu thuật: Tai khô, sức nghe giảm nhẹ	3	
+CT_XC_04	BT_TMH_XUONG_CHUM	CK_TMH	Đã phẫu thuật: Còn chảy mủ, sức nghe giảm vừa	4	
+CT_XC_05	BT_TMH_XUONG_CHUM	CK_TMH	Đã phẫu thuật: Chảy mủ liên tục, sức nghe giảm nặng	5	
+CT_MUI_01	BT_TMH_MUI	CK_TMH	Mũi bình thường	1	
+CT_MUI_06	BT_TMH_MUI	CK_TMH	Viêm mũi dị ứng, mạn tính đơn thuần: Không rối loạn hô hấp	2	
+CT_MUI_07	BT_TMH_MUI	CK_TMH	Viêm mũi dị ứng, mạn tính: Rối loạn hô hấp rõ, thể trạng khỏe	3	
+CT_MUI_08	BT_TMH_MUI	CK_TMH	Viêm mũi dị ứng, mạn tính: Rối loạn hô hấp rõ, thể trạng không khỏe	4	
+CT_MUI_09	BT_TMH_MUI	CK_TMH	Viêm mũi teo, trĩ mũi, chảy máu mũi thường xuyên	5	
+CT_HONG_01	BT_TMH_HONG	CK_TMH	Họng bình thường	1	
+CT_HONG_02	BT_TMH_HONG	CK_TMH	Viêm họng mạn tính đơn thuần, thể trạng tốt	2	
+CT_HONG_03	BT_TMH_HONG	CK_TMH	Viêm họng mạn tính niêm mạc dày, quá phát, họng hạt	3	
+CT_AMI_01	BT_TMH_AMIDAN	CK_TMH	Amidan trung bình không ảnh hưởng chức năng	1	
+CT_AMI_02	BT_TMH_AMIDAN	CK_TMH	Amidan hơi to, thỉnh thoảng viêm, không ảnh hưởng thể trạng	2	
+CT_AMI_03	BT_TMH_AMIDAN	CK_TMH	Amidan viêm mạn tính hốc mủ ảnh hưởng thể trạng	3	
+CT_AMI_04	BT_TMH_AMIDAN	CK_TMH	Amidan đã phẫu thuật, kết quả tốt	2	
+CT_TQ_01	BT_TMH_THANH_QUAN	CK_TMH	Thanh quản bình thường	1	
+CT_TQ_02	BT_TMH_THANH_QUAN	CK_TMH	Viêm thanh quản mạn tiếng nói còn phân biệt được	2	
+CT_TQ_03	BT_TMH_THANH_QUAN	CK_TMH	Viêm thanh quản mạn rối loạn phát âm rõ	4	
+CT_TQ_04	BT_TMH_THANH_QUAN	CK_TMH	Liệt cơ khép mở thanh quản	5	
+CT_TQ_05	BT_TMH_THANH_QUAN	CK_TMH	Khản tiếng đơn thuần (hạt/polyp dây thanh)	3	
+CT_XG_01	BT_TMH_XOANG	CK_TMH	Xoang mặt bình thường	1	
+CT_XG_02	BT_TMH_XOANG	CK_TMH	Viêm xoang hàm/liên xoang mạn không ảnh hưởng hô hấp	2	
+CT_XG_03	BT_TMH_XOANG	CK_TMH	Viêm đa xoang mạn 1 bên + polyp mũi	3	
+CT_XG_04	BT_TMH_XOANG	CK_TMH	Viêm đa xoang mạn 2 bên + polyp mũi 1 bên	4	
+CT_XG_05	BT_TMH_XOANG	CK_TMH	Viêm đa xoang mạn 2 bên + polyp mũi 2 bên	5	
+CT_RS_01	BT_RHM_RANG_SAU	CK_RHM	Không có răng sâu	1	
+CT_RS_02	BT_RHM_RANG_SAU	CK_RHM	Sâu men, ngà 1-3 cái không đau hoặc đã trám	2	
+CT_RS_03	BT_RHM_RANG_SAU	CK_RHM	Sâu men, ngà 4-5 cái không đau hoặc đã trám	3	
+CT_RS_04	BT_RHM_RANG_SAU	CK_RHM	Sâu men, ngà từ 6 cái trở lên	4	
+CT_MR_01	BT_RHM_MAT_RANG	CK_RHM	Đủ răng không kể răng khôn	1	
+CT_MR_02	BT_RHM_MAT_RANG	CK_RHM	Mất 1-2 răng, sức nhai > 90%	2	
+CT_MR_03	BT_RHM_MAT_RANG	CK_RHM	Mất răng sức nhai còn 81 - 90%	3	
+CT_MR_04	BT_RHM_MAT_RANG	CK_RHM	Mất răng sức nhai còn 61 - 80%	4	
+CT_MR_05	BT_RHM_MAT_RANG	CK_RHM	Mất răng sức nhai còn dưới 61%	5	
+CT_VQR_01	BT_RHM_VIEM_QUANH_RANG	CK_RHM	Không viêm quanh răng	1	
+CT_VQR_02	BT_RHM_VIEM_QUANH_RANG	CK_RHM	Viêm quanh răng ở 4-5 răng, túi lợi sâu	2	
+CT_VQR_03	BT_RHM_VIEM_QUANH_RANG	CK_RHM	Viêm quanh răng ở 6-11 răng	3	
+CT_VQR_04	BT_RHM_VIEM_QUANH_RANG	CK_RHM	Viêm quanh răng từ 12 răng trở lên	4	
+CT_TR_01	BT_RHM_TUY_RANG	CK_RHM	Không viêm tủy, quanh cuống	1	
+CT_TR_02	BT_RHM_TUY_RANG	CK_RHM	1-2 răng viêm tủy, quanh cuống đã chữa khỏi	2	
+CT_TR_03	BT_RHM_TUY_RANG	CK_RHM	1-2 răng viêm tủy, quanh cuống chưa điều trị	3	
+CT_RK_01	BT_RHM_RANG_KHON	CK_RHM	Răng khôn bình thường	1	
+CT_RK_02	BT_RHM_RANG_KHON	CK_RHM	Biến chứng đã điều trị tốt	2	
+CT_RK_03	BT_RHM_RANG_KHON	CK_RHM	Răng khôn đang biến chứng	3	
+CT_XH_01	BT_RHM_XUONG_HAM	CK_RHM	Xương hàm bình thường	1	
+CT_XH_02	BT_RHM_XUONG_HAM	CK_RHM	Gãy đã liền, khớp cắn không lệch, sức nhai tốt	3	
+CT_XH_03	BT_RHM_XUONG_HAM	CK_RHM	Khớp cắn lệch ít, còn nhai được	4	
+CT_XH_04	BT_RHM_XUONG_HAM	CK_RHM	Khớp cắn lệch nhiều, ảnh hưởng sức nhai	5	
+CT_VL_01	BT_RHM_VIEM_LOI	CK_RHM	Không viêm lợi	1	
+CT_VL_02	BT_RHM_VIEM_LOI	CK_RHM	Viêm lợi không quá 1/2 số răng	2	
+CT_VL_03	BT_RHM_VIEM_LOI	CK_RHM	Viêm lợi trên 1/2 số răng	3	
+CT_SM_01	BT_RHM_KHE_HO_MOM	CK_RHM	Không sứt môi, hở vòm miệng	1	
+CT_SM_02	BT_RHM_KHE_HO_MOM	CK_RHM	Khe hở môi đơn không hở vòm miệng	2	
+CT_SM_03	BT_RHM_KHE_HO_MOM	CK_RHM	Khe hở môi đã vá lành	2	
+CT_SM_06	BT_RHM_KHE_HO_MOM	CK_RHM	Khe hở môi kèm khe hở vòm miệng	5	
+CT_DK_01	BT_TK_DONG_KINH	CK_NOI_THAN_KINH	Không động kinh	1	
+CT_DK_02	BT_TK_DONG_KINH	CK_NOI_THAN_KINH	Cơn hiếm, thưa (đã điều trị < 3 cơn/năm)	4	
+CT_DK_03	BT_TK_DONG_KINH	CK_NOI_THAN_KINH	Cơn lớn/nhỏ có biến đổi tính tình	5	
+CT_SNTK_01	BT_TK_SUY_NHUOC	CK_NOI_THAN_KINH	Không suy nhược	1	
+CT_SNTK_02	BT_TK_SUY_NHUOC	CK_NOI_THAN_KINH	Đau đầu mất ngủ ít	2	
+CT_SNTK_03	BT_TK_SUY_NHUOC	CK_NOI_THAN_KINH	Giảm trí nhớ, giảm khả năng lao động	4	
+CT_TD_01	BT_TK_TIEN_DINH	CK_NOI_THAN_KINH	Không có rối loạn tiền đình	1	
+CT_TD_02	BT_TK_TIEN_DINH	CK_NOI_THAN_KINH	Rối loạn tiền đình nhẹ (1-2 lần/năm)	2	
+CT_TD_03	BT_TK_TIEN_DINH	CK_NOI_THAN_KINH	Vừa và nặng điều trị đã ổn định	3	
+CT_LM_01	BT_TK_LIET_MAT	CK_NOI_THAN_KINH	Không liệt mặt	1	
+CT_LM_02	BT_TK_LIET_MAT	CK_NOI_THAN_KINH	Méo mồm nhẹ khi cười, không ảnh hưởng nhắm mắt	3	
+CT_LM_03	BT_TK_LIET_MAT	CK_NOI_THAN_KINH	Méo mồm thường xuyên, ảnh hưởng nhắm mắt	4	
+CT_LTK_01	BT_TK_LIET_DAY_TK	CK_NOI_THAN_KINH	Không liệt thần kinh ngoại vi	1	
+CT_LTK_02	BT_TK_LIET_DAY_TK	CK_NOI_THAN_KINH	Liệt thần kinh quay, trụ, hông khoeo ngoài	5	
+CT_CO_01	BT_TK_CO	CK_NOI_THAN_KINH	Không có bệnh thần kinh - cơ	1	
+CT_CO_02	BT_TK_CO	CK_NOI_THAN_KINH	Teo cơ nhẹ ảnh hưởng ít đến vận động	2	
+CT_CO_03	BT_TK_CO	CK_NOI_THAN_KINH	Teo cơ nặng ảnh hưởng rõ khả năng lao động	4	
+CT_CO_04	BT_TK_CO	CK_NOI_THAN_KINH	Bệnh nhược cơ	5	
+CT_TTPL_01	BT_TAM_THAN_PHAN_LIET	CK_NOI_TAM_THAN	Không có bệnh tâm thần phân liệt	1	
+CT_TTPL_02	BT_TAM_THAN_PHAN_LIET	CK_NOI_TAM_THAN	Bệnh tâm thần phân liệt các thể	5	
+CT_LT_01	BT_TAM_THAN_LOAN_THAN	CK_NOI_TAM_THAN	Không loạn thần	1	
+CT_LT_02	BT_TAM_THAN_LOAN_THAN	CK_NOI_TAM_THAN	Loạn thần do chấn thương sọ não, di chứng	5	
+CT_LT_04	BT_TAM_THAN_LOAN_THAN	CK_NOI_TAM_THAN	Trầm uất, nghi bệnh: Cấp, bán cấp, mạn tính	5	
+CT_TNC_00	BT_TAM_THAN_THAI_NHAN_CACH	CK_NOI_TAM_THAN	Không có bệnh thái nhân cách	1	
+CT_TNC_01	BT_TAM_THAN_THAI_NHAN_CACH	CK_NOI_TAM_THAN	Bệnh thái nhân cách ở tất cả các thể	5	
+CT_HA_01	BT_TM_HUYET_AP	CK_NOI_TIM_MACH	Huyết áp bình thường (< 140 / < 90 mmHg)	1	
+CT_HA_03	BT_TM_HUYET_AP	CK_NOI_TIM_MACH	Tiền tăng huyết áp (136-140 / 90-95 mmHg)	3	
+CT_HA_04	BT_TM_HUYET_AP	CK_NOI_TIM_MACH	Tăng huyết áp rõ rệt (> 140 / > 95 mmHg)	4	
+CT_HA_05	BT_TM_HUYET_AP	CK_NOI_TIM_MACH	Huyết áp thấp (< 100 / < 60 mmHg)	4	
+CT_MC_01	BT_TM_MACH	CK_NOI_TIM_MACH	Tần số mạch 60 - 75 lần/phút	1	
+CT_MC_02	BT_TM_MACH	CK_NOI_TIM_MACH	Tần số mạch 76 - 85 lần/phút	2	
+CT_MC_03	BT_TM_MACH	CK_NOI_TIM_MACH	Tần số mạch 86 - 95 hoặc 55 - 60 lần/phút	3	
+CT_MC_04	BT_TM_MACH	CK_NOI_TIM_MACH	Tần số mạch > 95 hoặc < 55 lần/phút	4	
+CT_NT_01	BT_TM_NHIP_TIM	CK_NOI_TIM_MACH	Không rối loạn nhịp tim	1	
+CT_NT_02	BT_TM_NHIP_TIM	CK_NOI_TIM_MACH	Ngoại tâm thu thưa (<6 nhịp/phút) giảm sau gắng sức	2	
+CT_NT_04	BT_TM_NHIP_TIM	CK_NOI_TIM_MACH	Ngoại tâm thu mau (>7 nhịp/phút)	4	
+CT_NT_06	BT_TM_NHIP_TIM	CK_NOI_TIM_MACH	Loạn nhịp hoàn toàn liên tục	5	
+CT_BT_01	BT_TM_BENH_TIM	CK_NOI_TIM_MACH	Không có bệnh tim	1	
+CT_BT_02	BT_TM_BENH_TIM	CK_NOI_TIM_MACH	Tiếng thổi tâm thu cơ năng	2	
+CT_BT_05	BT_TM_BENH_TIM	CK_NOI_TIM_MACH	Tim bẩm sinh chưa suy tim	4	
+CT_BT_06	BT_TM_BENH_TIM	CK_NOI_TIM_MACH	Tim bẩm sinh có suy tim	5	
+CT_BT_08	BT_TM_BENH_TIM	CK_NOI_TIM_MACH	Bệnh van tim chưa suy tim	4	
+CT_BT_10	BT_TM_BENH_TIM	CK_NOI_TIM_MACH	Bệnh van tim đã có suy tim	5	
+CT_MP_01	BT_HH_MANG_PHOI_NOI	CK_NOI_HO_HAP	Màng phổi bình thường	1	
+CT_MP_02	BT_HH_MANG_PHOI_NOI	CK_NOI_HO_HAP	Dày dính màng phổi ít sau điều trị	3	
+CT_MP_03	BT_HH_MANG_PHOI_NOI	CK_NOI_HO_HAP	Dày dính toàn bộ một bên màng phổi	4	
+CT_PQ_01	BT_HH_PHE_QUAN	CK_NOI_HO_HAP	Phế quản bình thường	1	
+CT_PQ_02	BT_HH_PHE_QUAN	CK_NOI_HO_HAP	Viêm phế quản mạn tính tắc nghẽn nhẹ	3	
+CT_PQ_03	BT_HH_PHE_QUAN	CK_NOI_HO_HAP	Viêm phế quản mạn chưa có tắc nghẽn	2	
+CT_PQ_04	BT_HH_PHE_QUAN	CK_NOI_HO_HAP	Hen phế quản nhẹ và vừa	3	
+CT_PQ_05	BT_HH_PHE_QUAN	CK_NOI_HO_HAP	Hen phế quản nặng	4	
+CT_PHOI_01	BT_HH_PHOI_NOI	CK_NOI_HO_HAP	Phổi bình thường	1	
+CT_PHOI_02	BT_HH_PHOI_NOI	CK_NOI_HO_HAP	Bệnh bụi phổi	4	
+CT_PHOI_04	BT_HH_PHOI_NOI	CK_NOI_HO_HAP	Lao phổi xơ tiến triển	4	
+CT_DD_N01	BT_TH_DA_DAY_NOI	CK_NOI_TIEU_HOA	Dạ dày - tá tràng bình thường	1	
+CT_DD_N02	BT_TH_DA_DAY_NOI	CK_NOI_TIEU_HOA	Viêm dạ dày - tá tràng mạn tính	3	
+CT_DD_N03	BT_TH_DA_DAY_NOI	CK_NOI_TIEU_HOA	Loét hành tá tràng chưa biến chứng	3	
+CT_DD_N05	BT_TH_DA_DAY_NOI	CK_NOI_TIEU_HOA	Sa dạ dày độ II, III	4	
+CT_DT_N01	BT_TH_DAI_TRANG_NOI	CK_NOI_TIEU_HOA	Đại trực tràng bình thường	1	
+CT_DT_N02	BT_TH_DAI_TRANG_NOI	CK_NOI_TIEU_HOA	Rối loạn chức năng đại tràng mạn tính: Nhẹ	2	
+CT_DT_N04	BT_TH_DAI_TRANG_NOI	CK_NOI_TIEU_HOA	Rối loạn chức năng đại tràng mạn tính: Nặng	4	
+CT_GAN_N01	BT_TH_GAN_NOI	CK_NOI_TIEU_HOA	Gan bình thường	1	
+CT_GAN_N02	BT_TH_GAN_NOI	CK_NOI_TIEU_HOA	Viêm gan đã chữa khỏi trên 12 tháng	2	
+CT_GAN_N03	BT_TH_GAN_NOI	CK_NOI_TIEU_HOA	Viêm gan mạn tính thể hoạt động	5	
+CT_GAN_N04	BT_TH_GAN_NOI	CK_NOI_TIEU_HOA	Xơ gan các giai đoạn	5	
+CT_TN_N01	BT_TN_THAN_NOI	CK_NOI_TIET_NIEU_SD	Thận tiết niệu bình thường	1	
+CT_TN_N02	BT_TN_THAN_NOI	CK_NOI_TIET_NIEU_SD	Bệnh thận mạn chưa suy thận	4	
+CT_TN_N03	BT_TN_THAN_NOI	CK_NOI_TIET_NIEU_SD	Bệnh thận mạn đã suy thận	5	
+CT_CK_00	BT_CK_KHOP_NOI	CK_NOI_CO_XUONG_KHOP	Khớp bình thường	1	
+CT_CK_01	BT_CK_KHOP_NOI	CK_NOI_CO_XUONG_KHOP	Cứng dính cột sống mức độ nhẹ	3	
+CT_CK_02	BT_CK_KHOP_NOI	CK_NOI_CO_XUONG_KHOP	Cứng dính cột sống mức độ vừa	4	
+CT_CK_03	BT_CK_KHOP_NOI	CK_NOI_CO_XUONG_KHOP	Cứng dính cột sống mức độ nặng	5	
+CT_TG_N01	BT_NT_TUYEN_GIAP_NOI	CK_NOI_NOITIET	Tuyến giáp bình thường	1	
+CT_TG_N02	BT_NT_TUYEN_GIAP_NOI	CK_NOI_NOITIET	Bướu lành tính nhỏ	2	
+CT_TG_N03	BT_NT_TUYEN_GIAP_NOI	CK_NOI_NOITIET	Basedow chưa có biến chứng tim	4	
+CT_TG_N04	BT_NT_TUYEN_GIAP_NOI	CK_NOI_NOITIET	Basedow có biến chứng tim	5	
+CT_DTD_01	BT_NT_DAI_THAO_DUONG	CK_NOI_NOITIET	Không đái tháo đường	1	
+CT_DTD_02	BT_NT_DAI_THAO_DUONG	CK_NOI_NOITIET	Đái tháo đường Type II chưa biến chứng	3	
+CT_DTD_03	BT_NT_DAI_THAO_DUONG	CK_NOI_NOITIET	Đái tháo đường Type I	5	
+CT_DTD_04	BT_NT_DAI_THAO_DUONG	CK_NOI_NOITIET	Đái tháo đường có biến chứng mắt, thận	4	
+CT_NK_01	BT_NGOAI_KHOP	CK_NGOAI	Khớp xương ngoại khoa bình thường	1	
+CT_NK_03	BT_NGOAI_KHOP	CK_NGOAI	Sai khớp lớn để lại cố tật có ảnh hưởng	4	
+CT_NK_09	BT_NGOAI_KHOP	CK_NGOAI	Cứng dính khớp lớn (vai, khuỷu, gối, háng)	5	
+CT_NX_01	BT_NGOAI_XUONG	CK_NGOAI	Xương khớp bình thường, không gãy	1	
+CT_NX_02	BT_NGOAI_XUONG	CK_NGOAI	Gãy xương lớn liền tốt, không hạn chế vận động	3	
+CT_NX_03	BT_NGOAI_XUONG	CK_NGOAI	Gãy xương lớn can xấu, lệch trục, hạn chế vận động	4	
+CT_HM_01	BT_NGOAI_HAU_MON	CK_NGOAI	Hậu môn - trực tràng bình thường	1	
+CT_HM_08	BT_NGOAI_HAU_MON	CK_NGOAI	Trĩ ngoại độ I	2	
+CT_HM_09	BT_NGOAI_HAU_MON	CK_NGOAI	Trĩ ngoại độ II	3	
+CT_HM_10	BT_NGOAI_HAU_MON	CK_NGOAI	Trĩ ngoại độ III	4	
+CT_HM_11	BT_NGOAI_HAU_MON	CK_NGOAI	Trĩ nội hoặc trĩ hỗn hợp	3	
+CT_ND_01	BT_DL_NAM_DA	CK_DA_LIEU	Không có nấm da	1	
+CT_ND_02	BT_DL_NAM_DA	CK_DA_LIEU	Nấm da diện tích nhỏ (< lòng bàn tay)	2	
+CT_ND_03	BT_DL_NAM_DA	CK_DA_LIEU	Nấm da diện tích lớn (> lòng bàn tay)	3	
+CT_GHE_01	BT_DL_GHE	CK_DA_LIEU	Không có ghẻ	1	
+CT_GHE_02	BT_DL_GHE	CK_DA_LIEU	Ghẻ thể đơn giản	2	
+CT_GHE_03	BT_DL_GHE	CK_DA_LIEU	Ghẻ có biến chứng nhiễm trùng	3	
+CT_GHE_05	BT_DL_ECZEMA	CK_DA_LIEU	Không có Eczéma	1	
+CT_GHE_06	BT_DL_ECZEMA	CK_DA_LIEU	Eczéma mạn tính	2	
+CT_GHE_07	BT_DL_ECZEMA	CK_DA_LIEU	Eczéma cấp tính bội nhiễm	3	
+CT_LV_01	BT_DL_LUPUS_VAY_NEN	CK_DA_LIEU	Không có Lupus, vảy nến	1	
+CT_LV_05	BT_DL_LUPUS_VAY_NEN	CK_DA_LIEU	Vảy nến thể thông thường khu trú	3	
+CT_LV_06	BT_DL_LUPUS_VAY_NEN	CK_DA_LIEU	Vảy nến thể lan tỏa toàn thân	4	
+CT_PS_01	BT_PS_SINH_DUC_NU	CK_PHU_SAN	Phụ sản bình thường, kinh nguyệt đều	1	
+CT_PS_02	BT_PS_SINH_DUC_NU	CK_PHU_SAN	Rối loạn kinh nguyệt	3	
+CT_PS_06	BT_PS_SINH_DUC_NU	CK_PHU_SAN	U nang buồng trứng, u xơ tử cung chưa mổ	4	
+CT_PS_07	BT_PS_SINH_DUC_NU	CK_PHU_SAN	U nang buồng trứng, u xơ tử cung đã mổ tốt	3	
+CT_PS_10	BT_PS_SINH_DUC_NU	CK_PHU_SAN	Mổ lấy thai 1 lần không biến chứng	2	
+CT_PS_11	BT_PS_SINH_DUC_NU	CK_PHU_SAN	Mổ lấy thai 2 lần không biến chứng	3	
+CT_PS_12	BT_PS_SINH_DUC_NU	CK_PHU_SAN	Mổ lấy thai 3 lần	4	

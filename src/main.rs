@@ -52,6 +52,16 @@ struct UserRecord {
     role: String,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+struct Qd1613Item {
+    id: String,
+    disease_id: String,
+    spec_id: String,
+    name: String,
+    score: Option<i32>,
+    ref_rule: Option<String>,
+}
+
 // Cấu trúc danh mục dùng chung
 #[derive(Clone, Serialize, Deserialize)]
 struct CatalogRecord {
@@ -467,12 +477,63 @@ impl KskApp {
         };
 
         app.seed_default_catalogs();
+        app.seed_qd1613();
         app.reload_catalogs();
         app.reload_records();
         app.reload_users();
         app
     }
 
+    fn seed_qd1613(&self) {
+        let count: i64 = self.conn.query_row("SELECT COUNT(*) FROM qd1613_classifications", [], |r| r.get(0)).unwrap_or(0);
+        if count == 0 {
+            if let Ok(content) = fs::read_to_string("qd1613_seeds.tsv") {
+                for line in content.lines() {
+                    let parts: Vec<&str> = line.split('\t').collect();
+                    if parts.len() >= 5 {
+                        let id = parts[0].trim();
+                        let dis_id = parts[1].trim();
+                        let spec_id = parts[2].trim();
+                        let name = parts[3].trim();
+                        let score: Option<i32> = parts[4].trim().parse().ok();
+                        let ref_rule = if parts.len() >= 6 { parts[5].trim() } else { "" };
+                        let _ = self.conn.execute(
+                            "INSERT OR IGNORE INTO qd1613_classifications (id, disease_id, spec_id, name, score, ref_rule) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                            params![id, dis_id, spec_id, name, score, ref_rule],
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    /// Dropdown chọn bệnh lý theo chuẩn QĐ 1613/BYT: Tự động điền mô tả kết quả và tự động gán phân loại điểm tương ứng
+    fn ui_qd1613_disease_picker(ui: &mut egui::Ui, conn: &Connection, spec_filter: &str, text_val: &mut String, pl_val: &mut i32) {
+        let query = format!("SELECT id, name, score FROM qd1613_classifications WHERE spec_id = '{}' ORDER BY score ASC, name ASC", spec_filter);
+        let mut stmt = conn.prepare(&query).ok();
+        let items: Vec<(String, String, Option<i32>)> = if let Some(ref mut s) = stmt {
+            s.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?))).unwrap().filter_map(Result::ok).collect()
+        } else {
+            vec![]
+        };
+
+        if !items.is_empty() {
+            egui::ComboBox::from_id_source(format!("cb_qd1613_{}", spec_filter))
+                .width(280.0)
+                .selected_text("📑 Chọn theo danh mục QĐ 1613/BYT...")
+                .show_ui(ui, |ui| {
+                    for (_id, name, score) in items {
+                        let sc_label = score.map_or("".to_string(), |s| format!(" [Loại {}]", s));
+                        if ui.selectable_label(false, format!("{}{}", name, sc_label)).clicked() {
+                            *text_val = name.clone();
+                            if let Some(s) = score {
+                                *pl_val = s;
+                            }
+                        }
+                    }
+                });
+        }
+    }
     fn seed_default_catalogs(&self) {
         let count: i64 = self.conn.query_row("SELECT COUNT(*) FROM catalogs", [], |r| r.get(0)).unwrap_or(0);
         if count == 0 {
@@ -1703,7 +1764,8 @@ impl eframe::App for KskApp {
                                 ui.label("Có kính - Trái:"); ui.text_edit_singleline(&mut self.form.co_kinh_mat_trai);
                                 ui.end_row();
                             });
-                            Self::ui_multiline(ui, "Các bệnh về mắt khác:", &mut self.form.benh_khac_mat);
+                                                        Self::ui_qd1613_disease_picker(ui, &self.conn, "CK_MAT", &mut self.form.benh_khac_mat, &mut self.form.kham_mat_pl);
+                            Self::ui_multiline(ui, "Các bệnh về mắt (theo QĐ 1613/BYT):", &mut self.form.benh_khac_mat);
                             ui.horizontal(|ui| {
                                 ui.label("Phân loại Mắt:");
                                 Self::ui_radio_pl_num(ui, &mut self.form.kham_mat_pl);
@@ -1796,18 +1858,46 @@ impl eframe::App for KskApp {
                     3 => {
                         let enabled = self.can_edit_dept("ketluan");
                         ui.add_enabled_ui(enabled, |ui| {
+                            // TỔNG HỢP VÀ TỰ ĐỘNG TÍNH PHÂN LOẠI TOÀN DIỆN TỪ CÁC KHOA LÂM SÀNG
+                            let max_pl = self.form.kham_the_luc_pl
+                                .max(self.form.noi_khoa_tuan_hoan_pl)
+                                .max(self.form.noi_khoa_ho_hap_pl)
+                                .max(self.form.noi_khoa_tieu_hoa_pl)
+                                .max(self.form.noi_khoa_than_tn_sd_pl)
+                                .max(self.form.noi_khoa_noi_tiet_pl)
+                                .max(self.form.noi_khoa_co_xuong_khop_pl)
+                                .max(self.form.noi_khoa_than_kinh_pl)
+                                .max(self.form.noi_khoa_tam_than_pl)
+                                .max(self.form.kham_ngoai_khoa_pl)
+                                .max(self.form.kham_da_lieu_pl)
+                                .max(if self.form.gioi_tinh == 2 { self.form.kham_san_phu_khoa_pl } else { 1 })
+                                .max(self.form.kham_mat_pl)
+                                .max(self.form.kham_tai_mui_hong_pl)
+                                .max(self.form.kham_rang_ham_mat_pl);
+
+                            egui::Frame::group(ui.style()).fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(240, 253, 250) }).rounding(8.0).show(ui, |ui| {
+                                ui.horizontal(|ui| {
+                                    ui.strong("⚖ Gợi ý phân loại sức khỏe chung (theo mức kém nhất của các khoa):");
+                                    ui.colored_label(egui::Color32::from_rgb(14, 116, 144), format!("Loại {}", max_pl));
+                                    if ui.button(" Áp dụng gợi ý ").clicked() {
+                                        self.form.phan_loai_sk = max_pl;
+                                    }
+                                });
+                            });
+                            ui.add_space(6.0);
+
                             ui.horizontal(|ui| {
-                                ui.strong("Phân loại sức khỏe chung:");
+                                ui.strong("1. Phân loại sức khỏe chung *:");
                                 Self::ui_radio_pl_num(ui, &mut self.form.phan_loai_sk);
                             });
                             ui.add_space(8.0);
 
-                            ui.strong("Mã bệnh ICD-10 kết luận (chọn nhiều, tìm theo mã/tên):");
+                            ui.strong("2. Mã bệnh ICD-10 kết luận (chọn nhiều, tìm theo mã hoặc tên bệnh):");
                             let icds = Self::cat_items(&self.catalogs, "icd10", None);
                             multi_icd(ui, "icd_kl", &mut self.form.ket_luan_benh, &icds);
 
                             ui.add_space(8.0);
-                            Self::ui_multiline(ui, "Tình trạng sức khỏe; mắc các bệnh, tật nếu có (CAC_BENH_TAT_NEU_CO):", &mut self.form.cac_benh_tat_neu_co);
+                            Self::ui_multiline(ui, "3. Tình trạng sức khỏe; mắc các bệnh, tật nếu có (CAC_BENH_TAT_NEU_CO):", &mut self.form.cac_benh_tat_neu_co);
                         });
                     }
 
