@@ -1,30 +1,27 @@
 @echo off
-chcp 65001 >nul
 title KSK App - Debug Mode
 color 0B
 
 echo =======================================================
-echo   HỆ THỐNG NHẬP LIỆU KHÁM SỨC KHỎE - QĐ 3176/QĐ-BYT
-echo   Khởi chạy môi trường Debug (Rust / Cargo)
+echo   HE THONG NHAP LIEU KHAM SUC KHOE - QD 3176/QD-BYT
+echo   Khoi chay moi truong Debug (Rust / Cargo)
 echo =======================================================
 echo.
 
-:: Thiết lập log môi trường để debug chi tiết khi cần
 set RUST_BACKTRACE=1
 
-echo [*] Đang kiểm tra mã nguồn và biên dịch nhanh...
+echo [*] Dang kiem tra ma nguon va bien dich nhanh...
 cargo run
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
     color 0C
-    echo [!] Ứng dụng đã thoát hoặc gặp lỗi biên dịch/runtime (Error Code: %ERRORLEVEL%).
+    echo [!] Ung dung gap loi bien dich hoac runtime (Ma loi: %ERRORLEVEL%).
 ) else (
     echo.
-    echo [*] Ứng dụng đã đóng bình thường.
+    echo [*] Ung dung da dong binh thuong.
 )
 
 echo.
-echo Nhấn phím bất kỳ để thoát console...
+echo Nhan phim bat ky de thoat console...
 pause >nul
-
