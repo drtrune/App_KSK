@@ -1,8 +1,3 @@
-fn hash_pass(plain: &str) -> String {
-    let mut h = Sha256::new();
-    h.update(plain.as_bytes());
-    format!("{:x}", h.finalize())
-}
 #![windows_subsystem = "windows"]
 
 use eframe::egui;
@@ -10,6 +5,13 @@ use sha2::{Digest, Sha256};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::fs;
+
+fn hash_pass(plain: &str) -> String {
+    let mut h = Sha256::new();
+    h.update(plain.as_bytes());
+    let res = h.finalize();
+    res.iter().map(|b| format!("{:02x}", b)).collect()
+}
 
 const FONT_VN: &[u8] = include_bytes!("../assets/font_vn.ttf");
 
