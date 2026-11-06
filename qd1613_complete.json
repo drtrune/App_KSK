@@ -1,0 +1,5084 @@
+{
+  "specialties": [
+    {
+      "id": "CK_NOI",
+      "name": "Nội khoa",
+      "parent_id": null
+    },
+    {
+      "id": "CK_NOI_TIM_MACH",
+      "name": "Tim mạch",
+      "parent_id": "CK_NOI"
+    },
+    {
+      "id": "CK_NOI_HO_HAP",
+      "name": "Hô hấp",
+      "parent_id": "CK_NOI"
+    },
+    {
+      "id": "CK_NOI_TIEU_HOA",
+      "name": "Tiêu hóa",
+      "parent_id": "CK_NOI"
+    },
+    {
+      "id": "CK_NOI_TIET_NIEU_SD",
+      "name": "Tiết niệu - Sinh dục",
+      "parent_id": "CK_NOI"
+    },
+    {
+      "id": "CK_NOI_THAN_KINH",
+      "name": "Thần kinh",
+      "parent_id": "CK_NOI"
+    },
+    {
+      "id": "CK_NOI_TAM_THAN",
+      "name": "Tâm thần",
+      "parent_id": "CK_NOI"
+    },
+    {
+      "id": "CK_NOI_NOITIET",
+      "name": "Nội tiết",
+      "parent_id": "CK_NOI"
+    },
+    {
+      "id": "CK_NOI_CO_XUONG_KHOP",
+      "name": "Cơ xương khớp",
+      "parent_id": "CK_NOI"
+    },
+    {
+      "id": "CK_NGOAI",
+      "name": "Ngoại khoa",
+      "parent_id": null
+    },
+    {
+      "id": "CK_DA_LIEU",
+      "name": "Da liễu",
+      "parent_id": null
+    },
+    {
+      "id": "CK_PHU_SAN",
+      "name": "Phụ sản",
+      "parent_id": null
+    },
+    {
+      "id": "CK_MAT",
+      "name": "Mắt",
+      "parent_id": null
+    },
+    {
+      "id": "CK_TMH",
+      "name": "Tai Mũi Họng",
+      "parent_id": null
+    },
+    {
+      "id": "CK_RHM",
+      "name": "Răng Hàm Mặt",
+      "parent_id": null
+    }
+  ],
+  "diseases": [
+    {
+      "id": "BT_MAT_THI_LUC",
+      "name": "Thị lực",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_MONG_THIT",
+      "name": "Mộng thịt",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_SEO_GIAC_MAC",
+      "name": "Sẹo giác mạc",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_MAT_HOT",
+      "name": "Mắt hột",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_LE_DAO",
+      "name": "Viêm tắc lệ đạo mạn tính",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_LAC",
+      "name": "Lác mắt",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_HONG_MOT_MAT",
+      "name": "Hỏng một mắt",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_CAN_THI",
+      "name": "Cận thị",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_VIEN_THI",
+      "name": "Viễn thị",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_LOAN_THI",
+      "name": "Loạn thị",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_SAC_GIAC",
+      "name": "Rối loạn sắc giác",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_DAY_MAT",
+      "name": "Các bệnh về đáy mắt",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_MAT_KHAC",
+      "name": "Các bệnh khác về mắt",
+      "spec_id": "CK_MAT"
+    },
+    {
+      "id": "BT_TMH_TAI_NGOAI",
+      "name": "Tai ngoài",
+      "spec_id": "CK_TMH"
+    },
+    {
+      "id": "BT_TMH_TAI_GIUA",
+      "name": "Tai giữa",
+      "spec_id": "CK_TMH"
+    },
+    {
+      "id": "BT_TMH_TAI_TRONG",
+      "name": "Tai trong (Sức nghe)",
+      "spec_id": "CK_TMH"
+    },
+    {
+      "id": "BT_TMH_XUONG_CHUM",
+      "name": "Xương chũm",
+      "spec_id": "CK_TMH"
+    },
+    {
+      "id": "BT_TMH_MUI",
+      "name": "Mũi",
+      "spec_id": "CK_TMH"
+    },
+    {
+      "id": "BT_TMH_HONG",
+      "name": "Họng",
+      "spec_id": "CK_TMH"
+    },
+    {
+      "id": "BT_TMH_AMIDAN",
+      "name": "Amidan",
+      "spec_id": "CK_TMH"
+    },
+    {
+      "id": "BT_TMH_THANH_QUAN",
+      "name": "Thanh quản",
+      "spec_id": "CK_TMH"
+    },
+    {
+      "id": "BT_TMH_XOANG",
+      "name": "Xoang mặt",
+      "spec_id": "CK_TMH"
+    },
+    {
+      "id": "BT_RHM_RANG_SAU",
+      "name": "Răng sâu",
+      "spec_id": "CK_RHM"
+    },
+    {
+      "id": "BT_RHM_MAT_RANG",
+      "name": "Mất răng (Sức nhai)",
+      "spec_id": "CK_RHM"
+    },
+    {
+      "id": "BT_RHM_VIEM_QUANH_RANG",
+      "name": "Viêm quanh răng",
+      "spec_id": "CK_RHM"
+    },
+    {
+      "id": "BT_RHM_TUY_RANG",
+      "name": "Răng viêm tủy, tủy hoại tử, quanh cuống",
+      "spec_id": "CK_RHM"
+    },
+    {
+      "id": "BT_RHM_RANG_KHON",
+      "name": "Răng khôn",
+      "spec_id": "CK_RHM"
+    },
+    {
+      "id": "BT_RHM_XUONG_HAM",
+      "name": "Xương hàm",
+      "spec_id": "CK_RHM"
+    },
+    {
+      "id": "BT_RHM_VIEM_LOI",
+      "name": "Viêm lợi",
+      "spec_id": "CK_RHM"
+    },
+    {
+      "id": "BT_RHM_TUYEN_MANG_TAI",
+      "name": "Viêm tuyến mang tai",
+      "spec_id": "CK_RHM"
+    },
+    {
+      "id": "BT_RHM_KHE_HO_MOM",
+      "name": "Sứt môi, khe hở vòm miệng",
+      "spec_id": "CK_RHM"
+    },
+    {
+      "id": "BT_TAM_THAN_PHAN_LIET",
+      "name": "Bệnh tâm thần phân liệt",
+      "spec_id": "CK_NOI_TAM_THAN"
+    },
+    {
+      "id": "BT_TAM_THAN_LOAN_THAN",
+      "name": "Loạn thần thực tổn và triệu chứng",
+      "spec_id": "CK_NOI_TAM_THAN"
+    },
+    {
+      "id": "BT_TAM_THAN_THAI_NHAN_CACH",
+      "name": "Bệnh thái nhân cách",
+      "spec_id": "CK_NOI_TAM_THAN"
+    },
+    {
+      "id": "BT_TK_DONG_KINH",
+      "name": "Động kinh",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TK_SUY_NHUOC",
+      "name": "Hội chứng suy nhược thần kinh thực tổn",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TK_MO_HOI",
+      "name": "Ra mồ hôi tay chân",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TK_PHAN_XA",
+      "name": "Phản xạ gân xương",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TK_TIEN_DINH",
+      "name": "Rối loạn tiền đình - tiểu não",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TK_LIET_MAT",
+      "name": "Liệt mặt ngoại vi",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TK_LIET_DAY_TK",
+      "name": "Liệt dây thần kinh ngoại vi",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TK_DI_CHUNG_TKTW",
+      "name": "Di chứng tổn thương thần kinh trung ương",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TK_DAU_RE_TK",
+      "name": "Đau rễ và đám rối thần kinh",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TK_CO",
+      "name": "Bệnh thần kinh - cơ",
+      "spec_id": "CK_NOI_THAN_KINH"
+    },
+    {
+      "id": "BT_TM_HUYET_AP",
+      "name": "Huyết áp động mạch",
+      "spec_id": "CK_NOI_TIM_MACH"
+    },
+    {
+      "id": "BT_TM_MACH",
+      "name": "Tần số mạch",
+      "spec_id": "CK_NOI_TIM_MACH"
+    },
+    {
+      "id": "BT_TM_NHIP_TIM",
+      "name": "Rối loạn nhịp tim",
+      "spec_id": "CK_NOI_TIM_MACH"
+    },
+    {
+      "id": "BT_TM_BENH_TIM",
+      "name": "Bệnh lý tim mạch (Nội khoa)",
+      "spec_id": "CK_NOI_TIM_MACH"
+    },
+    {
+      "id": "BT_TM_MAU",
+      "name": "Máu và hệ bạch huyết",
+      "spec_id": "CK_NOI_TIM_MACH"
+    },
+    {
+      "id": "BT_NGOAI_MACH_MAU",
+      "name": "Bệnh mạch máu can thiệp ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_HH_MANG_PHOI_NOI",
+      "name": "Dày dính màng phổi sau điều trị nội",
+      "spec_id": "CK_NOI_HO_HAP"
+    },
+    {
+      "id": "BT_HH_PHE_QUAN",
+      "name": "Bệnh phế quản",
+      "spec_id": "CK_NOI_HO_HAP"
+    },
+    {
+      "id": "BT_HH_PHOI_NOI",
+      "name": "Bệnh phổi nội khoa (Lao, bụi phổi)",
+      "spec_id": "CK_NOI_HO_HAP"
+    },
+    {
+      "id": "BT_NGOAI_LONG_NGUC",
+      "name": "Bệnh lồng ngực và phổi can thiệp ngoại",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_TH_THUC_QUAN_NOI",
+      "name": "Bệnh thực quản nội khoa",
+      "spec_id": "CK_NOI_TIEU_HOA"
+    },
+    {
+      "id": "BT_NGOAI_THUC_QUAN",
+      "name": "Bệnh thực quản ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_TH_DA_DAY_NOI",
+      "name": "Bệnh lý dạ dày - tá tràng nội khoa",
+      "spec_id": "CK_NOI_TIEU_HOA"
+    },
+    {
+      "id": "BT_NGOAI_DA_DAY",
+      "name": "Bệnh lý dạ dày - tá tràng ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_TH_DAI_TRANG_NOI",
+      "name": "Bệnh lý đại - trực tràng nội khoa",
+      "spec_id": "CK_NOI_TIEU_HOA"
+    },
+    {
+      "id": "BT_NGOAI_DAI_TRANG",
+      "name": "Bệnh lý đại - trực tràng ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_NGOAI_HAU_MON",
+      "name": "Bệnh lý hậu môn, trực tràng và trĩ",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_TH_TIEU_TRANG_NOI",
+      "name": "Bệnh ký sinh trùng đường ruột",
+      "spec_id": "CK_NOI_TIEU_HOA"
+    },
+    {
+      "id": "BT_NGOAI_TIEU_TRANG_THOAT_VI",
+      "name": "Tổn thương tiểu tràng và thoát vị bẹn",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_NGOAI_RUOT_THUA",
+      "name": "Viêm ruột thừa sau phẫu thuật",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_TH_GAN_NOI",
+      "name": "Bệnh lý gan nội khoa",
+      "spec_id": "CK_NOI_TIEU_HOA"
+    },
+    {
+      "id": "BT_NGOAI_GAN",
+      "name": "Tổn thương gan ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_TH_MAT_TUY_NOI",
+      "name": "Bệnh lý mật - tụy nội khoa",
+      "spec_id": "CK_NOI_TIEU_HOA"
+    },
+    {
+      "id": "BT_NGOAI_MAT_TUY",
+      "name": "Bệnh lý mật - tụy ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_TH_LACH_NOI",
+      "name": "Lách to mạn tính",
+      "spec_id": "CK_NOI_TIEU_HOA"
+    },
+    {
+      "id": "BT_NGOAI_LACH",
+      "name": "Tổn thương lách ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_TN_THAN_NOI",
+      "name": "Bệnh thận nội khoa",
+      "spec_id": "CK_NOI_TIET_NIEU_SD"
+    },
+    {
+      "id": "BT_NGOAI_TIET_NIEU",
+      "name": "Bệnh lý tiết niệu ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Bệnh lý sinh dục nam ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_PS_SINH_DUC_NU",
+      "name": "Bệnh lý phụ sản",
+      "spec_id": "CK_PHU_SAN"
+    },
+    {
+      "id": "BT_CK_KHOP_NOI",
+      "name": "Bệnh cứng dính khớp mạn tính",
+      "spec_id": "CK_NOI_CO_XUONG_KHOP"
+    },
+    {
+      "id": "BT_NGOAI_KHOP",
+      "name": "Tổn thương khớp ngoại khoa",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_NGOAI_XUONG",
+      "name": "Gãy xương và biến dạng trục xương",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_NGOAI_CHI",
+      "name": "Dị tật, chênh lệch và co rút chi - ngón",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_DL_NAM_DA",
+      "name": "Bệnh nấm ngoài da",
+      "spec_id": "CK_DA_LIEU"
+    },
+    {
+      "id": "BT_DL_GHE",
+      "name": "Bệnh ghẻ",
+      "spec_id": "CK_DA_LIEU"
+    },
+    {
+      "id": "BT_DL_ECZEMA",
+      "name": "Bệnh Eczéma",
+      "spec_id": "CK_DA_LIEU"
+    },
+    {
+      "id": "BT_DL_DURHING_PEMPHIGUS",
+      "name": "Bệnh Durhing, Pemphigus",
+      "spec_id": "CK_DA_LIEU"
+    },
+    {
+      "id": "BT_DL_LUPUS_VAY_NEN",
+      "name": "Bệnh Lupus ban đỏ, vảy nến",
+      "spec_id": "CK_DA_LIEU"
+    },
+    {
+      "id": "BT_DL_TO_DIA",
+      "name": "Tổ đỉa, viêm da thần kinh",
+      "spec_id": "CK_DA_LIEU"
+    },
+    {
+      "id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Bệnh lây qua đường tình dục",
+      "spec_id": "CK_DA_LIEU"
+    },
+    {
+      "id": "BT_DL_HIV_PHONG",
+      "name": "HIV/AIDS và bệnh phong",
+      "spec_id": "CK_DA_LIEU"
+    },
+    {
+      "id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Bệnh lý móng, chai chân, mắt cá",
+      "spec_id": "CK_DA_LIEU"
+    },
+    {
+      "id": "BT_NT_TUYEN_GIAP_NOI",
+      "name": "Bệnh tuyến giáp nội khoa",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "BT_NGOAI_TUYEN_GIAP",
+      "name": "Bệnh tuyến giáp can thiệp ngoại",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_NT_TUYEN_YEN",
+      "name": "Bệnh tuyến yên",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "BT_NT_DAI_THAO_DUONG",
+      "name": "Đái tháo đường",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "BT_NT_DAI_THAO_NHAT",
+      "name": "Đái tháo nhạt",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "BT_NT_THUONG_THAN_NOI",
+      "name": "Cường vỏ thượng thận nội khoa",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "BT_NGOAI_THUONG_THAN",
+      "name": "Cường vỏ thượng thận đã phẫu thuật",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "BT_NT_BEO_PHE",
+      "name": "Thừa cân, béo phệ",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "BT_NGOAI_U",
+      "name": "U lành tính và u ác tính",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "NT_DAI_THAO_DUONG",
+      "name": "Đái tháo đường",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "NT_DAI_THAO_NHAT",
+      "name": "Đái tháo nhạt",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "NT_CUONG_THUONG_THAN",
+      "name": "Cường vỏ thượng thận",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "NT_BEO_PHI",
+      "name": "Béo phì",
+      "spec_id": "CK_NOI_NOITIET"
+    },
+    {
+      "id": "UB_U_LANH_TINH",
+      "name": "U lành tính",
+      "spec_id": "CK_NGOAI"
+    },
+    {
+      "id": "UB_U_AC_TINH",
+      "name": "U ác tính",
+      "spec_id": "CK_NGOAI"
+    }
+  ],
+  "classifications": [
+    {
+      "id": "CT_TL_01",
+      "disease_id": "BT_MAT_THI_LUC",
+      "name": "1 mắt 10/10, tổng 2 mắt 19-20/10",
+      "score": 1,
+      "ref_rule": "Dùng thuật toán tự phân loại theo thị lực",
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TL_02",
+      "disease_id": "BT_MAT_THI_LUC",
+      "name": "1 mắt 9-10/10, tổng 2 mắt 16-18/10",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TL_03",
+      "disease_id": "BT_MAT_THI_LUC",
+      "name": "1 mắt 7-9/10, tổng 2 mắt 14-15/10",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TL_04",
+      "disease_id": "BT_MAT_THI_LUC",
+      "name": "1 mắt 6-7/10, tổng 2 mắt 11-13/10",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TL_05",
+      "disease_id": "BT_MAT_THI_LUC",
+      "name": "1 mắt dưới 6/10, tổng 2 mắt dưới 11/10",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_01",
+      "disease_id": "BT_MAT_MONG_THIT",
+      "name": "Không có mộng thịt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_02",
+      "disease_id": "BT_MAT_MONG_THIT",
+      "name": "Mộng thịt độ I, II, III",
+      "score": null,
+      "ref_rule": "Theo thị lực chuẩn 2 mắt",
+      "ref_disease_id": "BT_MAT_THI_LUC",
+      "modifier": "0"
+    },
+    {
+      "id": "CT_MT_03",
+      "disease_id": "BT_MAT_MONG_THIT",
+      "name": "Mộng thịt độ III, 1 mắt thị lực dưới 6/10",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_04",
+      "disease_id": "BT_MAT_MONG_THIT",
+      "name": "Mộng thịt đã mổ, tái phát gây dính",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SGM_01",
+      "disease_id": "BT_MAT_SEO_GIAC_MAC",
+      "name": "Không có sẹo giác mạc",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SGM_02",
+      "disease_id": "BT_MAT_SEO_GIAC_MAC",
+      "name": "Sẹo đơn thuần, mỏng, nhỏ, ngoài vùng trung tâm",
+      "score": null,
+      "ref_rule": "Theo thị lực chuẩn hạ 1 loại",
+      "ref_disease_id": "BT_MAT_THI_LUC",
+      "modifier": "+1 loại"
+    },
+    {
+      "id": "CT_SGM_03",
+      "disease_id": "BT_MAT_SEO_GIAC_MAC",
+      "name": "Sẹo giác mạc có dính mống mắt: Tổng thị lực cả 2 mắt >= 16/10",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SGM_04",
+      "disease_id": "BT_MAT_SEO_GIAC_MAC",
+      "name": "Sẹo giác mạc có dính mống mắt: Thị lực 1 mắt <= 6/10",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MATHOT_01",
+      "disease_id": "BT_MAT_MAT_HOT",
+      "name": "Không có mắt hột",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MATHOT_02",
+      "disease_id": "BT_MAT_MAT_HOT",
+      "name": "Mắt hột chưa có biến chứng",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MATHOT_03",
+      "disease_id": "BT_MAT_MAT_HOT",
+      "name": "Biến chứng lông quặm: Không ảnh hưởng thị lực",
+      "score": null,
+      "ref_rule": "Theo thị lực chuẩn hạ 1 loại",
+      "ref_disease_id": "BT_MAT_THI_LUC",
+      "modifier": "+1 loại"
+    },
+    {
+      "id": "CT_MH_04",
+      "disease_id": "BT_MAT_MAT_HOT",
+      "name": "Biến chứng lông quặm: Có ảnh hưởng thị lực",
+      "score": null,
+      "ref_rule": "Theo thị lực chuẩn hạ 1 loại",
+      "ref_disease_id": "BT_MAT_THI_LUC",
+      "modifier": "+1 loại"
+    },
+    {
+      "id": "CT_LD_01",
+      "disease_id": "BT_MAT_LE_DAO",
+      "name": "Không viêm tắc lệ đạo",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LD_02",
+      "disease_id": "BT_MAT_LE_DAO",
+      "name": "Viêm tắc lệ đạo mạn tính hoặc điều trị nhiều lần không khỏi",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LAC_01",
+      "disease_id": "BT_MAT_LAC",
+      "name": "Không lác mắt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LAC_02",
+      "disease_id": "BT_MAT_LAC",
+      "name": "Lác mắt không ảnh hưởng tới chức năng thị giác",
+      "score": null,
+      "ref_rule": "Theo thị lực chuẩn hạ 1 loại",
+      "ref_disease_id": "BT_MAT_THI_LUC",
+      "modifier": "+1 loại"
+    },
+    {
+      "id": "CT_LAC_03",
+      "disease_id": "BT_MAT_LAC",
+      "name": "Lác mắt có ảnh hưởng tới chức năng thị lực",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HMM_00",
+      "disease_id": "BT_MAT_HONG_MOT_MAT",
+      "name": "Không hỏng mắt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HMM_01",
+      "disease_id": "BT_MAT_HONG_MOT_MAT",
+      "name": "Hỏng một mắt, mắt kia thị lực 10/10",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HMM_02",
+      "disease_id": "BT_MAT_HONG_MOT_MAT",
+      "name": "Hỏng một mắt, mắt kia thị lực dưới 10/10",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CT_01",
+      "disease_id": "BT_MAT_CAN_THI",
+      "name": "Không cận thị",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CT_02",
+      "disease_id": "BT_MAT_CAN_THI",
+      "name": "Có cận thị",
+      "score": null,
+      "ref_rule": "Theo thị lực khi có kính hạ 1 loại",
+      "ref_disease_id": "BT_MAT_THI_LUC",
+      "modifier": "+1 loại"
+    },
+    {
+      "id": "CT_VT_01",
+      "disease_id": "BT_MAT_VIEN_THI",
+      "name": "Không viễn thị",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_VT_02",
+      "disease_id": "BT_MAT_VIEN_THI",
+      "name": "Có viễn thị",
+      "score": null,
+      "ref_rule": "Theo thị lực khi có kính hạ 1 loại",
+      "ref_disease_id": "BT_MAT_THI_LUC",
+      "modifier": "+1 loại"
+    },
+    {
+      "id": "CT_LOANTHI_00",
+      "disease_id": "BT_MAT_LOAN_THI",
+      "name": "Không loạn thị",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LOANTHI_01",
+      "disease_id": "BT_MAT_LOAN_THI",
+      "name": "Loạn thị đơn thuần hoặc phối hợp",
+      "score": null,
+      "ref_rule": "Theo thị lực chuẩn hạ 1 loại",
+      "ref_disease_id": "BT_MAT_THI_LUC",
+      "modifier": "+1 loại"
+    },
+    {
+      "id": "CT_SG_01",
+      "disease_id": "BT_MAT_SAC_GIAC",
+      "name": "Không rối loạn sắc giác",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SG_02",
+      "disease_id": "BT_MAT_SAC_GIAC",
+      "name": "Có rối loạn sắc giác",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DM_00",
+      "disease_id": "BT_MAT_DAY_MAT",
+      "name": "Không có",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DM_01",
+      "disease_id": "BT_MAT_DAY_MAT",
+      "name": "Viêm võng mạc do bệnh thận, tăng huyết áp, viêm võng mạc sắc tố",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MK_01",
+      "disease_id": "BT_MAT_KHAC",
+      "name": "Không có bệnh khác về mắt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MK_02",
+      "disease_id": "BT_MAT_KHAC",
+      "name": "Bệnh bong võng mạc, teo gai thị",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MK_03",
+      "disease_id": "BT_MAT_KHAC",
+      "name": "Bệnh đã điều trị ổn định (Tăng nhãn áp, đục TTT, lệch TTT, viêm màng bồ đào dính bít đồng tử, các bệnh ở mi mắt)",
+      "score": null,
+      "ref_rule": "Theo thị lực chuẩn hạ 1 loại",
+      "ref_disease_id": "BT_MAT_THI_LUC",
+      "modifier": "+1 loại"
+    },
+    {
+      "id": "CT_TN_01",
+      "disease_id": "BT_TMH_TAI_NGOAI",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_02",
+      "disease_id": "BT_TMH_TAI_NGOAI",
+      "name": "Rách hoặc viêm teo sụn vành tai",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_03",
+      "disease_id": "BT_TMH_TAI_NGOAI",
+      "name": "Viêm ống tai ngoài mạn tính hoặc hẹp, dị dạng ống tai",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_01",
+      "disease_id": "BT_TMH_TAI_GIUA",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_02",
+      "disease_id": "BT_TMH_TAI_GIUA",
+      "name": "Viêm mạn tính có mủ nhầy hoặc thủng nhĩ trước dưới, sau dưới",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_03",
+      "disease_id": "BT_TMH_TAI_GIUA",
+      "name": "Viêm mạn tính có mủ nhầy hoặc thủng nhĩ trên và sau trên",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_04",
+      "disease_id": "BT_TMH_TAI_GIUA",
+      "name": "Viêm tai giữa mạn tính, tai khô hoàn toàn",
+      "score": null,
+      "ref_rule": "Theo sức nghe tai trong",
+      "ref_disease_id": "BT_TMH_TAI_TRONG",
+      "modifier": "0"
+    },
+    {
+      "id": "CT_TT_01",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Tiếng nói thầm: 1 bên 5 cm, tai kia 5 cm",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_02",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Tiếng nói thầm: 1 bên 4 cm, tai kia 2 cm",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_03",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Tiếng nói thầm: 1 bên 3 cm, tai kia 1 cm",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_04",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Tiếng nói thầm: 1 bên 2 cm, tai kia 0.5 cm",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_05",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Tiếng nói thầm: 1 bên 1 cm, tai kia 0.1 cm",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_06",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Thính lực kế: Không giảm hoặc giảm dưới 15 dBA",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_07",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Thính lực kế: Giảm cả 2 tai từ 15-35 dBA",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_08",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Thính lực kế: Giảm cả 2 tai từ 36-45 dBA",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_09",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Thính lực kế: Giảm cả 2 tai từ 46-65 dBA",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_10",
+      "disease_id": "BT_TMH_TAI_TRONG",
+      "name": "Thính lực kế: Giảm cả 2 tai trên 65 dBA",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XC_01",
+      "disease_id": "BT_TMH_XUONG_CHUM",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XC_02",
+      "disease_id": "BT_TMH_XUONG_CHUM",
+      "name": "Viêm xương chũm mạn tính",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XC_03",
+      "disease_id": "BT_TMH_XUONG_CHUM",
+      "name": "Đã phẫu thuật: Tai khô, sức nghe giảm nhẹ",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XC_04",
+      "disease_id": "BT_TMH_XUONG_CHUM",
+      "name": "Đã phẫu thuật: Còn chảy mủ, sức nghe giảm vừa",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XC_05",
+      "disease_id": "BT_TMH_XUONG_CHUM",
+      "name": "Đã phẫu thuật: Chảy mủ liên tục, sức nghe giảm nặng",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MUI_01",
+      "disease_id": "BT_TMH_MUI",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MUI_02",
+      "disease_id": "BT_TMH_MUI",
+      "name": "Lệch vẹo vách ngăn không có rối loạn hô hấp",
+      "score": null,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MUI_03",
+      "disease_id": "BT_TMH_MUI",
+      "name": "Lệch vẹo vách ngăn có rối loạn hô hấp nhẹ",
+      "score": null,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MUI_04",
+      "disease_id": "BT_TMH_MUI",
+      "name": "Lệch vẹo vách ngăn có rối loạn hô hấp rõ rệt",
+      "score": null,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MUI_05",
+      "disease_id": "BT_TMH_MUI",
+      "name": "Lệch vẹo vách ngăn rối loạn hô hấp mạn tính ảnh hưởng lồng ngực",
+      "score": null,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MUI_06",
+      "disease_id": "BT_TMH_MUI",
+      "name": "Viêm mũi dị ứng, vận mạch, mạn tính đơn thuần (tiết dịch, ngạt, tắc mũi, tái phát): Không rối loạn hô hấp đáng kể",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MUI_07",
+      "disease_id": "BT_TMH_MUI",
+      "name": "Viêm mũi dị ứng, vận mạch, mạn tính đơn thuần (tiết dịch, ngạt, tắc mũi, tái phát): Rối loạn hô hấp rõ, thể trạng khỏe",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MUI_08",
+      "disease_id": "BT_TMH_MUI",
+      "name": "Viêm mũi dị ứng, vận mạch, mạn tính đơn thuần (tiết dịch, ngạt, tắc mũi, tái phát): Rối loạn hô hấp rõ, thể trạng không khỏe",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MUI_09",
+      "disease_id": "BT_TMH_MUI",
+      "name": "Viêm mũi teo, trĩ mũi, chảy máu mũi thường xuyên",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HONG_01",
+      "disease_id": "BT_TMH_HONG",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HONG_02",
+      "disease_id": "BT_TMH_HONG",
+      "name": "Viêm họng mạn tính đơn thuần, thể trạng tốt",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HONG_03",
+      "disease_id": "BT_TMH_HONG",
+      "name": "Viêm họng mạn tính niêm mạc dày, quá phát, họng hạt ảnh hưởng đến thể trạng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_AMI_01",
+      "disease_id": "BT_TMH_AMIDAN",
+      "name": "Amidan trung bình không ảnh hưởng chức năng, thể trạng tốt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_AMI_02",
+      "disease_id": "BT_TMH_AMIDAN",
+      "name": "Amidan hơi to hay trung bình, thỉnh thoảng viêm, không ảnh hưởng thể trạng",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_AMI_03",
+      "disease_id": "BT_TMH_AMIDAN",
+      "name": "Amidan viêm mạn tính hốc mủ hay viêm nhiễm tái phát ảnh hưởng thể trạng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_AMI_04",
+      "disease_id": "BT_TMH_AMIDAN",
+      "name": "Amidan đã phẫu thuật, kết quả tốt",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_01",
+      "disease_id": "BT_TMH_THANH_QUAN",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_02",
+      "disease_id": "BT_TMH_THANH_QUAN",
+      "name": "Viêm thanh quản mạn không rối loạn nhiều phát âm, tiếng nói còn phân biệt được, thể trạng tốt",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_03",
+      "disease_id": "BT_TMH_THANH_QUAN",
+      "name": "Viêm thanh quản mạn rối loạn phát âm rõ, thể trạng kém",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_04",
+      "disease_id": "BT_TMH_THANH_QUAN",
+      "name": "Liệt cơ khép mở thanh quản",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_05",
+      "disease_id": "BT_TMH_THANH_QUAN",
+      "name": "Khản tiếng đơn thuần (hạt/polyp dây thanh) không liệt dây thanh (dây hồi quy)",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_06",
+      "disease_id": "BT_TMH_THANH_QUAN",
+      "name": "Nói lắp: 1 câu 4-5 từ lắp 1 lần",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_07",
+      "disease_id": "BT_TMH_THANH_QUAN",
+      "name": "Nói lắp: 1 câu 4-5 từ lắp 2 lần trở lên",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_08",
+      "disease_id": "BT_TMH_THANH_QUAN",
+      "name": "Biến dạng thanh quản do di chứng có ảnh hưởng chức năng",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_09",
+      "disease_id": "BT_TMH_THANH_QUAN",
+      "name": "Phẫu thuật thanh quản chức năng hồi phục tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XG_01",
+      "disease_id": "BT_TMH_XOANG",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XG_02",
+      "disease_id": "BT_TMH_XOANG",
+      "name": "Viêm xoang hàm/liên xoang (sàng -hàm) mạn không ảnh hưởng hô hấp",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XG_03",
+      "disease_id": "BT_TMH_XOANG",
+      "name": "Viêm đa xoang mạn 1 bên + polyp mũi",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XG_04",
+      "disease_id": "BT_TMH_XOANG",
+      "name": "Viêm đa xoang mạn 2 bên + polyp mũi 1 bên",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XG_05",
+      "disease_id": "BT_TMH_XOANG",
+      "name": "Viêm đa xoang mạn 2 bên + polyp mũi 2 bên",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XG_06",
+      "disease_id": "BT_TMH_XOANG",
+      "name": "Đã phẫu thuật xoang, cắt polyp ổn định tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RS_01",
+      "disease_id": "BT_RHM_RANG_SAU",
+      "name": "Không có răng sâu",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RS_02",
+      "disease_id": "BT_RHM_RANG_SAU",
+      "name": "Sâu men, ngà 1-3 cái không đau hoặc đã trám",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RS_03",
+      "disease_id": "BT_RHM_RANG_SAU",
+      "name": "Sâu men, ngà 4-5 cái không đau hoặc đã trám",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RS_04",
+      "disease_id": "BT_RHM_RANG_SAU",
+      "name": "Sâu men, ngà từ 6 cái trở lên",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MR_01",
+      "disease_id": "BT_RHM_MAT_RANG",
+      "name": "Đủ răng không kể răng khôn",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MR_02",
+      "disease_id": "BT_RHM_MAT_RANG",
+      "name": "Mất 1-2 răng, sức nhai > 90%",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MR_03",
+      "disease_id": "BT_RHM_MAT_RANG",
+      "name": "Mất răng sức nhai còn 81 - 90%",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MR_04",
+      "disease_id": "BT_RHM_MAT_RANG",
+      "name": "Mất răng sức nhai còn 61 - 80%",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MR_05",
+      "disease_id": "BT_RHM_MAT_RANG",
+      "name": "Mất răng sức nhai còn dưới 61%",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_VQR_01",
+      "disease_id": "BT_RHM_VIEM_QUANH_RANG",
+      "name": "Không viêm quanh răng",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_VQR_02",
+      "disease_id": "BT_RHM_VIEM_QUANH_RANG",
+      "name": "Viêm quanh răng ở 4-5 răng, túi lợi sâu độ 3 trở lên",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_VQR_03",
+      "disease_id": "BT_RHM_VIEM_QUANH_RANG",
+      "name": "Viêm quanh răng ở 6-11 răng, túi lợi sâu độ 3 trở lên",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_VQR_04",
+      "disease_id": "BT_RHM_VIEM_QUANH_RANG",
+      "name": "Viêm quanh răng từ 12 răng trở lên, túi lợi sâu độ 3 trở lên",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_VQR_05",
+      "disease_id": "BT_RHM_VIEM_QUANH_RANG",
+      "name": "Răng lung lay nhiều có chỉ định nhổ coi như răng đó bị mất",
+      "score": null,
+      "ref_rule": "Tính theo tỷ lệ mất sức nhai",
+      "ref_disease_id": "BT_RHM_MAT_RANG",
+      "modifier": "0"
+    },
+    {
+      "id": "CT_TR_01",
+      "disease_id": "BT_RHM_TUY_RANG",
+      "name": "Không viêm tủy, quanh cuống",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TR_02",
+      "disease_id": "BT_RHM_TUY_RANG",
+      "name": "1-2 răng viêm tủy, quanh cuống đã chữa khỏi",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TR_03",
+      "disease_id": "BT_RHM_TUY_RANG",
+      "name": "1-2 răng viêm tủy, quanh cuống, răng không được điều trị",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RK_01",
+      "disease_id": "BT_RHM_RANG_KHON",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RK_02",
+      "disease_id": "BT_RHM_RANG_KHON",
+      "name": "Biến chứng đã điều trị tốt",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RK_03",
+      "disease_id": "BT_RHM_RANG_KHON",
+      "name": "Răng khôn đang biến chứng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XH_01",
+      "disease_id": "BT_RHM_XUONG_HAM",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XH_02",
+      "disease_id": "BT_RHM_XUONG_HAM",
+      "name": "Gãy đã liền, khớp cắn không lệch, sức nhai tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XH_03",
+      "disease_id": "BT_RHM_XUONG_HAM",
+      "name": "Khớp cắn lệch ít, còn nhai được",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_XH_04",
+      "disease_id": "BT_RHM_XUONG_HAM",
+      "name": "Khớp cắn lệch nhiều, ảnh hưởng sức nhai",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_VL_01",
+      "disease_id": "BT_RHM_VIEM_LOI",
+      "name": "Không viêm lợi",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_VL_02",
+      "disease_id": "BT_RHM_VIEM_LOI",
+      "name": "Viêm lợi không quá 1/2 số răng",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_VL_03",
+      "disease_id": "BT_RHM_VIEM_LOI",
+      "name": "Viêm lợi trên 1/2 số răng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TMT_01",
+      "disease_id": "BT_RHM_TUYEN_MANG_TAI",
+      "name": "Không viêm tuyến mang tai",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TMT_02",
+      "disease_id": "BT_RHM_TUYEN_MANG_TAI",
+      "name": "Viêm đã chữa khỏi không tái phát trên 1 năm",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TMT_03",
+      "disease_id": "BT_RHM_TUYEN_MANG_TAI",
+      "name": "Viêm tuyến mang tai mạn tính đã ổn định",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SM_01",
+      "disease_id": "BT_RHM_KHE_HO_MOM",
+      "name": "Không sứt môi, hở vòm miệng",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SM_02",
+      "disease_id": "BT_RHM_KHE_HO_MOM",
+      "name": "Khe hở môi đơn không hở vòm miệng",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SM_03",
+      "disease_id": "BT_RHM_KHE_HO_MOM",
+      "name": "Khe hở môi đã vá lành, ít ảnh hưởng phát âm và thẩm mỹ",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SM_04",
+      "disease_id": "BT_RHM_KHE_HO_MOM",
+      "name": "Lưỡi gà tách đôi, khe hở nhỏ đã vá ở vòm miệng mềm, không ngọng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SM_05",
+      "disease_id": "BT_RHM_KHE_HO_MOM",
+      "name": "Khe hở vòm miệng đã vá lành có ảnh hưởng phát âm",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SM_06",
+      "disease_id": "BT_RHM_KHE_HO_MOM",
+      "name": "Khe hở môi kèm khe hở vòm miệng",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TTPL_01",
+      "disease_id": "BT_TAM_THAN_PHAN_LIET",
+      "name": "Không có bệnh tâm thần phân liệt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TTPL_02",
+      "disease_id": "BT_TAM_THAN_PHAN_LIET",
+      "name": "Bệnh tâm thần phân liệt các thể",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LT_01",
+      "disease_id": "BT_TAM_THAN_LOAN_THAN",
+      "name": "Không loạn thần",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LT_02",
+      "disease_id": "BT_TAM_THAN_LOAN_THAN",
+      "name": "Do chấn thương sọ não, nhiễm khuẩn hoặc tâm thần, di chứng sau điều trị",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LT_03",
+      "disease_id": "BT_TAM_THAN_LOAN_THAN",
+      "name": "Khôi phục được nhưng còn rối loạn tim mạch, thực vật nhẹ",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LT_04",
+      "disease_id": "BT_TAM_THAN_LOAN_THAN",
+      "name": "Trầm uất, nghi bệnh: Cấp, bán cấp, mạn tính",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LT_05",
+      "disease_id": "BT_TAM_THAN_LOAN_THAN",
+      "name": "Trầm uất, nghi bệnh: Bù trừ lâu dài và ổn định, tâm thần được khôi phục tốt",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TNC_00",
+      "disease_id": "BT_TAM_THAN_THAI_NHAN_CACH",
+      "name": "Không có",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TNC_01",
+      "disease_id": "BT_TAM_THAN_THAI_NHAN_CACH",
+      "name": "Bệnh thái nhân cách ở tất cả các thể và mức độ",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DK_01",
+      "disease_id": "BT_TK_DONG_KINH",
+      "name": "Không động kinh",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DK_02",
+      "disease_id": "BT_TK_DONG_KINH",
+      "name": "Cơn hiếm, thưa (đã điều trị còn dưới 3 cơn/năm)",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DK_03",
+      "disease_id": "BT_TK_DONG_KINH",
+      "name": "Cơn lớn/nhỏ có biến đổi tính tình, hành vi, nhân cách",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SNTK_01",
+      "disease_id": "BT_TK_SUY_NHUOC",
+      "name": "Không suy nhược",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SNTK_02",
+      "disease_id": "BT_TK_SUY_NHUOC",
+      "name": "Đau đầu mất ngủ ít",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SNTK_03",
+      "disease_id": "BT_TK_SUY_NHUOC",
+      "name": "Giảm trí nhớ, giảm khả năng lao động, thể trạng kém",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MH_01",
+      "disease_id": "BT_TK_MO_HOI",
+      "name": "Không có",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MH_02",
+      "disease_id": "BT_TK_MO_HOI",
+      "name": "Nhẹ",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MH_03",
+      "disease_id": "BT_TK_MO_HOI",
+      "name": "Vừa và nặng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PX_01",
+      "disease_id": "BT_TK_PHAN_XA",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PX_02",
+      "disease_id": "BT_TK_PHAN_XA",
+      "name": "Tăng hoặc không tăng đều 2 bên không rối loạn vận động cảm giác",
+      "score": 2,
+      "ref_rule": "Xếp theo nguyên nhân",
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PX_03",
+      "disease_id": "BT_TK_PHAN_XA",
+      "name": "Giảm đều 2 bên có rối loạn vận động cảm giác",
+      "score": 3,
+      "ref_rule": "Xếp theo nguyên nhân",
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TD_01",
+      "disease_id": "BT_TK_TIEN_DINH",
+      "name": "Không có rối loạn",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TD_02",
+      "disease_id": "BT_TK_TIEN_DINH",
+      "name": "Nhẹ (mỗi năm xuất hiện 1-2 lần)",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TD_03",
+      "disease_id": "BT_TK_TIEN_DINH",
+      "name": "Vừa và nặng điều trị đã ổn định trên 1 năm",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LM_01",
+      "disease_id": "BT_TK_LIET_MAT",
+      "name": "Không liệt mặt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LM_02",
+      "disease_id": "BT_TK_LIET_MAT",
+      "name": "Có di chứng, méo mồm nhẹ khi cười, không ảnh hưởng nhắm mắt, phát âm",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LM_03",
+      "disease_id": "BT_TK_LIET_MAT",
+      "name": "Còn di chứng méo mồm thường xuyên, ảnh hưởng nhắm mắt, phát âm",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LTK_01",
+      "disease_id": "BT_TK_LIET_DAY_TK",
+      "name": "Không liệt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LTK_02",
+      "disease_id": "BT_TK_LIET_DAY_TK",
+      "name": "Liệt thần kinh quay, trụ, hông khoeo ngoài",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LTK_03",
+      "disease_id": "BT_TK_LIET_DAY_TK",
+      "name": "Liệt TK khác: Mất hoặc giảm khả năng lao động một phần chi",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LTK_04",
+      "disease_id": "BT_TK_LIET_DAY_TK",
+      "name": "Liệt TK khác: Mất khả năng lao động hoàn toàn một chi",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TKTW_01",
+      "disease_id": "BT_TK_DI_CHUNG_TKTW",
+      "name": "Không có di chứng",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TKTW_02",
+      "disease_id": "BT_TK_DI_CHUNG_TKTW",
+      "name": "Liệt dây TK sọ hoặc tủy sống hạn chế khả năng lao động của chân tay",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DR_01",
+      "disease_id": "BT_TK_DAU_RE_TK",
+      "name": "Không đau",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DR_02",
+      "disease_id": "BT_TK_DAU_RE_TK",
+      "name": "Đau ảnh hưởng rõ rệt đến khả năng lao động",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CO_01",
+      "disease_id": "BT_TK_CO",
+      "name": "Không có bệnh thần kinh - cơ",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CO_02",
+      "disease_id": "BT_TK_CO",
+      "name": "Teo cơ nhẹ ảnh hưởng ít đến vận động",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CO_03",
+      "disease_id": "BT_TK_CO",
+      "name": "Teo cơ nặng ảnh hưởng rõ khả năng lao động",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CO_04",
+      "disease_id": "BT_TK_CO",
+      "name": "Bệnh nhược cơ",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HA_01",
+      "disease_id": "BT_TM_HUYET_AP",
+      "name": "< 30 tuổi: 110-125 / 65-85 mmHg",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HA_02",
+      "disease_id": "BT_TM_HUYET_AP",
+      "name": "< 30 tuổi: 126-135 / 60-<90 mmHg",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HA_03",
+      "disease_id": "BT_TM_HUYET_AP",
+      "name": "< 30 tuổi: 136-140 / 90-95 mmHg",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HA_04",
+      "disease_id": "BT_TM_HUYET_AP",
+      "name": "< 30 tuổi: > 140 / > 95 mmHg",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HA_05",
+      "disease_id": "BT_TM_HUYET_AP",
+      "name": "< 30 tuổi: < 100 / < 60 mmHg",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HA_06",
+      "disease_id": "BT_TM_HUYET_AP",
+      "name": "30-50 tuổi: < 140 / < 90 mmHg",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HA_07",
+      "disease_id": "BT_TM_HUYET_AP",
+      "name": "30-50 tuổi: 140-145 / 90-95 mmHg",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HA_08",
+      "disease_id": "BT_TM_HUYET_AP",
+      "name": "30-50 tuổi: > 150 / 96-100 mmHg",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MC_01",
+      "disease_id": "BT_TM_MACH",
+      "name": "Tần số 60 - 75 lần/phút",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MC_02",
+      "disease_id": "BT_TM_MACH",
+      "name": "Tần số 76 - 85 lần/phút",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MC_03",
+      "disease_id": "BT_TM_MACH",
+      "name": "Tần số 86 - 95 hoặc 55 - 60 lần/phút",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MC_04",
+      "disease_id": "BT_TM_MACH",
+      "name": "Tần số > 95 hoặc < 55 lần/phút",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NT_01",
+      "disease_id": "BT_TM_NHIP_TIM",
+      "name": "Không rối loạn nhịp tim",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NT_02",
+      "disease_id": "BT_TM_NHIP_TIM",
+      "name": "Ngoại tâm thu thưa (<6 nhịp/phút) mất hoặc giảm sau vận động gắng sức",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NT_03",
+      "disease_id": "BT_TM_NHIP_TIM",
+      "name": "Ngoại tâm thu thưa (<6 nhịp/phút) Không mất hoặc không giảm sau vận động gắng sức",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NT_04",
+      "disease_id": "BT_TM_NHIP_TIM",
+      "name": "Ngoại tâm thu mau (>7-12 nhịp/phút) tăng sau gắng sức",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NT_05",
+      "disease_id": "BT_TM_NHIP_TIM",
+      "name": "Loạn nhịp hoàn toàn từng cơn ngắn",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NT_06",
+      "disease_id": "BT_TM_NHIP_TIM",
+      "name": "Loạn nhịp hoàn toàn liên tục",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NT_07",
+      "disease_id": "BT_TM_NHIP_TIM",
+      "name": "Rối loạn hoàn toàn dẫn truyền trong cơ tim",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_01",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Không có bệnh tim",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_02",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Tiếng thổi tâm thu chức năng",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_03",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Tiếng tim đập mạnh đơn thuần",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_04",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Tiếng tim tách đôi sinh lý",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_05",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Tim bẩm sinh chưa gây tím tái, chưa suy tim",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_06",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Tim bẩm sinh gây tím tái, có suy tim",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_07",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Tim sang phải (Dextrocardia)",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_08",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Bệnh van tim (trừ hẹp hai lá) chưa suy tim",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_09",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Xơ hóa cơ tim, hẹp van hai lá, các bệnh tim khác chưa suy tim",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_10",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Xơ hóa cơ tim, hẹp van hai lá, các bệnh tim khác đã có suy tim",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BT_11",
+      "disease_id": "BT_TM_BENH_TIM",
+      "name": "Bệnh thực thể cơ tim, màng tim, ĐM chủ, ĐM vành",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MAU_01",
+      "disease_id": "BT_TM_MAU",
+      "name": "Bình thường theo hằng số sinh lý",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MAU_02",
+      "disease_id": "BT_TM_MAU",
+      "name": "Bệnh các cơ quan tạo máu",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MAU_03",
+      "disease_id": "BT_TM_MAU",
+      "name": "Hậu quả của máu về bệnh phóng xạ",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MAU_04",
+      "disease_id": "BT_TM_MAU",
+      "name": "Bệnh giun chỉ",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MAU_05",
+      "disease_id": "BT_TM_MAU",
+      "name": "Thiếu máu nặng thường xuyên do các nguyên nhân",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MAU_06",
+      "disease_id": "BT_TM_MAU",
+      "name": "Thiếu máu bẩm sinh (Hồng cầu, bạch cầu, đông máu)",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_00",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Không viêm tắc động, tĩnh mạch",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_01",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Viêm tắc mạch chưa hoại tử đầu chi",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_02",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Viêm tắc mạch hoại tử đầu chi can thiệp ngoại khoa",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_03",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Không có giãn tĩnh  mạch ở khoeo chân, cẳng chân",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_04",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Giãn tĩnh mạch ở khoeo chân, cẳng chân chưa thành búi",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_05",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Giãn tĩnh mạch ở khoeo chân, cẳng chân thành búi, chạy nhảy gây căng nhức",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_06",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Giãn tĩnh mạch ở khoeo chân, cẳng chân đã phẫu thuật tốt",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_07",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Không có giãn tĩnh mạch thừng tinh",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_08",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Giãn tĩnh mạch thừng tinh nhẹ (Sờ thấy tĩnh mạch to thẳng chưa quấn vào nhau)",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_09",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Giãn tĩnh mạch thừng tinh nặng (quấn vào nhau thành búi)",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NMM_10",
+      "disease_id": "BT_NGOAI_MACH_MAU",
+      "name": "Đã phẫu thuật về tim và van tim",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MP_01",
+      "disease_id": "BT_HH_MANG_PHOI_NOI",
+      "name": "Màng phổi bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MP_02",
+      "disease_id": "BT_HH_MANG_PHOI_NOI",
+      "name": "Sau viêm màng phổi, viêm màng phổi tràng dịch thanh tơ, tràn mủ màng phổi đã điều trị khỏi: Không dính hoặc dính ít",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MP_03",
+      "disease_id": "BT_HH_MANG_PHOI_NOI",
+      "name": "Sau viêm màng phổi, viêm màng phổi tràng dịch thanh tơ, tràn mủ màng phổi đã điều trị khỏi: Dày dính ít toàn bộ một bên",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PQ_01",
+      "disease_id": "BT_HH_PHE_QUAN",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PQ_02",
+      "disease_id": "BT_HH_PHE_QUAN",
+      "name": "Giãn phế quản nhẹ, viêm phế quãn mạng tính tắc nghẽn",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PQ_03",
+      "disease_id": "BT_HH_PHE_QUAN",
+      "name": "Viêm phế quản mạn chưa có tắc nghẽn",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PQ_04",
+      "disease_id": "BT_HH_PHE_QUAN",
+      "name": "Hen phế quản nhẹ và vừa",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PQ_05",
+      "disease_id": "BT_HH_PHE_QUAN",
+      "name": "Hen phế quản nặng",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PHOI_01",
+      "disease_id": "BT_HH_PHOI_NOI",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PHOI_02",
+      "disease_id": "BT_HH_PHOI_NOI",
+      "name": "Bệnh bụi phổi",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PHOI_03",
+      "disease_id": "BT_HH_PHOI_NOI",
+      "name": "Các bệnh bụi phổi đã điều trị ổn định trên 3 năm",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PHOI_04",
+      "disease_id": "BT_HH_PHOI_NOI",
+      "name": "Lao phổi xơ mới",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NLN_00",
+      "disease_id": "BT_NGOAI_LONG_NGUC",
+      "name": "Không có",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NLN_01",
+      "disease_id": "BT_NGOAI_LONG_NGUC",
+      "name": "Tràn khí màng phổi",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NLN_02",
+      "disease_id": "BT_NGOAI_LONG_NGUC",
+      "name": "Khí phế thũng, xẹp phổi, cắt thùy phổi",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NLN_03",
+      "disease_id": "BT_NGOAI_LONG_NGUC",
+      "name": "Ung thư phế quản hoặc ung thư phổi",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_N01",
+      "disease_id": "BT_TH_THUC_QUAN_NOI",
+      "name": "Thực quản bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_N02",
+      "disease_id": "BT_TH_THUC_QUAN_NOI",
+      "name": "Viêm thực quản mạn tính, giãn, loét",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_G00",
+      "disease_id": "BT_NGOAI_THUC_QUAN",
+      "name": "Thực quản bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_G01",
+      "disease_id": "BT_NGOAI_THUC_QUAN",
+      "name": "Hẹp thực quản",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_G02",
+      "disease_id": "BT_NGOAI_THUC_QUAN",
+      "name": "Giãn tĩnh mạch thực quản",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TQ_G03",
+      "disease_id": "BT_NGOAI_THUC_QUAN",
+      "name": "Ung thư thực quản",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_N01",
+      "disease_id": "BT_TH_DA_DAY_NOI",
+      "name": "Dạ dày tá tràng bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_N02",
+      "disease_id": "BT_TH_DA_DAY_NOI",
+      "name": "Viêm dạ dày - tá tràng mạn tính",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_N03",
+      "disease_id": "BT_TH_DA_DAY_NOI",
+      "name": "Loét hành tá tràng chưa biến chứng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_N04",
+      "disease_id": "BT_TH_DA_DAY_NOI",
+      "name": "Sa dạ dày độ I",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_N05",
+      "disease_id": "BT_TH_DA_DAY_NOI",
+      "name": "Sa dạ dày độ II, III",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_G00",
+      "disease_id": "BT_NGOAI_DA_DAY",
+      "name": "Dạ dày tá tràng bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_G01",
+      "disease_id": "BT_NGOAI_DA_DAY",
+      "name": "Loét dạ dày chưa biến chứng",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_G02",
+      "disease_id": "BT_NGOAI_DA_DAY",
+      "name": "Loét dạ dày có biến chứng chảy máu, hẹp môn vị",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_G03",
+      "disease_id": "BT_NGOAI_DA_DAY",
+      "name": "Loét hành tá tràng có biến chứng",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_G04",
+      "disease_id": "BT_NGOAI_DA_DAY",
+      "name": "Loét dạ dày tá tràng đã mổ kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_G05",
+      "disease_id": "BT_NGOAI_DA_DAY",
+      "name": "Loét dạ dày tá tràng đã mổ kết quả không tốt",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DD_G06",
+      "disease_id": "BT_NGOAI_DA_DAY",
+      "name": "Ung thư dạ dày",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_N01",
+      "disease_id": "BT_TH_DAI_TRANG_NOI",
+      "name": "Đại trực tràng bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_N02",
+      "disease_id": "BT_TH_DAI_TRANG_NOI",
+      "name": "Rối loạn chức năng đại tràng mạn tính: Nhẹ",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_N03",
+      "disease_id": "BT_TH_DAI_TRANG_NOI",
+      "name": "Rối loạn chức năng đại tràng mạn tính: Vừa",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_N04",
+      "disease_id": "BT_TH_DAI_TRANG_NOI",
+      "name": "Rối loạn chức năng đại tràng mạn tính: Nặng",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_N05",
+      "disease_id": "BT_TH_DAI_TRANG_NOI",
+      "name": "Viêm loét đại tràng xuất huyết: Nhẹ",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_N06",
+      "disease_id": "BT_TH_DAI_TRANG_NOI",
+      "name": "Viêm loét đại tràng xuất huyết: Vừa",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_N07",
+      "disease_id": "BT_TH_DAI_TRANG_NOI",
+      "name": "Viêm loét đại tràng xuất huyết: Nặng",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_G00",
+      "disease_id": "BT_NGOAI_DAI_TRANG",
+      "name": "Đại trực tràng bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_G01",
+      "disease_id": "BT_NGOAI_DAI_TRANG",
+      "name": "Bệnh lành tính đại tràng can thiệp phẫu thuật",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_G02",
+      "disease_id": "BT_NGOAI_DAI_TRANG",
+      "name": "Polyp trực tràng: Cuống nhỏ điều trị khỏi",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_G03",
+      "disease_id": "BT_NGOAI_DAI_TRANG",
+      "name": "Polyp trực tràng: Có chảy máu",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DT_G04",
+      "disease_id": "BT_NGOAI_DAI_TRANG",
+      "name": "Ung thư trực tràng, đại tràng",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_01",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Hậu môn trực tràng bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_02",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Rò hậu môn đơn giản đã điều trị tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_03",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Rò hậu môn phức tạp đã điều trị nhiều lần",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_04",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Sa trực tràng",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_05",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Nứt hậu môn đã điều trị kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_06",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Nứt hậu môn nhiễm trùng điều trị nhiều lần",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_07",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Không có trĩ",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_08",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Trĩ ngoại độ I",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_09",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Trĩ ngoại độ II",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_10",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Trĩ ngoại độ III",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_11",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Trĩ nội hoặc trĩ phối hợp búi nhỏ (<0.5cm) không có hoặc có ít biến chứng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_12",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Trĩ nội ngoại kết hợp có triệu chứng ít",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HM_13",
+      "disease_id": "BT_NGOAI_HAU_MON",
+      "name": "Trĩ đã thắt nay có búi trĩ tái phát",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_NOI01",
+      "disease_id": "BT_TH_TIEU_TRANG_NOI",
+      "name": "Ký sinh trùng đường ruột chưa biến đổi chức năng",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_NOI02",
+      "disease_id": "BT_TH_TIEU_TRANG_NOI",
+      "name": "Ký sinh trùng đường ruột gây biến đổi chức năng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_G01",
+      "disease_id": "BT_NGOAI_TIEU_TRANG_THOAT_VI",
+      "name": "Tiểu tràng bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_G02",
+      "disease_id": "BT_NGOAI_TIEU_TRANG_THOAT_VI",
+      "name": "Thủng tiểu tràng đã mổ kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_G03",
+      "disease_id": "BT_NGOAI_TIEU_TRANG_THOAT_VI",
+      "name": "Thủng tiểu tràng đã mổ có ảnh hưởng tiêu hoá và sinh hoạt, có hội chứng bán tắc",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_G04",
+      "disease_id": "BT_NGOAI_TIEU_TRANG_THOAT_VI",
+      "name": "Tắc ruột cơ học phẫu thuật kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_G05",
+      "disease_id": "BT_NGOAI_TIEU_TRANG_THOAT_VI",
+      "name": "Tắc ruột phẫu thuật còn rối loạn tiêu hóa",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_G06",
+      "disease_id": "BT_NGOAI_TIEU_TRANG_THOAT_VI",
+      "name": "Thoát vị bẹn chưa phẫu thuật",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_G07",
+      "disease_id": "BT_NGOAI_TIEU_TRANG_THOAT_VI",
+      "name": "Thoát vị bẹn đã phẫu thuật kết quả tốt",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_G08",
+      "disease_id": "BT_NGOAI_TIEU_TRANG_THOAT_VI",
+      "name": "Thoát vị bẹn đã phẫu thuật không tốt",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RT_01",
+      "disease_id": "BT_NGOAI_RUOT_THUA",
+      "name": "Bình thường hoặc mổ từ bé kết quả tốt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RT_02",
+      "disease_id": "BT_NGOAI_RUOT_THUA",
+      "name": "Đã mổ kết quả tốt (ở người lớn)",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_RT_03",
+      "disease_id": "BT_NGOAI_RUOT_THUA",
+      "name": "Có di chứng, biến chứng sau mổ",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GAN_N01",
+      "disease_id": "BT_TH_GAN_NOI",
+      "name": "Gan bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GAN_N02",
+      "disease_id": "BT_TH_GAN_NOI",
+      "name": "Viêm gan đã chữa khỏi trên 12 tháng",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GAN_N03",
+      "disease_id": "BT_TH_GAN_NOI",
+      "name": "Viêm gan mạn tính thể tồn tại, thể tấn công",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GAN_N04",
+      "disease_id": "BT_TH_GAN_NOI",
+      "name": "Xơ gan, gan to chưa rõ nguyên nhân",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GAN_G00",
+      "disease_id": "BT_NGOAI_GAN",
+      "name": "Gan bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GAN_G01",
+      "disease_id": "BT_NGOAI_GAN",
+      "name": "Đụng dập gan xử trí kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GAN_G02",
+      "disease_id": "BT_NGOAI_GAN",
+      "name": "Áp xe gan can thiệp ngoại khoa nay ổn định",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GAN_G03",
+      "disease_id": "BT_NGOAI_GAN",
+      "name": "Áp xe gan vỡ gây biến chứng, tuy đã điều trị khỏi",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GAN_G04",
+      "disease_id": "BT_NGOAI_GAN",
+      "name": "Ung thư gan",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_N01",
+      "disease_id": "BT_TH_MAT_TUY_NOI",
+      "name": "Mật tụy bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_N02",
+      "disease_id": "BT_TH_MAT_TUY_NOI",
+      "name": "Viêm túi mật, viêm ống dẫn mật mạn tính",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_N03",
+      "disease_id": "BT_TH_MAT_TUY_NOI",
+      "name": "Viêm tụy cấp điều trị khỏi",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_N04",
+      "disease_id": "BT_TH_MAT_TUY_NOI",
+      "name": "Viêm tụy mạn tính",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_G00",
+      "disease_id": "BT_NGOAI_MAT_TUY",
+      "name": "Mật tụy bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_G01",
+      "disease_id": "BT_NGOAI_MAT_TUY",
+      "name": "Sỏi túi mật đã cắt bỏ túi mật",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_G02",
+      "disease_id": "BT_NGOAI_MAT_TUY",
+      "name": "Sỏi ống mật chủ",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_G03",
+      "disease_id": "BT_NGOAI_MAT_TUY",
+      "name": "Viêm tụy chảy máu điều trị ngoại khoa",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MT_G04",
+      "disease_id": "BT_NGOAI_MAT_TUY",
+      "name": "Ung thư tụy",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LACH_N00",
+      "disease_id": "BT_TH_LACH_NOI",
+      "name": "Lách bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LACH_N01",
+      "disease_id": "BT_TH_LACH_NOI",
+      "name": "Lách to mạn tính xơ cứng",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LACH_G01",
+      "disease_id": "BT_NGOAI_LACH",
+      "name": "Lách bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LACH_G02",
+      "disease_id": "BT_NGOAI_LACH",
+      "name": "Cắt lách kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LACH_G03",
+      "disease_id": "BT_NGOAI_LACH",
+      "name": "Đụng dập lách xử trí ngoại khoa tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_N01",
+      "disease_id": "BT_TN_THAN_NOI",
+      "name": "Thận bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_N02",
+      "disease_id": "BT_TN_THAN_NOI",
+      "name": "Bệnh thận mạn (viêm cầu thận, thận hư, các loại u...): Chưa suy thận",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_N03",
+      "disease_id": "BT_TN_THAN_NOI",
+      "name": "Bệnh thận mạn (viêm cầu thận, thận hư, các loại u...): Đã suy thận",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_N04",
+      "disease_id": "BT_TN_THAN_NOI",
+      "name": "Bệnh thận bẩm sinh (đa nang, lạc chỗ, dị dạng): Chưa suy",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_N05",
+      "disease_id": "BT_TN_THAN_NOI",
+      "name": "Bệnh thận bẩm sinh (đa nang, lạc chỗ, dị dạng): Đã suy thận",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_G00",
+      "disease_id": "BT_NGOAI_TIET_NIEU",
+      "name": "Bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_G01",
+      "disease_id": "BT_NGOAI_TIET_NIEU",
+      "name": "Cắt 1 thận",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_G02",
+      "disease_id": "BT_NGOAI_TIET_NIEU",
+      "name": "U thận đã mổ không biến chứng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_G03",
+      "disease_id": "BT_NGOAI_TIET_NIEU",
+      "name": "Sỏi thận đã mổ kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_G04",
+      "disease_id": "BT_NGOAI_TIET_NIEU",
+      "name": "Sỏi thận chưa mổ",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_G05",
+      "disease_id": "BT_NGOAI_TIET_NIEU",
+      "name": "Sỏi niệu quản",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_G06",
+      "disease_id": "BT_NGOAI_TIET_NIEU",
+      "name": "Sỏi bàng quang đã mổ kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TN_G07",
+      "disease_id": "BT_NGOAI_TIET_NIEU",
+      "name": "Sỏi bàng quang đã mổ lại nhiều lần",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_01",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Sinh dục nam bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_02",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Hẹp bao quy đầu chưa phẫu thuật",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_03",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Hẹp bao quy đầu đã phẫu thuật tốt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_04",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Hẹp bao quy đầu sau phẫu thuật có ảnh hưởng tiết niệu",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_05",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Thiếu 1 tinh hoàn hoặc 1 tinh hoàn ẩn",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_06",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Thiếu 2 tinh hoàn hoặc 2 tinh hoàn ẩn",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_07",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Tràn dịch màng tinh hoàn đã điều trị tốt",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_08",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Tràn dịch màng tinh hoàn chưa điều trị",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_09",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Cắt cụt dương vật",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_SDN_10",
+      "disease_id": "BT_NGOAI_SINH_DUC_NAM",
+      "name": "Ung thư dương vật",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_01",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Bình thường, kinh nguyệt đều",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_02",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Rối loạn kinh nguyệt ( kinh nguyệt không đều, kinh thất thường, kinh kéo dài 6-7 ngày)",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_03",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Rong kinh, đa kinh, băng kinh",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_04",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Bế kinh, vô kinh",
+      "score": null,
+      "ref_rule": "Tùy nguyên nhân xếp loại",
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_05",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Sinh dục ngoài dị dạng bẩm sinh",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_06",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "U nang buồng trứng, u xơ tử cung chưa mổ",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_07",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "U nang buồng trứng, u xơ tử cung đã mổ tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_08",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Viêm phần phụ đã mổ tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_09",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Viêm phần phụ chưa mổ",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_10",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Mổ lấy thai 1 lần không biến chứng",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_11",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Mổ lấy thai 2 lần không biến chứng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_12",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Mổ lấy thai 3 lần không biến chứng",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_13",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Rò bàng quang - âm đạo chưa mổ",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_14",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Rò bàng quang - âm đạo đã mổ tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_PS_15",
+      "disease_id": "BT_PS_SINH_DUC_NU",
+      "name": "Ung thư sinh dục nữ",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CK_00",
+      "disease_id": "BT_CK_KHOP_NOI",
+      "name": "Không cứng khớp",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CK_01",
+      "disease_id": "BT_CK_KHOP_NOI",
+      "name": "Cứng dính cột sống có ảnh hưởng tới lao động, vận động mức độ nhẹ",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CK_02",
+      "disease_id": "BT_CK_KHOP_NOI",
+      "name": "Cứng dính cột sống có ảnh hưởng tới lao động, vận động mức độ vừa",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_CK_03",
+      "disease_id": "BT_CK_KHOP_NOI",
+      "name": "Cứng dính cột sống có ảnh hưởng tới lao động, vận động  mức độ nặng",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_01",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Khớp xương bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_02",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Sai khớp đã nắn chỉnh không di chứng",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_03",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Sai khớp lớn không nắn, thành cố tật có ảnh hưởng tới lao động học tập",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_04",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Sai khớp lớn phẫu thuật ổn định sau 1 năm, lao động sinh hoạt bình thường",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_05",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Sai khớp lớn để lại hạn chế vận động, thoái hóa biến dạng hoặc cứng khớp",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_06",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Sai khớp bệnh lý các khớp lớn",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_07",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Khớp giả kèm mất đoạn xương lớn, chi ngắn > 5cm",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_08",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Khớp giả không ngắn chi",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_09",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Cứng dính khớp lớn (vai, khuỷu, gối, háng, cột sống)",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_10",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Cứng dính khớp cổ tay, cổ chân",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NK_11",
+      "disease_id": "BT_NGOAI_KHOP",
+      "name": "Dị dạng bẩm sinh khớp lớn, mất đoạn đầu xương",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_01",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Không bị gãy xương",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_02",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Gãy xương lớn liền tốt, trục thẳng, ổn định > 1 năm, không hạn chế vận động",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_03",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Gãy xương lớn đã liền xương can xấu, lệch trục, thoái hóa biến chứng",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_04",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Gãy 1 xương sườn can tốt",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_05",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Gãy 2-3 xương sườn can tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_06",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Gãy trên 3 xương sườn can tốt",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_07",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Gù vẹo, quá ưỡn do bẩm sinh",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_08",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Gù vẹo, quá ưỡn do mắc phải",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_09",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Không có lao xương",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NX_10",
+      "disease_id": "BT_NGOAI_XUONG",
+      "name": "Lao xương đã điều trị khỏi, ổn định",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_01",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Không chênh lệch chiều dài chi",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_02",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Chênh lệch chiều dài chi: 1-2 cm",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_03",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Chênh lệch chiều dài chi: 3-4 cm",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_04",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Chênh lệch chiều dài chi: Trên 4 cm",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_05",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Hai chân vòng kiềng hình chữ O/X không ảnh hưởng đi lại",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_06",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Hai chân vòng kiềng hình chữ O/X có ảnh hưởng đi lại",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_07",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Không có bàn chân bẹt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_08",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Bàn chân bẹt độ I",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_09",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Bàn chân bẹt độ II",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_10",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Bàn chân bẹt độ III",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_11",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Mất 1-2 đốt ngón tay/chân cái, ngón tay trỏ thuận, từ 2 ngón khác của bàn tay/bàn chân",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_12",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Mất 1-2 đốt ngón khác của bàn tay, bàn chân",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_13",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Mất 1 ngón cái bàn tay hoặc bàn chân",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_14",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Mất 1 ngón trỏ bàn tay thuận",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_15",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Mất 1 ngón khác của bàn tay hoặc bàn chân",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_16",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Mất 2 ngón (không mất ngón cái tay/chân, ngón trỏ tay thuận)",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_17",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Mất từ 3 ngón tay trở lên (không mất ngón cái, ngón trỏ)",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_18",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Không dính kẽ ngón tay, ngón chân",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_19",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Dính kẽ ngón tay chân chưa xử trí",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_20",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Dính kẽ ngón đã mổ ảnh hưởng ít đến hoạt động bàn tay, bàn chân",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_21",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Dính kẽ ngón đã mổ ảnh hưởng nhiều đến hoạt động bàn tay, bàn chân",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_22",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Không thừa ngón tay, ngón chân",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_23",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Thừa ngón tay/chân chưa cắt hoặc cắt có ảnh hưởng chức năng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_24",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Co rút 1-2 ngón tay/chân ảnh hưởng lao động",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_25",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Co rút 3-4 ngón tay/chân ảnh hưởng lao động",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_26",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Co rút từ 5 ngón tay/chân ảnh hưởng lao động",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_27",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Không lệch ngón chân cái",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_28",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Lệch vẹo ngón chân cái không ảnh hưởng đi lại",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_NC_29",
+      "disease_id": "BT_NGOAI_CHI",
+      "name": "Lệch vẹo ngón chân cái có ảnh hưởng đi lại",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_ND_01",
+      "disease_id": "BT_DL_NAM_DA",
+      "name": "Không có nấm da",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_ND_02",
+      "disease_id": "BT_DL_NAM_DA",
+      "name": "Nấm da đơn giản chưa có biến chứng viêm da nhiễm khuẩn diện tích < lòng bàn tay",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_ND_03",
+      "disease_id": "BT_DL_NAM_DA",
+      "name": "Nấm da có biến chứng viêm da nhiễm khuẩn, diện tích > lòng bàn tay",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_ND_04",
+      "disease_id": "BT_DL_NAM_DA",
+      "name": "Không có nấm kẽ",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_ND_05",
+      "disease_id": "BT_DL_NAM_DA",
+      "name": "Nấm kẽ: Bột trắng 1-2 kẽ",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_ND_06",
+      "disease_id": "BT_DL_NAM_DA",
+      "name": "Nấm kẽ: Kèm theo nấm móng hoặc nấm da",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_ND_07",
+      "disease_id": "BT_DL_NAM_DA",
+      "name": "Không có lang ben",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_ND_08",
+      "disease_id": "BT_DL_NAM_DA",
+      "name": "Lang ben: Thể đơn giản không quá 1/3 cơ thể",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_ND_09",
+      "disease_id": "BT_DL_NAM_DA",
+      "name": "Lang ben: Thể lan tỏa",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GHE_01",
+      "disease_id": "BT_DL_GHE",
+      "name": "Không có ghẻ",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GHE_02",
+      "disease_id": "BT_DL_GHE",
+      "name": "Ghẻ thể đơn giản chưa có biến chứng",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GHE_03",
+      "disease_id": "BT_DL_GHE",
+      "name": "Ghẻ thể rải rác có biến chứng nhiễm trùng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GHE_04",
+      "disease_id": "BT_DL_GHE",
+      "name": "Ghẻ thể rải rác có biến chứng viêm thận",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GHE_05",
+      "disease_id": "BT_DL_ECZEMA",
+      "name": "Không có Eczéma",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GHE_06",
+      "disease_id": "BT_DL_ECZEMA",
+      "name": "Eczéma mạn tính",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_GHE_07",
+      "disease_id": "BT_DL_ECZEMA",
+      "name": "Eczéma cấp tính bội nhiễm",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DP_01",
+      "disease_id": "BT_DL_DURHING_PEMPHIGUS",
+      "name": "Không có bệnh Durhing",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DP_02",
+      "disease_id": "BT_DL_DURHING_PEMPHIGUS",
+      "name": "Bệnh Durhing thể nhẹ khu trú một chỗ",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DP_03",
+      "disease_id": "BT_DL_DURHING_PEMPHIGUS",
+      "name": "Bệnh Durhing thể rải rác",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DP_04",
+      "disease_id": "BT_DL_DURHING_PEMPHIGUS",
+      "name": "Không có bệnh Pemphigus",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DP_05",
+      "disease_id": "BT_DL_DURHING_PEMPHIGUS",
+      "name": "Bệnh Pemphigus thể da mỡ, vảy lá",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DP_06",
+      "disease_id": "BT_DL_DURHING_PEMPHIGUS",
+      "name": "Bệnh Pemphigus thể Vulgaris, thể sùi",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LV_01",
+      "disease_id": "BT_DL_LUPUS_VAY_NEN",
+      "name": "Không có bệnh Lupus ban đỏ",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LV_02",
+      "disease_id": "BT_DL_LUPUS_VAY_NEN",
+      "name": "Lupus ban đỏ kinh",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LV_03",
+      "disease_id": "BT_DL_LUPUS_VAY_NEN",
+      "name": "Lupus ban đỏ hệ thống",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LV_04",
+      "disease_id": "BT_DL_LUPUS_VAY_NEN",
+      "name": "Không có bệnh Vảy nến",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LV_05",
+      "disease_id": "BT_DL_LUPUS_VAY_NEN",
+      "name": "Vảy nến thể thông thường khu trú",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LV_06",
+      "disease_id": "BT_DL_LUPUS_VAY_NEN",
+      "name": "Vảy nến thể lan tỏa, đỏ da toàn thân",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_LV_07",
+      "disease_id": "BT_DL_LUPUS_VAY_NEN",
+      "name": "Vảy nến thể khớp",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TDIA_01",
+      "disease_id": "BT_DL_TO_DIA",
+      "name": "Không có Tổ đỉa, viêm da thần kinh",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TDIA_02",
+      "disease_id": "BT_DL_TO_DIA",
+      "name": "Có tổ đỉa, viêm da thần kinh",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_01",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Không có lậu",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_02",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Lậu cấp đã điều trị khỏi",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_03",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Lậu mạn chưa khỏi",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_04",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Không có giang mai",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_05",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Giang mai I đã điều trị khỏi",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_06",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Giang mai II đã điều trị khỏi LS & XN",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_07",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Giang mai I, II chưa điều trị",
+      "score": null,
+      "ref_rule": "Tạm hoãn, không xếp loại",
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_08",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Giang mai thần kinh, tim mạch",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_09",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Không có Hạ cam mềm",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_10",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Hạ cam mềm đã điều trị khỏi",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_11",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Hạ cam mềm chưa điều trị khỏi",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_12",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Không có Sùi mào gà",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_13",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Sùi mào gà đã điều trị khỏi",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_14",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Sùi mào gà chưa điều trị khỏi",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_15",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Không có Nicolas-Favres",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_16",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Nicolas-Favres đã điều trị khỏi",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BLTD_17",
+      "disease_id": "BT_DL_BENH_LAY_TINH_DUC",
+      "name": "Nicolas-Favres chưa điều trị khỏi",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HP_01",
+      "disease_id": "BT_DL_HIV_PHONG",
+      "name": "Không có HIV/AIDS",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HP_02",
+      "disease_id": "BT_DL_HIV_PHONG",
+      "name": "HIV dương tính",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HP_03",
+      "disease_id": "BT_DL_HIV_PHONG",
+      "name": "AIDS",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HP_04",
+      "disease_id": "BT_DL_HIV_PHONG",
+      "name": "Không có bệnh phong",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HP_05",
+      "disease_id": "BT_DL_HIV_PHONG",
+      "name": "Bệnh Phong không tàn phế",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HP_06",
+      "disease_id": "BT_DL_HIV_PHONG",
+      "name": "Bệnh Phong tàn phế độ I",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_HP_07",
+      "disease_id": "BT_DL_HIV_PHONG",
+      "name": "Bệnh Phong tàn phế độ II",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_01",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Không có Viêm móng, xung quanh móng",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_02",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Viêm móng, quanh móng đã điều trị khỏi",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_03",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Viêm móng, quanh móng chưa khỏi",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_04",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Không có chai chân, mắt cá lòng bàn chân, rỗ chân",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_05",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Chai chân dày sừng không nắn còn mềm, không ảnh hưởng tới đi lại",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_06",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Chai chân dày sừng gây cộm cứng ảnh hưởng đi lại",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_07",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Mắt cá lòng bàn chân < 1cm, dưới 2 cái, không ảnh hưởng tới đi lại",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_08",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Mắt cá lòng bàn chân < 1cm, dưới 3 cái, không ảnh hưởng tới đi lại",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_09",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Mắt cá lòng bàn chân > 1cm, trên 3 cái, ảnh hưởng tới đi lại",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_10",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Rỗ chân: Lõm < 2cm, 1-2 điểm/cm², không ảnh hưởng tới đi lại",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_11",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "Rỗ chân: Lõm < 2cm, trên 2 điểm/cm², không ảnh hưởng tới đi lại",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_MCC_12",
+      "disease_id": "BT_DL_MONG_CHAI_CHAN",
+      "name": "\"Rỗ chân: Lõm > 2cm, trên 2 điểm/cm², có ảnh",
+      "score": null,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_N01",
+      "disease_id": "BT_NT_TUYEN_GIAP_NOI",
+      "name": "Tuyến giáp bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_N02",
+      "disease_id": "BT_NT_TUYEN_GIAP_NOI",
+      "name": "Bướu lành tính nhỏ",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_N03",
+      "disease_id": "BT_NT_TUYEN_GIAP_NOI",
+      "name": "Basedow chưa có biến chứng tim",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_N04",
+      "disease_id": "BT_NT_TUYEN_GIAP_NOI",
+      "name": "Basedow có biến chứng tim",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_G00",
+      "disease_id": "BT_NGOAI_TUYEN_GIAP",
+      "name": "Tuyến giáp bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_G01",
+      "disease_id": "BT_NGOAI_TUYEN_GIAP",
+      "name": "Bướu lành tính to ảnh hưởng hô hấp",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TG_G02",
+      "disease_id": "BT_NGOAI_TUYEN_GIAP",
+      "name": "Ung thư tuyến giáp",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TY_01",
+      "disease_id": "BT_NT_TUYEN_YEN",
+      "name": "Tuyến yên bình thường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TY_02",
+      "disease_id": "BT_NT_TUYEN_YEN",
+      "name": "Suy hoặc cường tuyến yên",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DTD_01",
+      "disease_id": "BT_NT_DAI_THAO_DUONG",
+      "name": "Không đái tháo đường",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DTD_02",
+      "disease_id": "BT_NT_DAI_THAO_DUONG",
+      "name": "Đái tháo đường Type II chưa biến chứng",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DTD_03",
+      "disease_id": "BT_NT_DAI_THAO_DUONG",
+      "name": "Đái tháo đường Type I",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DTD_04",
+      "disease_id": "BT_NT_DAI_THAO_DUONG",
+      "name": "Đái tháo đường có biến chứng mắt, thận, mạch máu lớn",
+      "score": 4,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DTN_01",
+      "disease_id": "BT_NT_DAI_THAO_NHAT",
+      "name": "Không có Đái tháo nhạt",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DTN_02",
+      "disease_id": "BT_NT_DAI_THAO_NHAT",
+      "name": "Đái tháo nhạt nhẹ",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DTN_03",
+      "disease_id": "BT_NT_DAI_THAO_NHAT",
+      "name": "Đái tháo nhạt vừa",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_DTN_04",
+      "disease_id": "BT_NT_DAI_THAO_NHAT",
+      "name": "Đái tháo nhạt nặng",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_N00",
+      "disease_id": "BT_NGOAI_THUONG_THAN",
+      "name": "Không có",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_N01",
+      "disease_id": "BT_NT_THUONG_THAN_NOI",
+      "name": "Không có Cường vỏ thượng thận",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_N02",
+      "disease_id": "BT_NT_THUONG_THAN_NOI",
+      "name": "Cường vỏ thượng thận chưa mổ",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_N03",
+      "disease_id": "BT_NT_THUONG_THAN_NOI",
+      "name": "Cường vỏ thượng thận đã mổ kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_TT_N04",
+      "disease_id": "BT_NGOAI_THUONG_THAN",
+      "name": "Cường vỏ thượng thận đã mổ kết quả tốt",
+      "score": 3,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BP_01",
+      "disease_id": "BT_NT_BEO_PHE",
+      "name": "Không có Bệnh béo phệ",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_BP_02",
+      "disease_id": "BT_NT_BEO_PHE",
+      "name": "BMI = 25",
+      "score": 2,
+      "ref_rule": "Phụ lục chỉ số BMI",
+      "ref_disease_id": null,
+      "modifier": "0"
+    },
+    {
+      "id": "CT_BP_03",
+      "disease_id": "BT_NT_BEO_PHE",
+      "name": "BMI từ 26 - 27",
+      "score": 3,
+      "ref_rule": "Phụ lục chỉ số BMI",
+      "ref_disease_id": null,
+      "modifier": "0"
+    },
+    {
+      "id": "CT_BP_04",
+      "disease_id": "BT_NT_BEO_PHE",
+      "name": "BMI từ 28 trở lên",
+      "score": 4,
+      "ref_rule": "Phụ lục chỉ số BMI",
+      "ref_disease_id": null,
+      "modifier": "0"
+    },
+    {
+      "id": "CT_U_01",
+      "disease_id": "BT_NGOAI_U",
+      "name": "Không có U lành tính",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_U_02",
+      "disease_id": "BT_NGOAI_U",
+      "name": "U lành tính không ảnh hưởng lao động, học tập",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_U_03",
+      "disease_id": "BT_NGOAI_U",
+      "name": "U lành cản trở vận động đã mổ kết quả tốt",
+      "score": 2,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_U_04",
+      "disease_id": "BT_NGOAI_U",
+      "name": "Ung thư xương khớp",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_U_05",
+      "disease_id": "BT_NGOAI_U",
+      "name": "Không có U ác tính",
+      "score": 1,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    },
+    {
+      "id": "CT_U_06",
+      "disease_id": "BT_NGOAI_U",
+      "name": "Có u ác tính",
+      "score": 5,
+      "ref_rule": null,
+      "ref_disease_id": null,
+      "modifier": null
+    }
+  ]
+}

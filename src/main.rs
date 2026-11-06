@@ -5,6 +5,7 @@ use chrono::Datelike;
 use sha2::{Digest, Sha256};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
 use std::fs;
 
 fn hash_pass(plain: &str) -> String {
@@ -15,6 +16,7 @@ fn hash_pass(plain: &str) -> String {
 }
 
 const FONT_VN: &[u8] = include_bytes!("../assets/font_vn.ttf");
+const QD1613_JSON: &str = include_str!("../qd1613_complete.json");
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct AppConfig {
@@ -52,17 +54,7 @@ struct UserRecord {
     role: String,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-struct Qd1613Item {
-    id: String,
-    disease_id: String,
-    spec_id: String,
-    name: String,
-    score: Option<i32>,
-    ref_rule: Option<String>,
-}
-
-// Cấu trúc danh mục dùng chung
+// Cấu trúc danh mục dùng chung QĐ 3176
 #[derive(Clone, Serialize, Deserialize)]
 struct CatalogRecord {
     id: i64,
@@ -70,6 +62,53 @@ struct CatalogRecord {
     code: String,
     name: String,
     parent_code: String,
+}
+
+// Cấu trúc QĐ 1613/BYT
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct QdSpecialty {
+    id: String,
+    name: String,
+    parent_id: Option<String>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct QdDisease {
+    id: String,
+    name: String,
+    spec_id: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct QdClassification {
+    id: String,
+    disease_id: String,
+    name: String,
+    score: Option<i32>,
+    ref_rule: Option<String>,
+    ref_disease_id: Option<String>,
+    modifier: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct Qd1613CatalogData {
+    specialties: Vec<QdSpecialty>,
+    diseases: Vec<QdDisease>,
+    classifications: Vec<QdClassification>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+struct ManualConclusionRow {
+    classification: i32,
+    classification_id: String,
+    manifestation: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+struct SpecialtyConclusionExtra {
+    manual_rows: Vec<ManualConclusionRow>,
+    auto_overrides: HashMap<String, String>, // disease_id -> custom manifestation text
+    final_note: String,
 }
 
 // 1 Dòng Cận Lâm Sàng (Mục VI)
@@ -209,6 +248,18 @@ struct KskRecordPayload {
     phan_loai_sk: i32,
     ket_luan_benh: String,
     cac_benh_tat_neu_co: String,
+
+    // Lựa chọn động theo QĐ 1613/BYT
+    #[serde(default)]
+    selected_classifications: HashMap<String, String>, // disease_id -> classification_id
+    #[serde(default)]
+    specialty_extras: HashMap<String, SpecialtyConclusionExtra>, // spec_id -> manual rows, overrides, note
+    #[serde(default)]
+    dominant_hand: String, // "right" | "left"
+    #[serde(default)]
+    voice_hearing: i32, // 1..5
+    #[serde(default)]
+    audiometer_hearing: i32, // 1..5
 }
 
 impl Default for KskRecordPayload {
@@ -235,7 +286,7 @@ impl Default for KskRecordPayload {
             ma_gtin_cskcb: "8934286053806".into(),
             doi_tuong: "13".into(), // Người lao động
             nguon_chi_tra: 4, // Người sử dụng LĐ
-            ma_loai_kcb: "15".into(),
+            ma_loai_kcb: "15".into(), // KSK định kỳ
             ngay_vao: now.format("%d/%m/%Y").to_string(),
             tsgd_mac_benh: 0,
             tsgd_ma_benh: "".into(),
@@ -268,9 +319,9 @@ impl Default for KskRecordPayload {
             tsbt_thai_san: 0,
             tsbt_ma_benh_thai_san: "".into(),
             tsbt_ten_thuoc_thai_san: "".into(),
-            chieu_cao: "165.0".into(),
-            can_nang: "60.0".into(),
-            chi_so_bmi: "22.03".into(),
+            chieu_cao: "168".into(),
+            can_nang: "62".into(),
+            chi_so_bmi: "21.97".into(),
             mach: "75".into(),
             huyet_ap: "120/80".into(),
             kham_the_luc_pl: 1,
@@ -296,56 +347,373 @@ impl Default for KskRecordPayload {
             kham_da_lieu_pl: 1,
             ket_qua_kham_san_phu_khoa: "Bình thường".into(),
             kham_san_phu_khoa_pl: 1,
-            khong_kinh_mat_phai: "10/10".into(),
-            khong_kinh_mat_trai: "10/10".into(),
+            khong_kinh_mat_phai: "10".into(),
+            khong_kinh_mat_trai: "10".into(),
             co_kinh_mat_phai: "".into(),
             co_kinh_mat_trai: "".into(),
-            benh_khac_mat: "".into(),
+            benh_khac_mat: "Bình thường".into(),
             kham_mat_pl: 1,
             tai_trai_noi_thuong: "5".into(),
-            tai_trai_noi_tham: "0.5".into(),
+            tai_trai_noi_tham: "5".into(),
             tai_phai_noi_thuong: "5".into(),
-            tai_phai_noi_tham: "0.5".into(),
-            benh_khac_tai_mui_hong: "".into(),
+            tai_phai_noi_tham: "5".into(),
+            benh_khac_tai_mui_hong: "Bình thường".into(),
             kham_tai_mui_hong_pl: 1,
             ham_tren: "Bình thường".into(),
             ham_duoi: "Bình thường".into(),
-            benh_khac_rang_ham_mat: "".into(),
+            benh_khac_rang_ham_mat: "Bình thường".into(),
             kham_rang_ham_mat_pl: 1,
-            cls_list: vec![
-                ClsItem {
-                    ma_dich_vu: "XN01".into(),
-                    ma_chi_so: "GLU".into(),
-                    gia_tri: "5.2".into(),
-                    don_vi_do: "mmol/L".into(),
-                    mo_ta: "Đường huyết lúc đói".into(),
-                    ket_luan: "Bình thường".into(),
-                },
-                ClsItem {
-                    ma_dich_vu: "CDHA01".into(),
-                    ma_chi_so: "XQ_TP".into(),
-                    gia_tri: "Bình thường".into(),
-                    don_vi_do: "".into(),
-                    mo_ta: "Xquang tim phổi thẳng".into(),
-                    ket_luan: "Không thấy tổn thương khu trú".into(),
-                }
-            ],
+            cls_list: vec![],
             phan_loai_sk: 1,
-            ket_luan_benh: "Z00.0".into(),
-            cac_benh_tat_neu_co: "Đủ sức khỏe công tác".into(),
+            ket_luan_benh: "Đủ sức khỏe làm việc".into(),
+            cac_benh_tat_neu_co: "".into(),
+            selected_classifications: HashMap::new(),
+            specialty_extras: HashMap::new(),
+            dominant_hand: "right".into(),
+            voice_hearing: 1,
+            audiometer_hearing: 1,
         }
     }
 }
 
+#[derive(Clone)]
 struct RecordItem {
     id: i64,
     ho_ten: String,
     so_cccd: String,
     ngay_vao: String,
-    status: i32,
+    status: i32, // 0: Đang soạn, 1: Đã xác nhận / Khóa
     data: KskRecordPayload,
 }
 
+fn score_color_style(score: i32) -> (egui::Color32, egui::Color32) {
+    match score {
+        1 => (egui::Color32::from_rgb(22, 101, 52), egui::Color32::from_rgb(220, 252, 231)),   // Green
+        2 => (egui::Color32::from_rgb(30, 64, 175), egui::Color32::from_rgb(219, 234, 254)),  // Blue
+        3 => (egui::Color32::from_rgb(146, 64, 14), egui::Color32::from_rgb(254, 243, 199)),  // Yellow/Amber
+        4 => (egui::Color32::from_rgb(154, 52, 18), egui::Color32::from_rgb(255, 237, 213)),  // Orange
+        _ => (egui::Color32::from_rgb(153, 27, 27), egui::Color32::from_rgb(254, 226, 226)),  // Red
+    }
+}
+
+fn ui_score_badge(ui: &mut egui::Ui, score: i32, is_dyn: bool) {
+    let (fg, bg) = score_color_style(score);
+    let txt = if is_dyn {
+        format!("Loại {} *", score)
+    } else {
+        format!("Loại {}", score)
+    };
+    egui::Frame::none()
+        .fill(bg)
+        .rounding(4.0)
+        .inner_margin(egui::Margin::symmetric(6.0, 2.0))
+        .show(ui, |ui| {
+            ui.colored_label(fg, egui::RichText::new(txt).strong().size(11.5));
+        });
+}
+
+fn calc_vision_score(right_s: &str, left_s: &str) -> i32 {
+    let r: f64 = right_s.trim().parse::<f64>().unwrap_or(10.0).min(10.0).max(0.0);
+    let l: f64 = left_s.trim().parse::<f64>().unwrap_or(10.0).min(10.0).max(0.0);
+    let max_v = r.max(l);
+    let sum_v = r + l;
+
+    if max_v >= 9.99 && sum_v >= 18.99 {
+        1
+    } else if max_v >= 8.99 && sum_v >= 15.99 {
+        2
+    } else if max_v >= 6.99 && sum_v >= 13.99 {
+        3
+    } else if max_v >= 5.99 && sum_v >= 10.99 {
+        4
+    } else {
+        5
+    }
+}
+
+fn calc_hearing_score(voice: i32, audiometer: i32) -> i32 {
+    voice.max(audiometer).clamp(1, 5)
+}
+
+fn calc_classification_score(
+    c: &QdClassification,
+    base_vision: i32,
+    base_hearing: i32,
+) -> i32 {
+    if let Some(s) = c.score {
+        return s;
+    }
+    if let Some(ref ref_did) = c.ref_disease_id {
+        if ref_did == "BT_MAT_THI_LUC" {
+            let mut sc = base_vision;
+            if let Some(ref m) = c.modifier {
+                if m.contains("+1") {
+                    sc = (sc + 1).min(5);
+                } else if m.contains("+2") {
+                    sc = (sc + 2).min(5);
+                }
+            }
+            return sc;
+        } else if ref_did == "BT_TMH_TAI_TRONG" {
+            let mut sc = base_hearing;
+            if let Some(ref m) = c.modifier {
+                if m.contains("+1") {
+                    sc = (sc + 1).min(5);
+                }
+            }
+            return sc;
+        }
+    }
+    1
+}
+
+// ===================================================================
+// BỘ DATEPICKER & VALIDATION CHO NGÀY THÁNG (DD/MM/YYYY)
+// ===================================================================
+fn is_valid_date(d: u32, m: u32, y: u32) -> bool {
+    if !(1..=12).contains(&m) || !(1900..=2100).contains(&y) || d == 0 {
+        return false;
+    }
+    let max_days = match m {
+        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+        4 | 6 | 9 | 11 => 30,
+        2 => {
+            if (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0) {
+                29
+            } else {
+                28
+            }
+        }
+        _ => return false,
+    };
+    d <= max_days
+}
+
+fn parse_dmy(s: &str) -> Option<(u32, u32, u32)> {
+    let parts: Vec<&str> = s.split('/').collect();
+    if parts.len() == 3 {
+        if let (Ok(d), Ok(m), Ok(y)) = (parts[0].parse::<u32>(), parts[1].parse::<u32>(), parts[2].parse::<u32>()) {
+            if is_valid_date(d, m, y) {
+                return Some((d, m, y));
+            }
+        }
+    }
+    None
+}
+
+fn date_input_picker(ui: &mut egui::Ui, id_source: &str, date_str: &mut String) {
+    let mut digits_only = String::new();
+    for ch in date_str.chars() {
+        if ch.is_ascii_digit() {
+            digits_only.push(ch);
+            if digits_only.len() == 8 {
+                break;
+            }
+        }
+    }
+
+    let mut is_error = false;
+    if !date_str.is_empty() {
+        if let Some((d, m, y)) = parse_dmy(date_str) {
+            if !is_valid_date(d, m, y) {
+                is_error = true;
+            }
+        } else if date_str.len() >= 10 {
+            is_error = true;
+        }
+    }
+
+    let cal_id = ui.make_persistent_id(format!("{}_cal_state", id_source));
+    let mut view_date: (u32, u32) = ui.data_mut(|d| {
+        *d.get_temp_mut_or_insert_with(cal_id, || {
+            let now = chrono::Local::now();
+            (now.month(), now.year() as u32)
+        })
+    });
+
+    ui.horizontal(|ui| {
+        let mut text_edit = egui::TextEdit::singleline(date_str).desired_width(115.0);
+        if is_error {
+            text_edit = text_edit.text_color(egui::Color32::from_rgb(220, 38, 38));
+        }
+
+        let resp = ui.add(text_edit);
+        if resp.changed() {
+            let mut formatted = String::new();
+            let mut d_count = 0;
+            for ch in date_str.chars() {
+                if ch.is_ascii_digit() && d_count < 8 {
+                    formatted.push(ch);
+                    d_count += 1;
+                    if (d_count == 2 || d_count == 4) && d_count < digits_only.len() {
+                        formatted.push('/');
+                    }
+                }
+            }
+            if !formatted.is_empty() {
+                *date_str = formatted;
+            }
+        }
+
+        let popup_id = ui.make_persistent_id(format!("{}_popup", id_source));
+        let btn_resp = ui.small_button("📅");
+        if btn_resp.clicked() {
+            ui.memory_mut(|m| m.toggle_popup(popup_id));
+            if let Some((_, m, y)) = parse_dmy(date_str) {
+                view_date = (m, y);
+                ui.data_mut(|d| d.insert_temp(cal_id, view_date));
+            }
+        }
+
+        egui::popup_below_widget(ui, popup_id, &btn_resp, |ui| {
+            ui.set_min_width(240.0);
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    if ui.button("◀").clicked() {
+                        if view_date.0 == 1 {
+                            view_date.0 = 12;
+                            view_date.1 -= 1;
+                        } else {
+                            view_date.0 -= 1;
+                        }
+                        ui.data_mut(|d| d.insert_temp(cal_id, view_date));
+                    }
+                    ui.label(egui::RichText::new(format!("Tháng {:02} / {}", view_date.0, view_date.1)).strong());
+                    if ui.button("▶").clicked() {
+                        if view_date.0 == 12 {
+                            view_date.0 = 1;
+                            view_date.1 += 1;
+                        } else {
+                            view_date.0 += 1;
+                        }
+                        ui.data_mut(|d| d.insert_temp(cal_id, view_date));
+                    }
+                    if ui.small_button("Hôm nay").clicked() {
+                        let now = chrono::Local::now();
+                        *date_str = now.format("%d/%m/%Y").to_string();
+                        ui.memory_mut(|m| m.close_popup());
+                    }
+                });
+
+                ui.separator();
+
+                egui::Grid::new(format!("{}_cal_grid", id_source))
+                    .num_columns(7)
+                    .spacing([4.0, 4.0])
+                    .show(ui, |ui| {
+                        let days_header = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+                        for h in days_header {
+                            ui.label(egui::RichText::new(h).weak().size(11.0));
+                        }
+                        ui.end_row();
+
+                        let first_of_month = chrono::NaiveDate::from_ymd_opt(view_date.1 as i32, view_date.0, 1)
+                            .unwrap_or_else(|| chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap());
+                        let weekday_idx = first_of_month.weekday().num_days_from_monday();
+
+                        for _ in 0..weekday_idx {
+                            ui.label("");
+                        }
+
+                        let days_in_month = match view_date.0 {
+                            1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+                            4 | 6 | 9 | 11 => 30,
+                            2 => {
+                                let y = view_date.1;
+                                if (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0) { 29 } else { 28 }
+                            }
+                            _ => 30,
+                        };
+
+                        let parsed = parse_dmy(date_str);
+
+                        for d in 1..=days_in_month {
+                            let is_selected = parsed.map_or(false, |(sd, sm, sy)| sd == d && sm == view_date.0 && sy == view_date.1);
+                            let mut btn = egui::Button::new(d.to_string());
+                            if is_selected {
+                                btn = btn.fill(egui::Color32::from_rgb(14, 165, 233));
+                            }
+                            if ui.add(btn).clicked() {
+                                *date_str = format!("{:02}/{:02}/{}", d, view_date.0, view_date.1);
+                                ui.memory_mut(|m| m.close_popup());
+                            }
+
+                            if (weekday_idx + d) % 7 == 0 {
+                                ui.end_row();
+                            }
+                        }
+                    });
+            });
+        });
+
+        if is_error {
+            ui.colored_label(egui::Color32::from_rgb(220, 38, 38), "⚠ Sai định dạng dd/mm/yyyy");
+        }
+    });
+}
+
+// COMBOBOX TÌM KIẾM THEO TÊN HOẶC MÃ
+fn search_combo(ui: &mut egui::Ui, id_source: &str, selected_code: &mut String, items: &[(String, String)]) -> bool {
+    let mut changed = false;
+    let selected_label = items.iter().find(|(c, _)| c == selected_code)
+        .map(|(_, n)| n.clone())
+        .unwrap_or_else(|| {
+            if selected_code.is_empty() { "— Chọn —".to_string() } else { selected_code.clone() }
+        });
+
+    let search_id = ui.make_persistent_id(format!("{}_search", id_source));
+    let mut search_kw = ui.data_mut(|d| d.get_temp::<String>(search_id).unwrap_or_default());
+
+    egui::ComboBox::from_id_source(id_source)
+        .width(260.0)
+        .selected_text(selected_label)
+        .show_ui(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.label("🔍");
+                if ui.add(egui::TextEdit::singleline(&mut search_kw).hint_text("Gõ mã hoặc tên...")).changed() {
+                    ui.data_mut(|d| d.insert_temp(search_id, search_kw.clone()));
+                }
+            });
+            ui.separator();
+
+            let kw_lower = search_kw.to_lowercase();
+            egui::ScrollArea::vertical().max_height(200.0).show(ui, |ui| {
+                for (code, name) in items {
+                    if kw_lower.is_empty() || code.to_lowercase().contains(&kw_lower) || name.to_lowercase().contains(&kw_lower) {
+                        let is_sel = selected_code == code;
+                        if ui.selectable_label(is_sel, format!("{}: {}", code, name)).clicked() {
+                            *selected_code = code.clone();
+                            changed = true;
+                        }
+                    }
+                }
+            });
+        });
+    changed
+}
+
+// BỘ CHỌN NHIỀU MÃ ICD-10 CÁCH NHAU BẰNG DẤU CHẤM PHẨY
+fn multi_icd(ui: &mut egui::Ui, id_source: &str, target_val: &mut String, items: &[(String, String)]) {
+    ui.horizontal(|ui| {
+        ui.add(egui::TextEdit::singleline(target_val).desired_width(220.0).hint_text("Mã ICD-10 (nối bằng ;)"));
+        let mut temp_code = String::new();
+        if search_combo(ui, id_source, &mut temp_code, items) && !temp_code.is_empty() {
+            let mut list: Vec<String> = target_val.split(';')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+            if !list.contains(&temp_code) {
+                list.push(temp_code);
+                *target_val = list.join("; ");
+            }
+        }
+        if !target_val.is_empty() && ui.small_button("Xóa").clicked() {
+            target_val.clear();
+        }
+    });
+}
+
+#[allow(dead_code)]
 struct KskApp {
     conn: Connection,
     config: AppConfig,
@@ -385,6 +753,15 @@ struct KskApp {
     cat_code_input: String,
     cat_name_input: String,
     cat_parent_input: String,
+
+    // Bộ quy tắc QĐ 1613/BYT
+    qd_specialties: Vec<QdSpecialty>,
+    qd_diseases: Vec<QdDisease>,
+    qd_classifications: Vec<QdClassification>,
+    expanded_diseases: HashSet<String>,
+    noi_khoa_sub_tab: usize, // 0..7
+    qd_rule_filter_spec: String,
+    qd_rule_search: String,
 }
 
 impl KskApp {
@@ -424,6 +801,25 @@ impl KskApp {
                 ngay_vao TEXT,
                 status INTEGER DEFAULT 0,
                 json_data TEXT
+            );
+            CREATE TABLE IF NOT EXISTS qd1613_specialties (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                parent_id TEXT
+            );
+            CREATE TABLE IF NOT EXISTS qd1613_diseases (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                spec_id TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS qd1613_classifications (
+                id TEXT PRIMARY KEY,
+                disease_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                score INTEGER,
+                ref_rule TEXT,
+                ref_disease_id TEXT,
+                modifier TEXT
             );
             -- Tạo sẵn user phân quyền
             INSERT OR IGNORE INTO users (username, password, role) VALUES ('admin', 'admin123', 'admin');
@@ -474,10 +870,18 @@ impl KskApp {
             cat_code_input: "".into(),
             cat_name_input: "".into(),
             cat_parent_input: "".into(),
+            qd_specialties: vec![],
+            qd_diseases: vec![],
+            qd_classifications: vec![],
+            expanded_diseases: HashSet::new(),
+            noi_khoa_sub_tab: 0,
+            qd_rule_filter_spec: "all".into(),
+            qd_rule_search: "".into(),
         };
 
         app.seed_default_catalogs();
         app.seed_qd1613();
+        app.reload_qd1613();
         app.reload_catalogs();
         app.reload_records();
         app.reload_users();
@@ -485,55 +889,67 @@ impl KskApp {
     }
 
     fn seed_qd1613(&self) {
-        let count: i64 = self.conn.query_row("SELECT COUNT(*) FROM qd1613_classifications", [], |r| r.get(0)).unwrap_or(0);
+        let count: i64 = self.conn.query_row("SELECT COUNT(*) FROM qd1613_specialties", [], |r| r.get(0)).unwrap_or(0);
         if count == 0 {
-            if let Ok(content) = fs::read_to_string("qd1613_seeds.tsv") {
-                for line in content.lines() {
-                    let parts: Vec<&str> = line.split('\t').collect();
-                    if parts.len() >= 5 {
-                        let id = parts[0].trim();
-                        let dis_id = parts[1].trim();
-                        let spec_id = parts[2].trim();
-                        let name = parts[3].trim();
-                        let score: Option<i32> = parts[4].trim().parse().ok();
-                        let ref_rule = if parts.len() >= 6 { parts[5].trim() } else { "" };
-                        let _ = self.conn.execute(
-                            "INSERT OR IGNORE INTO qd1613_classifications (id, disease_id, spec_id, name, score, ref_rule) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                            params![id, dis_id, spec_id, name, score, ref_rule],
-                        );
-                    }
-                }
+            self.reset_qd1613_to_default();
+        }
+    }
+
+    fn reset_qd1613_to_default(&self) {
+        if let Ok(data) = serde_json::from_str::<Qd1613CatalogData>(QD1613_JSON) {
+            let _ = self.conn.execute("DELETE FROM qd1613_classifications", []);
+            let _ = self.conn.execute("DELETE FROM qd1613_diseases", []);
+            let _ = self.conn.execute("DELETE FROM qd1613_specialties", []);
+
+            let mut stmt_s = self.conn.prepare("INSERT INTO qd1613_specialties (id, name, parent_id) VALUES (?, ?, ?)").unwrap();
+            for s in &data.specialties {
+                let _ = stmt_s.execute(params![s.id, s.name, s.parent_id]);
+            }
+            let mut stmt_d = self.conn.prepare("INSERT INTO qd1613_diseases (id, name, spec_id) VALUES (?, ?, ?)").unwrap();
+            for d in &data.diseases {
+                let _ = stmt_d.execute(params![d.id, d.name, d.spec_id]);
+            }
+            let mut stmt_c = self.conn.prepare("INSERT INTO qd1613_classifications (id, disease_id, name, score, ref_rule, ref_disease_id, modifier) VALUES (?, ?, ?, ?, ?, ?, ?)").unwrap();
+            for c in &data.classifications {
+                let _ = stmt_c.execute(params![c.id, c.disease_id, c.name, c.score, c.ref_rule, c.ref_disease_id, c.modifier]);
             }
         }
     }
 
-    /// Dropdown chọn bệnh lý theo chuẩn QĐ 1613/BYT: Tự động điền mô tả kết quả và tự động gán phân loại điểm tương ứng
-    fn ui_qd1613_disease_picker(ui: &mut egui::Ui, conn: &Connection, spec_filter: &str, text_val: &mut String, pl_val: &mut i32) {
-        let query = format!("SELECT id, name, score FROM qd1613_classifications WHERE spec_id = '{}' ORDER BY score ASC, name ASC", spec_filter);
-        let mut stmt = conn.prepare(&query).ok();
-        let items: Vec<(String, String, Option<i32>)> = if let Some(ref mut s) = stmt {
-            s.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?))).unwrap().filter_map(Result::ok).collect()
-        } else {
-            vec![]
-        };
-
-        if !items.is_empty() {
-            egui::ComboBox::from_id_source(format!("cb_qd1613_{}", spec_filter))
-                .width(280.0)
-                .selected_text("📑 Chọn theo danh mục QĐ 1613/BYT...")
-                .show_ui(ui, |ui| {
-                    for (_id, name, score) in items {
-                        let sc_label = score.map_or("".to_string(), |s| format!(" [Loại {}]", s));
-                        if ui.selectable_label(false, format!("{}{}", name, sc_label)).clicked() {
-                            *text_val = name.clone();
-                            if let Some(s) = score {
-                                *pl_val = s;
-                            }
-                        }
-                    }
-                });
+    fn reload_qd1613(&mut self) {
+        if let Ok(mut stmt) = self.conn.prepare("SELECT id, name, parent_id FROM qd1613_specialties") {
+            self.qd_specialties = stmt.query_map([], |r| {
+                Ok(QdSpecialty {
+                    id: r.get(0)?,
+                    name: r.get(1)?,
+                    parent_id: r.get(2)?,
+                })
+            }).unwrap().filter_map(Result::ok).collect();
+        }
+        if let Ok(mut stmt) = self.conn.prepare("SELECT id, name, spec_id FROM qd1613_diseases") {
+            self.qd_diseases = stmt.query_map([], |r| {
+                Ok(QdDisease {
+                    id: r.get(0)?,
+                    name: r.get(1)?,
+                    spec_id: r.get(2)?,
+                })
+            }).unwrap().filter_map(Result::ok).collect();
+        }
+        if let Ok(mut stmt) = self.conn.prepare("SELECT id, disease_id, name, score, ref_rule, ref_disease_id, modifier FROM qd1613_classifications") {
+            self.qd_classifications = stmt.query_map([], |r| {
+                Ok(QdClassification {
+                    id: r.get(0)?,
+                    disease_id: r.get(1)?,
+                    name: r.get(2)?,
+                    score: r.get(3)?,
+                    ref_rule: r.get(4)?,
+                    ref_disease_id: r.get(5)?,
+                    modifier: r.get(6)?,
+                })
+            }).unwrap().filter_map(Result::ok).collect();
         }
     }
+
     fn seed_default_catalogs(&self) {
         let count: i64 = self.conn.query_row("SELECT COUNT(*) FROM catalogs", [], |r| r.get(0)).unwrap_or(0);
         if count == 0 {
@@ -564,37 +980,47 @@ impl KskApp {
                 ("payment", "5", "5 - Xã hội hóa", ""),
                 ("payment", "9", "9 - Khác", ""),
 
-                // 3. Tỉnh / Xã
+                // 3. Tỉnh mẫu
                 ("province", "64", "64 - Tỉnh Gia Lai", ""),
-                ("province", "52", "52 - Tỉnh Bình Định", ""),
-                ("ward", "23992", "23992 - Phường Quy Nhơn", "64"),
-                ("ward", "23995", "23995 - Phường Pleiku", "64"),
-                ("ward", "21517", "21517 - Phường Lê Lợi", "52"),
+                ("province", "79", "79 - TP. Hồ Chí Minh", ""),
+                ("province", "01", "01 - TP. Hà Nội", ""),
 
-                // 4. Dân tộc & Nghề nghiệp
+                // 4. Xã mẫu
+                ("ward", "23992", "23992 - Phường Hoa Lư", "64"),
+                ("ward", "23995", "23995 - Phường Tây Sơn", "64"),
+
+                // 5. Dân tộc mẫu
                 ("ethnicity", "01", "01 - Kinh", ""),
-                ("ethnicity", "08", "08 - Gia Rai", ""),
-                ("ethnicity", "12", "12 - Ba Na", ""),
-                ("occupation", "22", "22 - Chuyên môn Y tế", ""),
-                ("occupation", "23", "23 - Giảng dạy / Giáo viên", ""),
-                ("occupation", "41", "41 - Nhân viên văn phòng", ""),
+                ("ethnicity", "02", "02 - Tày", ""),
+                ("ethnicity", "03", "03 - Thái", ""),
+                ("ethnicity", "10", "10 - Gia Rai", ""),
+                ("ethnicity", "11", "11 - Ba Na", ""),
 
-                // 5. ICD-10
-                ("icd10", "Z00.0", "Z00.0 - Khám sức khỏe định kỳ", ""),
-                ("icd10", "I10", "I10 - Tăng huyết áp nguyên phát", ""),
-                ("icd10", "E11", "E11 - Đái tháo đường Type 2", ""),
+                // 6. Nghề nghiệp mẫu
+                ("occupation", "22", "22 - Kỹ sư, Chuyên viên", ""),
+                ("occupation", "52", "52 - Nhân viên bán hàng", ""),
+                ("occupation", "71", "71 - Công nhân xây dựng", ""),
+                ("occupation", "99", "99 - Khác", ""),
+
+                // 7. ICD-10 cơ bản cho tiền sử
+                ("icd10", "I10", "I10 - Bệnh tăng huyết áp vô căn", ""),
+                ("icd10", "E11", "E11 - Đái tháo đường không phụ thuộc insulin", ""),
+                ("icd10", "J45", "J45 - Hen phế quản", ""),
+                ("icd10", "A15", "A15 - Lao đường hô hấp", ""),
+                ("icd10", "G40", "G40 - Động kinh", ""),
             ];
+
+            let mut stmt = self.conn.prepare(
+                "INSERT OR IGNORE INTO catalogs (cat_type, code, name, parent_code) VALUES (?1, ?2, ?3, ?4)"
+            ).unwrap();
             for s in seeds {
-                let _ = self.conn.execute(
-                    "INSERT OR IGNORE INTO catalogs (cat_type, code, name, parent_code) VALUES (?1, ?2, ?3, ?4)",
-                    params![s.0, s.1, s.2, s.3],
-                );
+                stmt.execute(params![s.0, s.1, s.2, s.3]).unwrap();
             }
         }
     }
 
     fn reload_catalogs(&mut self) {
-        let mut stmt = self.conn.prepare("SELECT id, cat_type, code, name, parent_code FROM catalogs ORDER BY cat_type, code").unwrap();
+        let mut stmt = self.conn.prepare("SELECT id, cat_type, code, name, parent_code FROM catalogs ORDER BY code ASC").unwrap();
         let rows = stmt.query_map([], |r| {
             Ok(CatalogRecord {
                 id: r.get(0)?,
@@ -616,18 +1042,7 @@ impl KskApp {
                 role: r.get(2)?,
             })
         }).unwrap();
-        self.user_list = rows.filter_map(Result::ok).collect();
-    }
-
-    fn new_record_with_defaults(&mut self) {
-        let mut f = KskRecordPayload::default();
-        f.ma_cskcb = self.config.default_cskcb.clone();
-        f.ma_gtin_cskcb = self.config.default_gtin_cskcb.clone();
-        f.matinh_cu_tru = self.config.default_province_code.clone();
-        f.maxa_cu_tru = self.config.default_ward_code.clone();
-        self.current_id = None;
-        self.current_status = 0;
-        self.form = f;
+        self.user_list = rows.flatten().collect();
     }
 
     fn reload_records(&mut self) {
@@ -684,6 +1099,8 @@ impl KskApp {
             }
         }
 
+        self.update_global_health_score();
+
         let new_status = if confirm { 1 } else { self.current_status };
         let json_str = serde_json::to_string(&self.form).unwrap();
 
@@ -710,7 +1127,6 @@ impl KskApp {
         self.reload_records();
     }
 
-    // Xuất file CSV chuẩn 100% các cột theo QĐ 3176 (bỏ chữ ký)
     fn export_csv(&mut self) {
         let mut wtr = csv::WriterBuilder::new().from_writer(vec![]);
         let headers = [
@@ -769,578 +1185,1060 @@ impl KskApp {
                 d.noi_khoa_tuan_hoan.as_str(), &d.noi_khoa_tuan_hoan_pl.to_string(), d.noi_khoa_ho_hap.as_str(),
                 &d.noi_khoa_ho_hap_pl.to_string(), d.noi_khoa_tieu_hoa.as_str(), &d.noi_khoa_tieu_hoa_pl.to_string(),
                 d.noi_khoa_than_tn_sd.as_str(), &d.noi_khoa_than_tn_sd_pl.to_string(), d.noi_khoa_noi_tiet.as_str(),
-                &d.noi_khoa_noi_tiet_pl.to_string(), d.noi_khoa_co_xuong_khop.as_str(), &d.noi_khoa_co_xuong_khop_pl.to_string(),
-                d.noi_khoa_than_kinh.as_str(), &d.noi_khoa_than_kinh_pl.to_string(), d.noi_khoa_tam_than.as_str(),
-                &d.noi_khoa_tam_than_pl.to_string(), d.ket_qua_kham_ngoai_khoa.as_str(), &d.kham_ngoai_khoa_pl.to_string(),
-                d.ket_qua_kham_da_lieu.as_str(), &d.kham_da_lieu_pl.to_string(), d.ket_qua_kham_san_phu_khoa.as_str(),
-                &d.kham_san_phu_khoa_pl.to_string(), d.khong_kinh_mat_phai.as_str(), d.khong_kinh_mat_trai.as_str(),
-                d.co_kinh_mat_phai.as_str(), d.co_kinh_mat_trai.as_str(), d.benh_khac_mat.as_str(),
-                &d.kham_mat_pl.to_string(), d.tai_trai_noi_thuong.as_str(), d.tai_trai_noi_tham.as_str(),
-                d.tai_phai_noi_thuong.as_str(), d.tai_phai_noi_tham.as_str(), d.benh_khac_tai_mui_hong.as_str(),
+                &d.noi_khoa_noi_tiet_pl.to_string(), d.noi_khoa_co_xuong_khop.as_str(),
+                &d.noi_khoa_co_xuong_khop_pl.to_string(), d.noi_khoa_than_kinh.as_str(),
+                &d.noi_khoa_than_kinh_pl.to_string(), d.noi_khoa_tam_than.as_str(),
+                &d.noi_khoa_tam_than_pl.to_string(), d.ket_qua_kham_ngoai_khoa.as_str(),
+                &d.kham_ngoai_khoa_pl.to_string(), d.ket_qua_kham_da_lieu.as_str(), &d.kham_da_lieu_pl.to_string(),
+                d.ket_qua_kham_san_phu_khoa.as_str(), &d.kham_san_phu_khoa_pl.to_string(),
+                d.khong_kinh_mat_phai.as_str(), d.khong_kinh_mat_trai.as_str(), d.co_kinh_mat_phai.as_str(),
+                d.co_kinh_mat_trai.as_str(), d.benh_khac_mat.as_str(), &d.kham_mat_pl.to_string(),
+                d.tai_trai_noi_thuong.as_str(), d.tai_trai_noi_tham.as_str(), d.tai_phai_noi_thuong.as_str(),
+                d.tai_phai_noi_tham.as_str(), d.benh_khac_tai_mui_hong.as_str(),
                 &d.kham_tai_mui_hong_pl.to_string(), d.ham_tren.as_str(), d.ham_duoi.as_str(),
-                d.benh_khac_rang_ham_mat.as_str(), &d.kham_rang_ham_mat_pl.to_string(), &d.phan_loai_sk.to_string(),
-                d.ket_luan_benh.as_str(), d.cac_benh_tat_neu_co.as_str()
+                d.benh_khac_rang_ham_mat.as_str(), &d.kham_rang_ham_mat_pl.to_string(),
+                &d.phan_loai_sk.to_string(), d.ket_luan_benh.as_str(), d.cac_benh_tat_neu_co.as_str(),
             ];
             wtr.write_record(&row).unwrap();
         }
 
-        let mut out = vec![0xEF, 0xBB, 0xBF];
-        out.extend(wtr.into_inner().unwrap());
-        fs::write("XUAT_DULIEU_KSK_QD3176.csv", out).unwrap();
-        self.status_msg = "Đã xuất file thành công: XUAT_DULIEU_KSK_QD3176.csv".into();
+        let csv_data = wtr.into_inner().unwrap();
+        let fname = format!("xuat_ksk_qd3176_{}.csv", chrono::Local::now().format("%Y%m%d_%H%M%S"));
+        if let Ok(_) = fs::write(&fname, &csv_data) {
+            self.status_msg = format!("Đã xuất {} hồ sơ chuẩn QĐ 3176 sang file: {}!", self.records.len(), fname);
+        } else {
+            self.status_msg = "LỖI: Không ghi được file CSV!".into();
+        }
     }
 
-    fn cat_items(cats: &[CatalogRecord], ty: &str, parent: Option<&str>) -> Vec<(String, String)> {
-        cats.iter()
-            .filter(|c| c.cat_type == ty && parent.map_or(true, |p| c.parent_code == p))
-            .map(|c| (c.code.clone(), if ty == "icd10" && !c.name.starts_with(&c.code) { format!("{} - {}", c.code, c.name) } else { c.name.clone() }))
+    fn new_record_with_defaults(&mut self) {
+        let mut p = KskRecordPayload::default();
+        p.ma_cskcb = self.config.default_cskcb.clone();
+        p.ma_gtin_cskcb = self.config.default_gtin_cskcb.clone();
+        p.matinh_cu_tru = self.config.default_province_code.clone();
+        p.maxa_cu_tru = self.config.default_ward_code.clone();
+        self.form = p;
+        self.current_id = None;
+        self.current_status = 0;
+        self.status_msg = "Tạo mới hồ sơ thành công!".into();
+    }
+
+    fn cat_items<'a>(catalogs: &'a [CatalogRecord], cat_type: &str, parent: Option<&str>) -> Vec<(String, String)> {
+        catalogs.iter()
+            .filter(|c| c.cat_type == cat_type && parent.map_or(true, |p| c.parent_code == p || c.parent_code.is_empty()))
+            .map(|c| (c.code.clone(), c.name.clone()))
             .collect()
-    }
-
-    fn ui_radio_pl_num(ui: &mut egui::Ui, val: &mut i32) {
-        ui.horizontal(|ui| {
-            let pls = [
-                (1, "Loại I", egui::Color32::from_rgb(16, 185, 129)),   // Emerald green
-                (2, "Loại II", egui::Color32::from_rgb(14, 165, 233)),  // Sky blue
-                (3, "Loại III", egui::Color32::from_rgb(234, 179, 8)),  // Amber yellow
-                (4, "Loại IV", egui::Color32::from_rgb(249, 115, 22)),  // Orange
-                (5, "Loại V", egui::Color32::from_rgb(239, 68, 68)),    // Red
-            ];
-            for (num, label, active_color) in pls {
-                let is_selected = *val == num;
-                let text = if is_selected {
-                    egui::RichText::new(label).strong().color(egui::Color32::WHITE)
-                } else {
-                    egui::RichText::new(label)
-                };
-                let mut btn = egui::Button::new(text).rounding(12.0);
-                if is_selected {
-                    btn = btn.fill(active_color);
-                }
-                if ui.add(btn).clicked() {
-                    *val = num;
-                }
-            }
-        });
     }
 
     fn ui_radio_yn(ui: &mut egui::Ui, val: &mut i32) {
         ui.horizontal(|ui| {
-            let is_no = *val == 0;
-            let is_yes = *val == 1;
+            ui.radio_value(val, 0, "Không");
+            ui.radio_value(val, 1, "Có");
+        });
+    }
 
-            let no_txt = if is_no {
-                egui::RichText::new(" Không ").strong().color(egui::Color32::WHITE)
-            } else {
-                egui::RichText::new(" Không ")
-            };
-            let mut btn_no = egui::Button::new(no_txt).rounding(10.0);
-            if is_no {
-                btn_no = btn_no.fill(egui::Color32::from_rgb(100, 116, 139)); // Slate
-            }
-            if ui.add(btn_no).clicked() {
-                *val = 0;
-            }
-
-            let yes_txt = if is_yes {
-                egui::RichText::new(" Có ").strong().color(egui::Color32::WHITE)
-            } else {
-                egui::RichText::new(" Có ")
-            };
-            let mut btn_yes = egui::Button::new(yes_txt).rounding(10.0);
-            if is_yes {
-                btn_yes = btn_yes.fill(egui::Color32::from_rgb(239, 68, 68)); // Red highlight for disease history
-            }
-            if ui.add(btn_yes).clicked() {
-                *val = 1;
+    #[allow(dead_code)]
+    fn ui_radio_pl_num(ui: &mut egui::Ui, val: &mut i32) {
+        ui.horizontal(|ui| {
+            for i in 1..=5 {
+                ui.radio_value(val, i, format!("Loại {}", i));
             }
         });
     }
 
-    fn ui_multiline(ui: &mut egui::Ui, label: &str, val: &mut String) {
-        ui.vertical(|ui| {
-            ui.strong(label);
-            ui.add(egui::TextEdit::multiline(val).desired_rows(3).desired_width(f32::INFINITY));
-        });
+    // ===================================================================
+    // BỘ ĐỒNG BỘ KẾT QUẢ VÀ TỰ TÍNH PHÂN LOẠI THEO CHUẨN QĐ 1613/BYT
+    // ===================================================================
+    fn sync_specialty_result(&mut self, spec_id: &str) {
+        let base_vision = calc_vision_score(&self.form.khong_kinh_mat_phai, &self.form.khong_kinh_mat_trai);
+        let base_hearing = calc_hearing_score(self.form.voice_hearing, self.form.audiometer_hearing);
+
+        let diseases: Vec<QdDisease> = self.qd_diseases.iter().filter(|d| d.spec_id == spec_id).cloned().collect();
+        let mut abnormal_items: Vec<(String, i32)> = Vec::new();
+        let mut max_sc = 1;
+
+        let extra = self.form.specialty_extras.entry(spec_id.to_string()).or_default();
+        let auto_overrides = extra.auto_overrides.clone();
+        let manual_rows = extra.manual_rows.clone();
+        let final_note = extra.final_note.clone();
+
+        for d in &diseases {
+            let clss: Vec<QdClassification> = self.qd_classifications.iter().filter(|c| c.disease_id == d.id).cloned().collect();
+            if clss.is_empty() { continue; }
+
+            let selected_cid = self.form.selected_classifications.get(&d.id);
+            let sel = selected_cid.and_then(|cid| clss.iter().find(|c| &c.id == cid)).unwrap_or(&clss[0]);
+            let sc = if d.id == "BT_MAT_THI_LUC" {
+                base_vision
+            } else if d.id == "BT_TMH_TAI_TRONG" {
+                base_hearing
+            } else {
+                calc_classification_score(sel, base_vision, base_hearing)
+            };
+
+            if sc > max_sc {
+                max_sc = sc;
+            }
+            if sc > 1 {
+                let text = if let Some(custom) = auto_overrides.get(&d.id) {
+                    if !custom.trim().is_empty() { custom.clone() } else { sel.name.clone() }
+                } else {
+                    sel.name.clone()
+                };
+                abnormal_items.push((format!("{}: {}", d.name, text), sc));
+            }
+        }
+
+        for mr in &manual_rows {
+            if mr.classification > max_sc {
+                max_sc = mr.classification;
+            }
+            if !mr.manifestation.trim().is_empty() {
+                abnormal_items.push((mr.manifestation.clone(), mr.classification));
+            }
+        }
+
+        let summary = if max_sc == 1 && abnormal_items.is_empty() {
+            "Bình thường".to_string()
+        } else {
+            let mut parts: Vec<String> = abnormal_items.into_iter().map(|(txt, _)| txt).collect();
+            if !final_note.trim().is_empty() {
+                parts.push(format!("Ghi chú: {}", final_note.trim()));
+            }
+            parts.join("; ")
+        };
+
+        match spec_id {
+            "CK_NOI_TIM_MACH" => {
+                self.form.noi_khoa_tuan_hoan = summary;
+                self.form.noi_khoa_tuan_hoan_pl = max_sc;
+            }
+            "CK_NOI_HO_HAP" => {
+                self.form.noi_khoa_ho_hap = summary;
+                self.form.noi_khoa_ho_hap_pl = max_sc;
+            }
+            "CK_NOI_TIEU_HOA" => {
+                self.form.noi_khoa_tieu_hoa = summary;
+                self.form.noi_khoa_tieu_hoa_pl = max_sc;
+            }
+            "CK_NOI_TIET_NIEU_SD" => {
+                self.form.noi_khoa_than_tn_sd = summary;
+                self.form.noi_khoa_than_tn_sd_pl = max_sc;
+            }
+            "CK_NOI_THAN_KINH" => {
+                self.form.noi_khoa_than_kinh = summary;
+                self.form.noi_khoa_than_kinh_pl = max_sc;
+            }
+            "CK_NOI_TAM_THAN" => {
+                self.form.noi_khoa_tam_than = summary;
+                self.form.noi_khoa_tam_than_pl = max_sc;
+            }
+            "CK_NOI_NOITIET" => {
+                self.form.noi_khoa_noi_tiet = summary;
+                self.form.noi_khoa_noi_tiet_pl = max_sc;
+            }
+            "CK_NOI_CO_XUONG_KHOP" => {
+                self.form.noi_khoa_co_xuong_khop = summary;
+                self.form.noi_khoa_co_xuong_khop_pl = max_sc;
+            }
+            "CK_NGOAI" => {
+                self.form.ket_qua_kham_ngoai_khoa = summary;
+                self.form.kham_ngoai_khoa_pl = max_sc;
+            }
+            "CK_DA_LIEU" => {
+                self.form.ket_qua_kham_da_lieu = summary;
+                self.form.kham_da_lieu_pl = max_sc;
+            }
+            "CK_PHU_SAN" => {
+                self.form.ket_qua_kham_san_phu_khoa = summary;
+                self.form.kham_san_phu_khoa_pl = max_sc;
+            }
+            "CK_MAT" => {
+                self.form.benh_khac_mat = summary;
+                self.form.kham_mat_pl = max_sc;
+            }
+            "CK_TMH" => {
+                self.form.benh_khac_tai_mui_hong = summary;
+                self.form.kham_tai_mui_hong_pl = max_sc;
+            }
+            "CK_RHM" => {
+                self.form.benh_khac_rang_ham_mat = summary;
+                self.form.kham_rang_ham_mat_pl = max_sc;
+            }
+            _ => {}
+        }
+
+        self.update_global_health_score();
     }
+
+    fn update_global_health_score(&mut self) {
+        let scores = [
+            self.form.kham_the_luc_pl,
+            self.form.noi_khoa_tuan_hoan_pl,
+            self.form.noi_khoa_ho_hap_pl,
+            self.form.noi_khoa_tieu_hoa_pl,
+            self.form.noi_khoa_than_tn_sd_pl,
+            self.form.noi_khoa_noi_tiet_pl,
+            self.form.noi_khoa_co_xuong_khop_pl,
+            self.form.noi_khoa_than_kinh_pl,
+            self.form.noi_khoa_tam_than_pl,
+            self.form.kham_ngoai_khoa_pl,
+            self.form.kham_da_lieu_pl,
+            self.form.kham_san_phu_khoa_pl,
+            self.form.kham_mat_pl,
+            self.form.kham_tai_mui_hong_pl,
+            self.form.kham_rang_ham_mat_pl,
+        ];
+        let max_val = scores.into_iter().max().unwrap_or(1).clamp(1, 5);
+        self.form.phan_loai_sk = max_val;
+    }
+
+    // ===================================================================
+    // UI: RENDER FULL CONTENT CHO MỖI CHUYÊN KHOA THEO QĐ 1613/BYT
+    // ===================================================================
+    fn render_qd1613_specialty(&mut self, ui: &mut egui::Ui, spec_id: &str, parent_title: Option<&str>) {
+        let spec_name = self.qd_specialties.iter().find(|s| s.id == spec_id).map(|s| s.name.clone()).unwrap_or_else(|| spec_id.to_string());
+        let diseases: Vec<QdDisease> = self.qd_diseases.iter().filter(|d| d.spec_id == spec_id).cloned().collect();
+
+        // 1. TIÊU ĐỀ CHUYÊN KHOA & THAO TÁC MỞ/THU GỌN
+        ui.horizontal(|ui| {
+            ui.vertical(|ui| {
+                let title = if let Some(p) = parent_title {
+                    format!("Chuyên khoa: {} › {}", p, spec_name)
+                } else {
+                    format!("Chuyên khoa: {}", spec_name)
+                };
+                ui.heading(egui::RichText::new(title).strong().size(17.0));
+                ui.colored_label(egui::Color32::from_rgb(100, 116, 139), "Kết luận tự động lấy từ các kết quả. Khi tất cả Loại 1 → Bình thường.");
+            });
+
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui.button("Thu gọn tất cả").clicked() {
+                    for d in &diseases {
+                        self.expanded_diseases.remove(&d.id);
+                    }
+                }
+                if ui.button("Mở tất cả").clicked() {
+                    for d in &diseases {
+                        self.expanded_diseases.insert(d.id.clone());
+                    }
+                }
+            });
+        });
+
+        ui.add_space(8.0);
+
+        // 2. BẢNG ĐO THỊ LỰC NẾU LÀ MẮT (CK_MAT)
+        let base_vision = calc_vision_score(&self.form.khong_kinh_mat_phai, &self.form.khong_kinh_mat_trai);
+        if spec_id == "CK_MAT" {
+            egui::Frame::group(ui.style())
+                .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(239, 246, 255) })
+                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(147, 197, 253)))
+                .inner_margin(12.0)
+                .show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.strong(egui::RichText::new("👁 Đo thị lực & Tự động phân loại").size(14.0).color(egui::Color32::from_rgb(29, 78, 216)));
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            ui_score_badge(ui, base_vision, false);
+                            ui.strong(format!("Thị lực chuẩn: LOẠI {}", base_vision));
+                        });
+                    });
+
+                    ui.add_space(6.0);
+                    egui::Grid::new("grid_vision_auto").num_columns(3).spacing([20.0, 8.0]).show(ui, |ui| {
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Tay thuận:").strong().size(12.0));
+                            ui.horizontal(|ui| {
+                                if ui.radio_value(&mut self.form.dominant_hand, "right".into(), "Tay Phải").changed() {
+                                    self.sync_specialty_result(spec_id);
+                                }
+                                if ui.radio_value(&mut self.form.dominant_hand, "left".into(), "Tay Trái").changed() {
+                                    self.sync_specialty_result(spec_id);
+                                }
+                            });
+                        });
+
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Thị lực Mắt Phải (MP):").strong().size(12.0));
+                            ui.horizontal(|ui| {
+                                if ui.add(egui::TextEdit::singleline(&mut self.form.khong_kinh_mat_phai).desired_width(70.0)).changed() {
+                                    self.sync_specialty_result(spec_id);
+                                }
+                                ui.label("/10");
+                            });
+                        });
+
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Thị lực Mắt Trái (MT):").strong().size(12.0));
+                            ui.horizontal(|ui| {
+                                if ui.add(egui::TextEdit::singleline(&mut self.form.khong_kinh_mat_trai).desired_width(70.0)).changed() {
+                                    self.sync_specialty_result(spec_id);
+                                }
+                                ui.label("/10");
+                            });
+                        });
+                    });
+                    ui.add_space(4.0);
+                    ui.colored_label(egui::Color32::from_rgb(30, 64, 175), "*(Nhập > 10, hệ thống tự quy về trần 10/10)*");
+                });
+            ui.add_space(8.0);
+        }
+
+        // 3. BẢNG ĐO SỨC NGHE NẾU LÀ TAI MŨI HỌNG (CK_TMH)
+        let base_hearing = calc_hearing_score(self.form.voice_hearing, self.form.audiometer_hearing);
+        if spec_id == "CK_TMH" {
+            egui::Frame::group(ui.style())
+                .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(254, 243, 199) })
+                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(252, 211, 77)))
+                .inner_margin(12.0)
+                .show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.strong(egui::RichText::new("👂 Đo sức nghe & Tự động phân loại").size(14.0).color(egui::Color32::from_rgb(180, 83, 9)));
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            ui_score_badge(ui, base_hearing, false);
+                            ui.strong(format!("Sức nghe chuẩn: LOẠI {}", base_hearing));
+                        });
+                    });
+
+                    ui.add_space(6.0);
+                    egui::Grid::new("grid_hearing_auto").num_columns(2).spacing([24.0, 8.0]).show(ui, |ui| {
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Tiếng nói thầm (16.1):").strong().size(12.0));
+                            let voice_labels = [
+                                (1, "Một bên 5m, tai kia 5m — Loại 1"),
+                                (2, "Một bên 4m, tai kia 2m — Loại 2"),
+                                (3, "Một bên 3m, tai kia 1m — Loại 3"),
+                                (4, "Một bên 2m, tai kia 0.5m — Loại 4"),
+                                (5, "Một bên 1m, tai kia 0.1m — Loại 5"),
+                            ];
+                            let cur_voice_text = voice_labels.iter().find(|(v, _)| *v == self.form.voice_hearing).map(|(_, t)| *t).unwrap_or("Loại 1");
+                            egui::ComboBox::from_id_source("cb_hearing_voice")
+                                .width(280.0)
+                                .selected_text(cur_voice_text)
+                                .show_ui(ui, |ui| {
+                                    for (v, label) in voice_labels {
+                                        if ui.selectable_value(&mut self.form.voice_hearing, v, label).clicked() {
+                                            self.sync_specialty_result(spec_id);
+                                        }
+                                    }
+                                });
+                        });
+
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Thính lực kế (16.2):").strong().size(12.0));
+                            let audio_labels = [
+                                (1, "Không giảm hoặc <15 dBA — Loại 1"),
+                                (2, "Giảm cả 2 tai 15-35 dBA — Loại 2"),
+                                (3, "Giảm cả 2 tai 36-45 dBA — Loại 3"),
+                                (4, "Giảm cả 2 tai 46-65 dBA — Loại 4"),
+                                (5, "Giảm cả 2 tai >65 dBA — Loại 5"),
+                            ];
+                            let cur_audio_text = audio_labels.iter().find(|(v, _)| *v == self.form.audiometer_hearing).map(|(_, t)| *t).unwrap_or("Loại 1");
+                            egui::ComboBox::from_id_source("cb_hearing_audio")
+                                .width(280.0)
+                                .selected_text(cur_audio_text)
+                                .show_ui(ui, |ui| {
+                                    for (v, label) in audio_labels {
+                                        if ui.selectable_value(&mut self.form.audiometer_hearing, v, label).clicked() {
+                                            self.sync_specialty_result(spec_id);
+                                        }
+                                    }
+                                });
+                        });
+                    });
+                    ui.add_space(4.0);
+                    ui.colored_label(egui::Color32::from_rgb(180, 83, 9), "*Lấy mức cao nhất trong 2 phương pháp đo*");
+                });
+            ui.add_space(8.0);
+        }
+
+        // 4. DANH SÁCH CÁC THẺ BỆNH TẬT CỦA CHUYÊN KHOA
+        if diseases.is_empty() {
+            ui.colored_label(egui::Color32::GRAY, "Chuyên khoa này chưa có danh mục bệnh tật nào.");
+        } else {
+            for disease in &diseases {
+                let clss: Vec<QdClassification> = self.qd_classifications.iter().filter(|c| c.disease_id == disease.id).cloned().collect();
+                if clss.is_empty() { continue; }
+
+                // Thẻ bệnh tự động: Thị lực hoặc Thính lực
+                if disease.id == "BT_MAT_THI_LUC" {
+                    egui::Frame::group(ui.style())
+                        .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(240, 249, 255) })
+                        .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(186, 230, 253)))
+                        .inner_margin(10.0)
+                        .show(ui, |ui| {
+                            ui.horizontal(|ui| {
+                                ui.strong(format!("⚡ {} [TỰ ĐỘNG]", disease.name));
+                                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                    ui_score_badge(ui, base_vision, false);
+                                    ui.label(format!("MP {}/10 — MT {}/10", self.form.khong_kinh_mat_phai, self.form.khong_kinh_mat_trai));
+                                });
+                            });
+                        });
+                    ui.add_space(4.0);
+                    continue;
+                }
+
+                if disease.id == "BT_TMH_TAI_TRONG" {
+                    egui::Frame::group(ui.style())
+                        .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(255, 251, 235) })
+                        .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(253, 230, 138)))
+                        .inner_margin(10.0)
+                        .show(ui, |ui| {
+                            ui.horizontal(|ui| {
+                                ui.strong(format!("⚡ {} [TỰ ĐỘNG]", disease.name));
+                                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                    ui_score_badge(ui, base_hearing, false);
+                                    ui.label(format!("Nói thầm Loại {} — Thính lực kế Loại {}", self.form.voice_hearing, self.form.audiometer_hearing));
+                                });
+                            });
+                        });
+                    ui.add_space(4.0);
+                    continue;
+                }
+
+                // Thẻ bệnh tiêu chuẩn với Accordion
+                let is_expanded = self.expanded_diseases.contains(&disease.id);
+                let current_sel_cid = self.form.selected_classifications.get(&disease.id);
+                let current_sel = current_sel_cid.and_then(|cid| clss.iter().find(|c| &c.id == cid)).unwrap_or(&clss[0]);
+                let cur_score = calc_classification_score(current_sel, base_vision, base_hearing);
+
+                egui::Frame::group(ui.style())
+                    .fill(if self.dark_mode {
+                        if cur_score > 1 { egui::Color32::from_rgb(35, 30, 45) } else { egui::Color32::from_rgb(24, 30, 42) }
+                    } else {
+                        if cur_score > 1 { egui::Color32::from_rgb(254, 242, 242) } else { egui::Color32::from_rgb(248, 250, 252) }
+                    })
+                    .stroke(egui::Stroke::new(1.0_f32, if cur_score > 1 { egui::Color32::from_rgb(248, 113, 113) } else { egui::Color32::from_rgb(226, 232, 240) }))
+                    .inner_margin(10.0)
+                    .show(ui, |ui| {
+                        // Header có thể click để bung ra / thu gọn
+                        let resp = ui.horizontal(|ui| {
+                            let chevron = if is_expanded { "▼" } else { "▶" };
+                            ui.label(egui::RichText::new(chevron).monospace().size(12.0));
+                            ui.vertical(|ui| {
+                                ui.strong(egui::RichText::new(&disease.name).size(13.5));
+                                ui.colored_label(egui::Color32::from_rgb(100, 116, 139), egui::RichText::new(&current_sel.name).size(11.5));
+                            });
+                            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                ui_score_badge(ui, cur_score, current_sel.ref_disease_id.is_some());
+                            });
+                        }).response;
+
+                        if resp.interact(egui::Sense::click()).clicked() {
+                            if is_expanded {
+                                self.expanded_diseases.remove(&disease.id);
+                            } else {
+                                self.expanded_diseases.insert(disease.id.clone());
+                            }
+                        }
+
+                        // Nội dung bung ra: các tiêu chuẩn phân loại lựa chọn
+                        if is_expanded {
+                            ui.separator();
+                            ui.vertical(|ui| {
+                                for c in &clss {
+                                    let is_checked = current_sel.id == c.id;
+                                    let c_score = calc_classification_score(c, base_vision, base_hearing);
+                                    let is_dyn = c.ref_disease_id.is_some();
+
+                                    ui.horizontal(|ui| {
+                                        let radio_resp = ui.radio(is_checked, "");
+                                        let text_resp = ui.vertical(|ui| {
+                                            ui.label(if is_checked {
+                                                egui::RichText::new(&c.name).strong().color(egui::Color32::from_rgb(14, 165, 233))
+                                            } else {
+                                                egui::RichText::new(&c.name)
+                                            });
+                                            if let Some(ref r) = c.ref_rule {
+                                                ui.colored_label(egui::Color32::from_rgb(180, 83, 9), egui::RichText::new(format!("↳ {}", r)).italics().size(11.0));
+                                            }
+                                        }).response;
+
+                                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                            ui_score_badge(ui, c_score, is_dyn);
+                                        });
+
+                                        if radio_resp.clicked() || text_resp.interact(egui::Sense::click()).clicked() {
+                                            self.form.selected_classifications.insert(disease.id.clone(), c.id.clone());
+                                            self.sync_specialty_result(spec_id);
+                                        }
+                                    });
+                                    ui.add_space(2.0);
+                                }
+                            });
+                        }
+                    });
+                ui.add_space(4.0);
+            }
+        }
+
+        ui.add_space(10.0);
+
+        // 5. KHỐI KẾT LUẬN CHUYÊN KHOA (BÌNH THƯỜNG / CHI TIẾT BỆNH LÝ)
+        let extra = self.form.specialty_extras.entry(spec_id.to_string()).or_default().clone();
+        let mut abnormal_rows: Vec<(String, String, i32, String)> = Vec::new(); // (disease_id, disease_name, score, classif_name)
+        let mut max_spec_score = 1;
+
+        for d in &diseases {
+            let clss: Vec<QdClassification> = self.qd_classifications.iter().filter(|c| c.disease_id == d.id).cloned().collect();
+            if clss.is_empty() { continue; }
+            let sel_cid = self.form.selected_classifications.get(&d.id);
+            let sel = sel_cid.and_then(|cid| clss.iter().find(|c| &c.id == cid)).unwrap_or(&clss[0]);
+            let sc = if d.id == "BT_MAT_THI_LUC" {
+                base_vision
+            } else if d.id == "BT_TMH_TAI_TRONG" {
+                base_hearing
+            } else {
+                calc_classification_score(sel, base_vision, base_hearing)
+            };
+            if sc > max_spec_score {
+                max_spec_score = sc;
+            }
+            if sc > 1 {
+                abnormal_rows.push((d.id.clone(), d.name.clone(), sc, sel.name.clone()));
+            }
+        }
+
+        for mr in &extra.manual_rows {
+            if mr.classification > max_spec_score {
+                max_spec_score = mr.classification;
+            }
+        }
+
+        // Trường hợp tất cả Loại 1 và không có dòng nhập tay: HIỂN THỊ HỘP XANH BÌNH THƯỜNG
+        if max_spec_score == 1 && abnormal_rows.is_empty() && extra.manual_rows.is_empty() {
+            egui::Frame::group(ui.style())
+                .fill(if self.dark_mode { egui::Color32::from_rgb(20, 45, 35) } else { egui::Color32::from_rgb(236, 253, 245) })
+                .stroke(egui::Stroke::new(2.0_f32, egui::Color32::from_rgb(110, 231, 183)))
+                .inner_margin(16.0)
+                .show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.strong(egui::RichText::new(format!("🛡 KẾT LUẬN — {}", spec_name)).size(14.0).color(egui::Color32::from_rgb(6, 95, 70)));
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            ui.colored_label(egui::Color32::from_rgb(6, 95, 70), egui::RichText::new("BÌNH THƯỜNG (LOẠI 1)").strong().size(13.0));
+                        });
+                    });
+                    ui.separator();
+                    ui.horizontal(|ui| {
+                        ui.label(egui::RichText::new("✔").size(22.0).color(egui::Color32::from_rgb(16, 185, 129)));
+                        ui.vertical(|ui| {
+                            ui.strong(egui::RichText::new("Không phát hiện bệnh lý").size(14.0).color(egui::Color32::from_rgb(6, 95, 70)));
+                            ui.colored_label(egui::Color32::from_rgb(4, 120, 87), "Tất cả chỉ số khám đều ở mức Loại 1 — bình thường.");
+                        });
+                    });
+                    ui.add_space(4.0);
+                    ui.colored_label(egui::Color32::from_rgb(100, 116, 139), egui::RichText::new("* Kết luận được hệ thống tự động xác định. Nếu phát hiện bất thường, chọn phân loại phù hợp ở các mục bên trên.").italics().size(11.0));
+                });
+        } else {
+            // Trường hợp có bệnh lý > Loại 1: HIỂN THỊ BẢNG KẾT LUẬN & TEXT THỂ HIỆN CHO PHÉP SỬA
+            egui::Frame::group(ui.style())
+                .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(240, 253, 250) })
+                .stroke(egui::Stroke::new(2.0_f32, egui::Color32::from_rgb(94, 234, 212)))
+                .inner_margin(16.0)
+                .show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.strong(egui::RichText::new(format!("🛡 KẾT LUẬN — {}", spec_name)).size(14.0).color(egui::Color32::from_rgb(19, 78, 74)));
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            ui_score_badge(ui, max_spec_score, false);
+                            ui.strong(format!("Phân loại tổng: Loại {}", max_spec_score));
+                        });
+                    });
+
+                    ui.separator();
+
+                    ui.strong("CÁC BỆNH GHI NHẬN (PHÂN LOẠI > 1):");
+                    ui.add_space(4.0);
+
+                    let mut changed_anything = false;
+
+                    egui::Grid::new(format!("grid_concl_{}", spec_id)).striped(true).min_col_width(70.0).spacing([12.0, 8.0]).show(ui, |ui| {
+                        ui.strong("STT");
+                        ui.strong("Phân loại");
+                        ui.strong("Text phân loại (theo danh mục)");
+                        ui.strong("Text thể hiện (chỉnh sửa được)");
+                        ui.strong("Hành động");
+                        ui.end_row();
+
+                        let mut stt = 1;
+
+                        // Các hàng tự động từ bệnh tật
+                        for (d_id, d_name, sc, c_name) in abnormal_rows {
+                            ui.label(stt.to_string());
+                            ui_score_badge(ui, sc, false);
+                            ui.vertical(|ui| {
+                                ui.strong(&c_name);
+                                ui.colored_label(egui::Color32::GRAY, egui::RichText::new(&d_name).size(11.0));
+                            });
+
+                            let cur_override = self.form.specialty_extras.entry(spec_id.to_string()).or_default()
+                                .auto_overrides.entry(d_id.clone()).or_insert_with(|| c_name.clone());
+
+                            if ui.add(egui::TextEdit::singleline(cur_override).desired_width(320.0)).changed() {
+                                changed_anything = true;
+                            }
+
+                            ui.colored_label(egui::Color32::from_rgb(16, 185, 129), egui::RichText::new("tự động").italics().size(11.0));
+                            ui.end_row();
+                            stt += 1;
+                        }
+
+                        // Các hàng nhập tay
+                        let mut remove_idx = None;
+                        let extra_ref = self.form.specialty_extras.entry(spec_id.to_string()).or_default();
+                        for (idx, row) in extra_ref.manual_rows.iter_mut().enumerate() {
+                            ui.label(stt.to_string());
+                            egui::ComboBox::from_id_source(format!("cb_pl_m_{}_{}", spec_id, idx))
+                                .width(80.0)
+                                .selected_text(format!("Loại {}", row.classification))
+                                .show_ui(ui, |ui| {
+                                    for n in 1..=5 {
+                                        if ui.selectable_value(&mut row.classification, n, format!("Loại {}", n)).clicked() {
+                                            changed_anything = true;
+                                        }
+                                    }
+                                });
+
+                            ui.label(&row.classification_id);
+                            if ui.add(egui::TextEdit::singleline(&mut row.manifestation).desired_width(320.0)).changed() {
+                                changed_anything = true;
+                            }
+                            if ui.button("Xóa").clicked() {
+                                remove_idx = Some(idx);
+                            }
+                            ui.end_row();
+                            stt += 1;
+                        }
+
+                        if let Some(r_idx) = remove_idx {
+                            self.form.specialty_extras.entry(spec_id.to_string()).or_default().manual_rows.remove(r_idx);
+                            changed_anything = true;
+                        }
+                    });
+
+                    ui.add_space(6.0);
+                    if ui.button("➕ Thêm dòng thủ công").clicked() {
+                        self.form.specialty_extras.entry(spec_id.to_string()).or_default().manual_rows.push(ManualConclusionRow {
+                            classification: 2,
+                            classification_id: "Thủ công".into(),
+                            manifestation: "".into(),
+                        });
+                        changed_anything = true;
+                    }
+
+                    ui.add_space(8.0);
+                    ui.strong("GHI CHÚ TỔNG HỢP (PHẦN HIỂN THỊ CUỐI CÙNG):");
+                    let final_note_ref = &mut self.form.specialty_extras.entry(spec_id.to_string()).or_default().final_note;
+                    if ui.add(egui::TextEdit::multiline(final_note_ref).desired_rows(2).desired_width(ui.available_width())).changed() {
+                        changed_anything = true;
+                    }
+
+                    if changed_anything {
+                        self.sync_specialty_result(spec_id);
+                    }
+                });
+        }
+    }
+}
+
+fn apply_theme(ctx: &egui::Context, dark: bool) {
+    let mut visuals = if dark {
+        egui::Visuals::dark()
+    } else {
+        egui::Visuals::light()
+    };
+    visuals.window_rounding = 6.0.into();
+    ctx.set_visuals(visuals);
 }
 
 impl eframe::App for KskApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // GIAO DIỆN ĐĂNG NHẬP NẾU CHƯA ĐĂNG NHẬP
         if !self.logged_in {
             egui::CentralPanel::default().show(ctx, |ui| {
                 ui.vertical_centered(|ui| {
                     ui.add_space(80.0);
-                    ui.heading("HỆ THỐNG NHẬP LIỆU KHÁM SỨC KHỎE - QĐ 3176/QĐ-BYT");
-                    ui.label("Phần mềm nhập liệu lâm sàng & quản lý danh mục");
-                    ui.add_space(20.0);
+                    ui.heading(egui::RichText::new("🏥 HỆ THỐNG KHÁM SỨC KHỎE ĐỊNH KỲ").size(24.0).strong().color(egui::Color32::from_rgb(14, 165, 233)));
+                    ui.label(egui::RichText::new("Chuẩn Quyết định 3176/QĐ-BYT & Quyết định 1613/BYT").size(14.0).weak());
+                    ui.add_space(24.0);
 
-                    egui::Frame::group(ui.style()).show(ui, |ui| {
-                        ui.set_width(380.0);
-                        ui.label("Chọn nhanh tài khoản bác sĩ chuyên khoa:");
-                        egui::ComboBox::from_id_source("cb_fast_login")
-                            .selected_text(&self.login_user)
-                            .show_ui(ui, |ui| {
-                                ui.selectable_value(&mut self.login_user, "admin".into(), "admin (Quản trị viên)");
-                                ui.selectable_value(&mut self.login_user, "client".into(), "client (Hành chính / Tiếp đón)");
-                                ui.selectable_value(&mut self.login_user, "bs_theluc".into(), "bs_theluc (Bác sĩ Thể lực)");
-                                ui.selectable_value(&mut self.login_user, "bs_noi".into(), "bs_noi (Bác sĩ Nội khoa)");
-                                ui.selectable_value(&mut self.login_user, "bs_ngoai".into(), "bs_ngoai (Bác sĩ Ngoại khoa)");
-                                ui.selectable_value(&mut self.login_user, "bs_dalieu".into(), "bs_dalieu (Bác sĩ Da liễu)");
-                                ui.selectable_value(&mut self.login_user, "bs_san".into(), "bs_san (Bác sĩ Sản phụ khoa)");
-                                ui.selectable_value(&mut self.login_user, "bs_mat".into(), "bs_mat (Bác sĩ Mắt)");
-                                ui.selectable_value(&mut self.login_user, "bs_tmh".into(), "bs_tmh (Bác sĩ Tai Mũi Họng)");
-                                ui.selectable_value(&mut self.login_user, "bs_rhm".into(), "bs_rhm (Bác sĩ Răng Hàm Mặt)");
-                                ui.selectable_value(&mut self.login_user, "bs_cls".into(), "bs_cls (Bác sĩ Cận lâm sàng)");
-                                ui.selectable_value(&mut self.login_user, "bs_ketluan".into(), "bs_ketluan (Bác sĩ Kết luận)");
-                            });
+                    egui::Frame::group(ui.style())
+                        .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(248, 250, 252) })
+                        .inner_margin(24.0)
+                        .rounding(8.0)
+                        .show(ui, |ui| {
+                            ui.set_max_width(340.0);
+                            ui.strong("Tài khoản:");
+                            ui.add(egui::TextEdit::singleline(&mut self.login_user).desired_width(320.0));
+                            ui.add_space(8.0);
 
-                        ui.add_space(8.0);
-                        ui.horizontal(|ui| {
-                            ui.label("Tài khoản:");
-                            ui.text_edit_singleline(&mut self.login_user);
-                        });
-                        ui.horizontal(|ui| {
-                            ui.label("Mật khẩu:");
-                            ui.add(egui::TextEdit::singleline(&mut self.login_pass).password(true));
-                        });
-                        ui.add_space(10.0);
-                        if ui.button("   ĐĂNG NHẬP HỆ THỐNG   ").clicked() {
-                            let hashed = hash_pass(&self.login_pass);
-                            let mut stmt = self.conn.prepare("SELECT role, password FROM users WHERE username = ?1").unwrap();
-                            let auth_result = stmt.query_row(params![self.login_user], |r| {
-                                let role: String = r.get(0)?;
-                                let pass_db: String = r.get(1)?;
-                                Ok((role, pass_db))
-                            });
+                            ui.strong("Mật khẩu:");
+                            ui.add(egui::TextEdit::singleline(&mut self.login_pass).password(true).desired_width(320.0));
+                            ui.add_space(16.0);
 
-                            let authenticated = match auth_result {
-                                Ok((role, pass_db)) => {
-                                    if pass_db == self.login_pass || pass_db == hashed {
-                                        Some(role)
-                                    } else {
-                                        None
+                            if ui.button(egui::RichText::new("  Đăng Nhập  ").size(15.0).strong()).clicked() {
+                                let query = "SELECT id, username, role FROM users WHERE username = ?1 AND password = ?2";
+                                let pass_hashed = hash_pass(&self.login_pass);
+                                let found = {
+                                    let mut stmt = self.conn.prepare(query).unwrap();
+                                    stmt.query_row(params![self.login_user, self.login_pass], |r| {
+                                        Ok((r.get::<_, String>(1)?, r.get::<_, String>(2)?))
+                                    }).or_else(|_| {
+                                        stmt.query_row(params![self.login_user, pass_hashed], |r| {
+                                            Ok((r.get::<_, String>(1)?, r.get::<_, String>(2)?))
+                                        })
+                                    })
+                                };
+
+                                match found {
+                                    Ok((u, r)) => {
+                                        self.current_user = u;
+                                        self.current_role = r;
+                                        self.logged_in = true;
+                                        self.status_msg = format!("Xin chào {}, vai trò: {}!", self.current_user, self.current_role);
+                                        self.new_record_with_defaults();
+                                    }
+                                    Err(_) => {
+                                        self.status_msg = "LỖI: Sai tên đăng nhập hoặc mật khẩu!".into();
                                     }
                                 }
-                                Err(_) => None,
-                            };
-
-                            if let Some(role) = authenticated {
-                                self.current_user = self.login_user.clone();
-                                self.current_role = role.clone();
-                                self.logged_in = true;
-                                match role.as_str() {
-                                    "bs_theluc" => { self.dept_tab = 2; self.kham_sub_tab = 0; }
-                                    "bs_noi" => { self.dept_tab = 2; self.kham_sub_tab = 1; }
-                                    "bs_ngoai" => { self.dept_tab = 2; self.kham_sub_tab = 2; }
-                                    "bs_dalieu" => { self.dept_tab = 2; self.kham_sub_tab = 3; }
-                                    "bs_san" => { self.dept_tab = 2; self.kham_sub_tab = 4; }
-                                    "bs_mat" => { self.dept_tab = 2; self.kham_sub_tab = 5; }
-                                    "bs_tmh" => { self.dept_tab = 2; self.kham_sub_tab = 6; }
-                                    "bs_rhm" => { self.dept_tab = 2; self.kham_sub_tab = 7; }
-                                    "bs_cls" => { self.dept_tab = 2; self.kham_sub_tab = 8; }
-                                    "bs_ketluan" => { self.dept_tab = 3; }
-                                    _ => { self.dept_tab = 0; }
-                                };
-                                self.status_msg = format!("Chào mừng {}", self.current_user);
-                            } else {
-                                self.status_msg = "Sai tài khoản hoặc mật khẩu!".into();
                             }
-                        }
-                        if !self.status_msg.is_empty() {
-                            ui.colored_label(egui::Color32::RED, &self.status_msg);
-                        }
-                    });
+
+                            if !self.status_msg.is_empty() {
+                                ui.add_space(8.0);
+                                ui.colored_label(egui::Color32::RED, &self.status_msg);
+                            }
+                        });
                 });
             });
             return;
         }
 
-        // TOP BAR
-        egui::TopBottomPanel::top("top_bar").show(ctx, |ui| {
+        // TOP PANEL: THANH TIÊU ĐỀ, USER INFO, NÚT GIAO DIỆN & TAB CHÍNH
+        egui::TopBottomPanel::top("top_nav").show(ctx, |ui| {
+            ui.add_space(4.0);
             ui.horizontal(|ui| {
-                ui.strong("🏥 PHẦN MỀM KSK QĐ 3176");
-                ui.separator();
-                ui.selectable_value(&mut self.active_tab, 0, "📝 Phiếu Nhập Liệu");
-                ui.selectable_value(&mut self.active_tab, 1, format!("📋 Hồ Sơ ({})", self.records.len()));
-                ui.selectable_value(&mut self.active_tab, 2, "📚 Danh Mục");
-                if self.current_role == "admin" {
-                    ui.selectable_value(&mut self.active_tab, 3, "👥 Quản Lý Users");
-                    ui.selectable_value(&mut self.active_tab, 4, "⚙ Cài Đặt Hệ Thống");
-                }
-                ui.separator();
-
-                if ui.button("📥 Xuất CSV (Chuẩn 3176)").clicked() {
-                    self.export_csv();
-                }
+                ui.heading(egui::RichText::new("🏥 KSK ĐỊNH KỲ").strong().color(egui::Color32::from_rgb(14, 165, 233)));
+                ui.label(egui::RichText::new("QĐ 3176/QĐ-BYT & QĐ 1613/BYT").weak().size(12.0));
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.button("Đăng xuất").clicked() {
+                    if ui.button("Đăng Xuất").clicked() {
                         self.logged_in = false;
+                        self.login_pass.clear();
+                        self.current_user.clear();
+                        self.current_role.clear();
                     }
-                    ui.separator();
+
                     if ui.button(if self.dark_mode { "☀ Sáng" } else { "🌙 Tối" }).clicked() {
                         self.dark_mode = !self.dark_mode;
                         apply_theme(ctx, self.dark_mode);
                     }
-                    ui.separator();
-                    ui.label(format!("BS: {} [{}]", self.current_user, self.current_role));
+
+                    ui.colored_label(
+                        egui::Color32::from_rgb(14, 165, 233),
+                        format!("👤 {} ({})", self.current_user, self.current_role)
+                    );
                 });
             });
-        });
 
-        // STATUS BAR
-        egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
+            ui.separator();
+
+            // CÁC TAB CHÍNH TOÀN ỨNG DỤNG
             ui.horizontal(|ui| {
-                ui.label(&self.status_msg);
+                ui.selectable_value(&mut self.active_tab, 0, "📝 Phiếu Nhập Liệu");
+                ui.selectable_value(&mut self.active_tab, 1, format!("📋 Hồ Sơ ({})", self.records.len()));
+                ui.selectable_value(&mut self.active_tab, 2, "📚 Danh Mục & Quy Tắc");
+                if self.current_role == "admin" {
+                    ui.selectable_value(&mut self.active_tab, 3, "👥 Quản Lý Users");
+                    ui.selectable_value(&mut self.active_tab, 4, "⚙ Cài Đặt Hệ Thống");
+                }
+            });
+            ui.add_space(4.0);
+        });
+
+        // BOTTOM PANEL: STATUS BAR
+        egui::TopBottomPanel::bottom("bottom_status").show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                ui.label(egui::RichText::new(&self.status_msg).size(12.0));
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.weak("App KSK QĐ 3176 v0.4.0 — Google Antigravity");
+                });
             });
         });
 
+        // CENTRAL PANEL NỘI DUNG CHÍNH THEO TAB ĐANG CHỌN
         egui::CentralPanel::default().show(ctx, |ui| {
-            // TAB 3: QUẢN LÝ TÀI KHOẢN VÀ PHÂN QUYỀN (DÀNH CHO ADMIN)
+            // TAB 3: QUẢN LÝ USERS (ADMIN)
             if self.active_tab == 3 {
-                ui.heading("👥 QUẢN TRỊ TÀI KHOẢN & PHÂN QUYỀN HỆ THỐNG");
-                ui.add_space(8.0);
+                ui.heading("Quản Lý Người Dùng & Phân Quyền");
+                ui.separator();
 
-                egui::Grid::new("grid_add_user").num_columns(2).spacing([12.0, 8.0]).show(ui, |ui| {
-                    ui.strong("Tên đăng nhập mới:");
-                    ui.text_edit_singleline(&mut self.new_username);
+                egui::Grid::new("grid_add_user").num_columns(4).spacing([12.0, 8.0]).show(ui, |ui| {
+                    ui.label("Tên đăng nhập mới:"); ui.text_edit_singleline(&mut self.new_username);
+                    ui.label("Mật khẩu:"); ui.text_edit_singleline(&mut self.new_password);
                     ui.end_row();
 
-                    ui.strong("Mật khẩu ban đầu:");
-                    ui.add(egui::TextEdit::singleline(&mut self.new_password).password(true));
-                    ui.end_row();
+                    ui.label("Vai trò:");
+                    egui::ComboBox::from_id_source("cb_new_role").selected_text(&self.new_user_role).show_ui(ui, |ui| {
+                        let roles = [
+                            ("admin", "Quản trị viên (Admin)"),
+                            ("reception", "Tiếp đón / Hành chính"),
+                            ("bs_theluc", "Bác sĩ Thể lực"),
+                            ("bs_noi", "Bác sĩ Nội khoa"),
+                            ("bs_ngoai", "Bác sĩ Ngoại khoa"),
+                            ("bs_dalieu", "Bác sĩ Da liễu"),
+                            ("bs_san", "Bác sĩ Sản phụ khoa"),
+                            ("bs_mat", "Bác sĩ Mắt"),
+                            ("bs_tmh", "Bác sĩ Tai Mũi Họng"),
+                            ("bs_rhm", "Bác sĩ Răng Hàm Mặt"),
+                            ("bs_cls", "Bác sĩ Cận Lâm Sàng"),
+                            ("bs_ketluan", "Bác sĩ Kết Luận"),
+                        ];
+                        for (r_code, r_label) in roles {
+                            ui.selectable_value(&mut self.new_user_role, r_code.to_string(), r_label);
+                        }
+                    });
 
-                    ui.strong("Vai trò / Chuyên khoa:");
-                    egui::ComboBox::from_id_source("cb_new_role")
-                        .selected_text(match self.new_user_role.as_str() {
-                            "admin" => "admin (Quản trị toàn quyền)",
-                            "reception" => "reception (Hành chính / Tiếp đón)",
-                            "bs_theluc" => "bs_theluc (Bác sĩ Thể lực)",
-                            "bs_noi" => "bs_noi (Bác sĩ Nội khoa)",
-                            "bs_ngoai" => "bs_ngoai (Bác sĩ Ngoại khoa)",
-                            "bs_dalieu" => "bs_dalieu (Bác sĩ Da liễu)",
-                            "bs_san" => "bs_san (Bác sĩ Sản phụ khoa)",
-                            "bs_mat" => "bs_mat (Bác sĩ Mắt)",
-                            "bs_tmh" => "bs_tmh (Bác sĩ Tai Mũi Họng)",
-                            "bs_rhm" => "bs_rhm (Bác sĩ Răng Hàm Mặt)",
-                            "bs_cls" => "bs_cls (Bác sĩ Cận lâm sàng)",
-                            "bs_ketluan" => "bs_ketluan (Bác sĩ Kết luận)",
-                            _ => "Chọn vai trò",
-                        })
-                        .show_ui(ui, |ui| {
-                            ui.selectable_value(&mut self.new_user_role, "admin".into(), "admin (Quản trị toàn quyền)");
-                            ui.selectable_value(&mut self.new_user_role, "reception".into(), "reception (Hành chính / Tiếp đón)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_theluc".into(), "bs_theluc (Bác sĩ Thể lực)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_noi".into(), "bs_noi (Bác sĩ Nội khoa)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_ngoai".into(), "bs_ngoai (Bác sĩ Ngoại khoa)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_dalieu".into(), "bs_dalieu (Bác sĩ Da liễu)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_san".into(), "bs_san (Bác sĩ Sản phụ khoa)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_mat".into(), "bs_mat (Bác sĩ Mắt)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_tmh".into(), "bs_tmh (Bác sĩ Tai Mũi Họng)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_rhm".into(), "bs_rhm (Bác sĩ Răng Hàm Mặt)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_cls".into(), "bs_cls (Bác sĩ Cận lâm sàng)");
-                            ui.selectable_value(&mut self.new_user_role, "bs_ketluan".into(), "bs_ketluan (Bác sĩ Kết luận)");
-                        });
-                    ui.end_row();
-                });
-
-                if ui.button("＋ Tạo Tài Khoản Mới").clicked() {
-                    if self.new_username.trim().is_empty() || self.new_password.trim().is_empty() {
-                        self.status_msg = "Lỗi: Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!".into();
-                    } else {
-                        let hashed = hash_pass(&self.new_password);
-                        let res = self.conn.execute(
-                            "INSERT INTO users (username, password, role) VALUES (?1, ?2, ?3)",
-                            params![self.new_username.trim(), hashed, self.new_user_role],
-                        );
-                        match res {
-                            Ok(_) => {
-                                self.status_msg = format!("Đã tạo thành công tài khoản: {}", self.new_username);
-                                self.new_username.clear();
-                                self.new_password.clear();
-                                self.reload_users();
-                            }
-                            Err(e) => {
-                                self.status_msg = format!("Lỗi tạo tài khoản (có thể trùng tên): {}", e);
-                            }
+                    if ui.button("➕ Thêm User").clicked() {
+                        if !self.new_username.trim().is_empty() && !self.new_password.trim().is_empty() {
+                            let pass_h = hash_pass(&self.new_password);
+                            let _ = self.conn.execute(
+                                "INSERT INTO users (username, password, role) VALUES (?1, ?2, ?3)",
+                                params![self.new_username, pass_h, self.new_user_role],
+                            );
+                            self.new_username.clear();
+                            self.new_password.clear();
+                            self.reload_users();
+                            self.status_msg = "Đã thêm người dùng thành công!".into();
                         }
                     }
-                }
+                    ui.end_row();
+                });
 
                 ui.separator();
-                ui.strong("Danh sách tài khoản trong hệ thống:");
-                let mut delete_id: Option<i64> = None;
-                let mut reset_id: Option<(i64, String)> = None;
-
-                egui::ScrollArea::vertical().max_height(350.0).show(ui, |ui| {
-                    egui::Grid::new("grid_users").striped(true).min_col_width(100.0).show(ui, |ui| {
-                        ui.strong("ID");
-                        ui.strong("Tên đăng nhập");
-                        ui.strong("Vai trò phân quyền");
-                        ui.strong("Hành động");
-                        ui.end_row();
-
+                ui.strong("DANH SÁCH TÀI KHOẢN NGƯỜI DÙNG:");
+                let mut del_user_id = None;
+                egui::ScrollArea::vertical().show(ui, |ui| {
+                    egui::Grid::new("grid_users_table").striped(true).min_col_width(120.0).spacing([12.0, 6.0]).show(ui, |ui| {
+                        ui.strong("ID"); ui.strong("Tên Đăng Nhập"); ui.strong("Vai Trò"); ui.strong("Hành Động"); ui.end_row();
                         for u in &self.user_list {
                             ui.label(u.id.to_string());
                             ui.label(&u.username);
                             ui.label(&u.role);
-                            ui.horizontal(|ui| {
-                                if u.username != "admin" {
-                                    if ui.button("Đặt lại MK (123456)").clicked() {
-                                        reset_id = Some((u.id, u.username.clone()));
-                                    }
-                                    if ui.button("🗑 Xóa").clicked() {
-                                        delete_id = Some(u.id);
-                                    }
-                                } else {
-                                    ui.weak("(Admin mặc định)");
-                                }
-                            });
+                            if u.username != "admin" && ui.button("Xóa").clicked() {
+                                del_user_id = Some(u.id);
+                            } else {
+                                ui.label("");
+                            }
                             ui.end_row();
                         }
                     });
                 });
-
-                if let Some(id) = delete_id {
+                if let Some(id) = del_user_id {
                     let _ = self.conn.execute("DELETE FROM users WHERE id = ?", params![id]);
                     self.reload_users();
-                    self.status_msg = "Đã xóa tài khoản thành công!".into();
+                    self.status_msg = "Đã xóa tài khoản người dùng!".into();
                 }
-                if let Some((id, uname)) = reset_id {
-                    let hashed = hash_pass("123456");
-                    let _ = self.conn.execute("UPDATE users SET password = ? WHERE id = ?", params![hashed, id]);
-                    self.status_msg = format!("Đã đặt lại mật khẩu của '{}' về '123456'!", uname);
-                }
-
                 return;
             }
 
-            // TAB 4: CÀI ĐẶT HỆ THỐNG (SETTINGS)
+            // TAB 4: CÀI ĐẶT HỆ THỐNG
             if self.active_tab == 4 {
-                ui.heading("⚙ CÀI ĐẶT HỆ THỐNG & CƠ SỞ KHÁM CHỮA BỆNH");
-                ui.add_space(8.0);
+                ui.heading("Cài Đặt Hệ Thống & Tham Số Mặc Định");
+                ui.separator();
 
                 egui::Grid::new("grid_settings").num_columns(2).spacing([16.0, 10.0]).show(ui, |ui| {
-                    ui.strong("Mã cơ sở KCB (MA_CSKCB):");
-                    ui.text_edit_singleline(&mut self.setting_cskcb);
-                    ui.end_row();
-
-                    ui.strong("Mã định danh GLN/GTIN CSKCB (13 số):");
-                    ui.text_edit_singleline(&mut self.setting_gtin);
-                    ui.end_row();
-
-                    ui.strong("Mã Tỉnh / TP mặc định:");
-                    let provs = Self::cat_items(&self.catalogs, "province", None);
-                    search_combo(ui, "cb_setting_prov", &mut self.setting_prov, &provs);
-                    ui.end_row();
-
-                    ui.strong("Mã Phường / Xã mặc định:");
-                    let wards = Self::cat_items(&self.catalogs, "ward", Some(&self.setting_prov));
-                    search_combo(ui, "cb_setting_ward", &mut self.setting_ward, &wards);
-                    ui.end_row();
-
-                    ui.strong("Đường dẫn CSDL SQLite:");
-                    ui.label(&self.config.db_path);
-                    ui.end_row();
+                    ui.label("Mã CSKCB mặc định:"); ui.text_edit_singleline(&mut self.setting_cskcb); ui.end_row();
+                    ui.label("Mã Định Danh GTIN CSKCB:"); ui.text_edit_singleline(&mut self.setting_gtin); ui.end_row();
+                    ui.label("Mã Tỉnh Nơi Ở Mặc Định:"); ui.text_edit_singleline(&mut self.setting_prov); ui.end_row();
+                    ui.label("Mã Xã Nơi Ở Mặc Định:"); ui.text_edit_singleline(&mut self.setting_ward); ui.end_row();
                 });
 
-                ui.add_space(12.0);
-                ui.horizontal(|ui| {
-                    if ui.button("💾 Lưu Cài Đặt (Lưu vào config.toml)").clicked() {
-                        self.config.default_cskcb = self.setting_cskcb.clone();
-                        self.config.default_gtin_cskcb = self.setting_gtin.clone();
-                        self.config.default_province_code = self.setting_prov.clone();
-                        self.config.default_ward_code = self.setting_ward.clone();
-                        if let Err(e) = self.config.save() {
-                            self.status_msg = format!("Lỗi lưu config.toml: {}", e);
-                        } else {
-                            self.status_msg = "Đã lưu cài đặt hệ thống thành công vào config.toml!".into();
-                        }
-                    }
-
-                    if ui.button("📦 Sao Lưu CSDL (Backup .db)").clicked() {
-                        let now = chrono::Local::now();
-                        let backup_name = format!("backup_ksk_{}.db", now.format("%Y%m%d_%H%M%S"));
-                        match fs::copy(&self.config.db_path, &backup_name) {
-                            Ok(_) => self.status_msg = format!("Đã tạo bản sao lưu thành công: {}", backup_name),
-                            Err(e) => self.status_msg = format!("Lỗi sao lưu CSDL: {}", e),
-                        }
-                    }
-                });
-
-                ui.separator();
-                ui.heading("🔑 ĐỔI MẬT KHẨU TÀI KHOẢN CỦA BẠN");
-                egui::Grid::new("grid_change_pass").num_columns(2).spacing([12.0, 8.0]).show(ui, |ui| {
-                    ui.label("Mật khẩu hiện tại:");
-                    ui.add(egui::TextEdit::singleline(&mut self.change_old_pass).password(true));
-                    ui.end_row();
-
-                    ui.label("Mật khẩu mới:");
-                    ui.add(egui::TextEdit::singleline(&mut self.change_new_pass).password(true));
-                    ui.end_row();
-                });
-
-                if ui.button("Cập Nhật Mật Khẩu").clicked() {
-                    let hashed_old = hash_pass(&self.change_old_pass);
-                    let mut stmt = self.conn.prepare("SELECT password FROM users WHERE username = ?1").unwrap();
-                    if let Ok(cur_pass_db) = stmt.query_row(params![self.current_user], |r| r.get::<_, String>(0)) {
-                        if cur_pass_db == self.change_old_pass || cur_pass_db == hashed_old {
-                            let hashed_new = hash_pass(&self.change_new_pass);
-                            let _ = self.conn.execute("UPDATE users SET password = ? WHERE username = ?", params![hashed_new, self.current_user]);
-                            self.change_old_pass.clear();
-                            self.change_new_pass.clear();
-                            self.status_msg = "Đổi mật khẩu thành công!".into();
-                        } else {
-                            self.status_msg = "Mật khẩu cũ không chính xác!".into();
-                        }
+                ui.add_space(10.0);
+                if ui.button("💾 Lưu Cài Đặt").clicked() {
+                    self.config.default_cskcb = self.setting_cskcb.clone();
+                    self.config.default_gtin_cskcb = self.setting_gtin.clone();
+                    self.config.default_province_code = self.setting_prov.clone();
+                    self.config.default_ward_code = self.setting_ward.clone();
+                    if let Ok(_) = self.config.save() {
+                        self.status_msg = "Đã lưu cài đặt cấu hình thành công!".into();
                     }
                 }
-
                 return;
             }
 
-            // TAB 2: QUẢN LÝ DANH MỤC RIÊNG BIỆT (IMPORT HÀNG LOẠT EXCEL / TSV)
+            // TAB 2: QUẢN LÝ DANH MỤC & BỘ QUY TẮC QĐ 1613
             if self.active_tab == 2 {
-                ui.heading("QUẢN LÝ VÀ CẤU HÌNH DANH MỤC HỆ THỐNG");
                 ui.horizontal(|ui| {
-                    ui.label("Chọn phân hệ danh mục cần cấu hình:");
-                    let cats = [
-                        ("priority", "1. Đối tượng (16 mã)"),
-                        ("payment", "2. Nguồn chi trả"),
-                        ("province", "3. Tỉnh / Thành phố"),
-                        ("ward", "4. Phường / Xã"),
-                        ("ethnicity", "5. Dân tộc"),
-                        ("occupation", "6. Nghề nghiệp"),
-                        ("icd10", "7. Mã bệnh ICD-10"),
-                    ];
-                    for (k, label) in cats {
-                        ui.selectable_value(&mut self.cur_cat_tab, k.to_string(), label);
+                    if ui.selectable_label(self.cur_cat_tab != "qd1613", "📚 Danh Mục QĐ 3176").clicked() {
+                        self.cur_cat_tab = "priority".into();
+                    }
+                    if ui.selectable_label(self.cur_cat_tab == "qd1613", "⚖ Bộ Quy Tắc Phân Loại QĐ 1613/BYT").clicked() {
+                        self.cur_cat_tab = "qd1613".into();
                     }
                 });
                 ui.separator();
 
-                ui.horizontal(|ui| {
-                    ui.label("Mã:");
-                    ui.text_edit_singleline(&mut self.cat_code_input);
-                    ui.label("Tên danh mục:");
-                    ui.text_edit_singleline(&mut self.cat_name_input);
-                    if self.cur_cat_tab == "ward" {
-                        ui.label("Mã Tỉnh cha:");
-                        ui.text_edit_singleline(&mut self.cat_parent_input);
-                    }
-                    if ui.button("+ Thêm thủ công").clicked() {
-                        if !self.cat_code_input.is_empty() && !self.cat_name_input.is_empty() {
-                            let _ = self.conn.execute(
-                                "INSERT OR REPLACE INTO catalogs (cat_type, code, name, parent_code) VALUES (?1, ?2, ?3, ?4)",
-                                params![self.cur_cat_tab, self.cat_code_input, self.cat_name_input, self.cat_parent_input],
-                            );
-                            self.cat_code_input.clear();
-                            self.cat_name_input.clear();
-                            self.reload_catalogs();
-                            self.status_msg = "Đã lưu danh mục thành công!".into();
-                        }
-                    }
-                });
-
-                ui.add_space(8.0);
-                egui::CollapsingHeader::new("⬇ Import hàng loạt từ Excel (Dán nhiều dòng)")
-                    .default_open(false)
-                    .show(ui, |ui| {
-                        ui.label("Định dạng mỗi dòng copy từ Excel: Mã [Tab] Tên hiển thị [Tab] Mã tỉnh cha (nếu là xã):");
-                        ui.add(egui::TextEdit::multiline(&mut self.import_tsv_text).desired_rows(4).desired_width(f32::INFINITY));
-                        if ui.button("Bắt đầu Import vào Database").clicked() {
-                            for line in self.import_tsv_text.lines() {
-                                let parts: Vec<&str> = if line.contains('\t') { line.split('\t').collect() } else { line.split('|').collect() };
-                                if parts.len() >= 2 {
-                                    let code = parts[0].trim();
-                                    let name = parts[1].trim();
-                                    let parent = if parts.len() >= 3 { parts[2].trim() } else { "" };
-                                    let _ = self.conn.execute(
-                                        "INSERT OR REPLACE INTO catalogs (cat_type, code, name, parent_code) VALUES (?1, ?2, ?3, ?4)",
-                                        params![self.cur_cat_tab, code, name, parent],
-                                    );
-                                }
+                if self.cur_cat_tab == "qd1613" {
+                    ui.horizontal(|ui| {
+                        ui.heading("Bộ Quy Tắc Phân Loại Bệnh Tật & Sức Khỏe (QĐ 1613/BYT)");
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui.button("🔄 Khôi Phục Quy Tắc Gốc (QĐ 1613)").clicked() {
+                                self.reset_qd1613_to_default();
+                                self.reload_qd1613();
+                                self.status_msg = "Đã khôi phục toàn bộ 499 quy tắc phân loại gốc theo QĐ 1613/BYT!".into();
                             }
-                            self.import_tsv_text.clear();
-                            self.reload_catalogs();
-                            self.status_msg = "Đã import thành công dữ liệu vào danh mục!".into();
-                        }
+                        });
                     });
 
-                ui.separator();
-                egui::ScrollArea::vertical().show(ui, |ui| {
-                    egui::Grid::new("grid_cat_display").striped(true).min_col_width(100.0).show(ui, |ui| {
-                        ui.strong("ID"); ui.strong("Mã"); ui.strong("Tên hiển thị"); ui.strong("Thuộc cha"); ui.strong("Thao tác");
-                        ui.end_row();
+                    ui.add_space(4.0);
+                    ui.horizontal(|ui| {
+                        ui.label(format!("📊 Thống kê: {} Chuyên khoa | {} Bệnh tật | {} Quy tắc phân loại", self.qd_specialties.len(), self.qd_diseases.len(), self.qd_classifications.len()));
+                    });
 
-                        let mut del_id = None;
-                        for c in self.catalogs.iter().filter(|x| x.cat_type == self.cur_cat_tab) {
-                            ui.label(c.id.to_string());
-                            ui.label(&c.code);
-                            ui.label(&c.name);
-                            ui.label(&c.parent_code);
-                            if ui.button("Xóa").clicked() {
-                                del_id = Some(c.id);
+                    ui.add_space(6.0);
+                    ui.horizontal(|ui| {
+                        ui.label("Lọc theo chuyên khoa:");
+                        let cur_spec_label = if self.qd_rule_filter_spec == "all" {
+                            "Tất cả chuyên khoa".to_string()
+                        } else {
+                            self.qd_specialties.iter().find(|s| s.id == self.qd_rule_filter_spec).map(|s| s.name.clone()).unwrap_or("Tất cả".to_string())
+                        };
+
+                        egui::ComboBox::from_id_source("cb_filter_spec")
+                            .width(220.0)
+                            .selected_text(cur_spec_label)
+                            .show_ui(ui, |ui| {
+                                ui.selectable_value(&mut self.qd_rule_filter_spec, "all".into(), "Tất cả chuyên khoa");
+                                for s in &self.qd_specialties {
+                                    ui.selectable_value(&mut self.qd_rule_filter_spec, s.id.clone(), &s.name);
+                                }
+                            });
+
+                        ui.add_space(12.0);
+                        ui.label("Tìm kiếm:");
+                        ui.add(egui::TextEdit::singleline(&mut self.qd_rule_search).hint_text("Nhập tên bệnh hoặc tiêu chuẩn..."));
+                    });
+
+                    ui.separator();
+
+                    let kw = self.qd_rule_search.to_lowercase();
+                    egui::ScrollArea::vertical().show(ui, |ui| {
+                        egui::Grid::new("grid_qd1613_rules").striped(true).min_col_width(70.0).spacing([12.0, 6.0]).show(ui, |ui| {
+                            ui.strong("Mã Tiêu Chuẩn");
+                            ui.strong("Chuyên Khoa");
+                            ui.strong("Bệnh Tật");
+                            ui.strong("Tiêu Chuẩn / Phân Loại");
+                            ui.strong("Điểm Phân Loại");
+                            ui.strong("Quy Tắc Tham Chiếu");
+                            ui.end_row();
+
+                            let mut filtered_items = Vec::new();
+                            for c in &self.qd_classifications {
+                                let disease = self.qd_diseases.iter().find(|d| d.id == c.disease_id);
+                                let spec_id = disease.map(|d| d.spec_id.as_str()).unwrap_or("");
+                                if self.qd_rule_filter_spec != "all" && spec_id != self.qd_rule_filter_spec {
+                                    continue;
+                                }
+                                let d_name = disease.map(|d| d.name.as_str()).unwrap_or("");
+                                let spec = self.qd_specialties.iter().find(|s| s.id == spec_id);
+                                let s_name = spec.map(|s| s.name.as_str()).unwrap_or("");
+
+                                if !kw.is_empty() && !c.name.to_lowercase().contains(&kw) && !d_name.to_lowercase().contains(&kw) && !c.id.to_lowercase().contains(&kw) {
+                                    continue;
+                                }
+                                filtered_items.push((c.id.clone(), s_name.to_string(), d_name.to_string(), c.name.clone(), c.score, c.ref_rule.clone(), c.ref_disease_id.is_some()));
                             }
+
+                            for (cid, s_name, d_name, c_name, score, rule, is_dyn) in filtered_items.iter().take(200) {
+                                ui.label(cid);
+                                ui.label(s_name);
+                                ui.strong(d_name);
+                                ui.label(c_name);
+                                if let Some(sc) = score {
+                                    ui_score_badge(ui, *sc, *is_dyn);
+                                } else {
+                                    ui.colored_label(egui::Color32::from_rgb(180, 83, 9), "Tham chiếu *");
+                                }
+                                ui.colored_label(egui::Color32::GRAY, rule.as_deref().unwrap_or(""));
+                                ui.end_row();
+                            }
+                        });
+                    });
+                    return;
+                }
+
+                // SUB-TAB DANH MỤC QĐ 3176
+                let cat_tabs = [
+                    ("priority", "1. Đối tượng (16 nhóm)"),
+                    ("payment", "2. Nguồn chi trả"),
+                    ("province", "3. Tỉnh / TP"),
+                    ("ward", "4. Xã / Phường"),
+                    ("ethnicity", "5. Dân tộc"),
+                    ("occupation", "6. Nghề nghiệp"),
+                    ("icd10", "7. Mã ICD-10"),
+                ];
+
+                ui.horizontal_wrapped(|ui| {
+                    for (t_code, t_title) in cat_tabs {
+                        if ui.selectable_label(self.cur_cat_tab == t_code, t_title).clicked() {
+                            self.cur_cat_tab = t_code.into();
+                        }
+                    }
+                });
+
+                ui.separator();
+
+                let filtered_cats: Vec<CatalogRecord> = self.catalogs.iter().filter(|c| c.cat_type == self.cur_cat_tab).cloned().collect();
+                ui.label(format!("Tổng số bản ghi danh mục '{}': {}", self.cur_cat_tab, filtered_cats.len()));
+
+                egui::ScrollArea::vertical().show(ui, |ui| {
+                    egui::Grid::new("grid_cat_display").striped(true).min_col_width(120.0).spacing([12.0, 6.0]).show(ui, |ui| {
+                        ui.strong("Mã"); ui.strong("Tên Danh Mục"); ui.strong("Mã Cha"); ui.end_row();
+                        for item in filtered_cats {
+                            ui.label(&item.code);
+                            ui.label(&item.name);
+                            ui.label(&item.parent_code);
                             ui.end_row();
                         }
-                        if let Some(id) = del_id {
-                            let _ = self.conn.execute("DELETE FROM catalogs WHERE id = ?", params![id]);
-                            self.reload_catalogs();
-                        }
                     });
                 });
                 return;
             }
 
-            // TAB 1: DANH SÁCH HỒ SƠ
+            // TAB 1: DANH SÁCH HỒ SƠ ĐÃ LƯU
             if self.active_tab == 1 {
-                ui.heading("DANH SÁCH HỒ SƠ KHÁM SỨC KHỎE");
+                ui.horizontal(|ui| {
+                    ui.heading(format!("Danh Sách Hồ Sơ Khám Sức Khỏe ({})", self.records.len()));
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        if ui.button("📥 Xuất File CSV Chuẩn QĐ 3176 (97 Cột)").clicked() {
+                            self.export_csv();
+                        }
+                    });
+                });
+                ui.separator();
+
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    egui::Grid::new("grid_records").striped(true).min_col_width(80.0).show(ui, |ui| {
-                        ui.strong("ID"); ui.strong("Mã LK"); ui.strong("Họ và tên"); ui.strong("Số CCCD");
-                        ui.strong("Ngày khám"); ui.strong("Trạng thái"); ui.strong("Thao tác");
-                        ui.end_row();
-
-                        let mut unlock_id = None;
-                        let mut load_id = None;
-
+                    egui::Grid::new("grid_rec_list").striped(true).min_col_width(100.0).spacing([14.0, 8.0]).show(ui, |ui| {
+                        ui.strong("ID"); ui.strong("Họ và Tên"); ui.strong("Số CCCD"); ui.strong("Ngày Vào"); ui.strong("Trạng Thái"); ui.strong("Thao Tác"); ui.end_row();
                         for r in &self.records {
                             ui.label(r.id.to_string());
-                            ui.label(&r.data.ma_lk);
-                            ui.label(&r.ho_ten);
+                            ui.strong(&r.ho_ten);
                             ui.label(&r.so_cccd);
                             ui.label(&r.ngay_vao);
                             if r.status == 1 {
-                                ui.colored_label(egui::Color32::from_rgb(220, 140, 0), "🔒 Đã ký/khóa");
+                                ui.colored_label(egui::Color32::from_rgb(220, 140, 0), "🔒 Đã Khóa");
                             } else {
-                                ui.colored_label(egui::Color32::GREEN, "📝 Bản nháp");
+                                ui.colored_label(egui::Color32::GREEN, "📝 Đang Soạn");
                             }
 
-                            ui.horizontal(|ui| {
-                                if ui.button("Mở hồ sơ").clicked() {
-                                    load_id = Some(r.id);
-                                }
-                                if r.status == 1 && self.current_role == "admin" && ui.button("Mở khóa").clicked() {
-                                    unlock_id = Some(r.id);
-                                }
-                            });
-                            ui.end_row();
-                        }
-
-                        if let Some(id) = unlock_id {
-                            self.conn.execute("UPDATE records SET status = 0 WHERE id = ?", params![id]).unwrap();
-                            self.reload_records();
-                            self.status_msg = format!("Đã mở khóa hồ sơ #{}", id);
-                        }
-                        if let Some(id) = load_id {
-                            if let Some(found) = self.records.iter().find(|x| x.id == id) {
-                                self.current_id = Some(found.id);
-                                self.current_status = found.status;
-                                self.form = found.data.clone();
+                            if ui.button("Mở Xem / Chỉnh Sửa").clicked() {
+                                self.current_id = Some(r.id);
+                                self.current_status = r.status;
+                                self.form = r.data.clone();
                                 self.active_tab = 0;
                             }
+                            ui.end_row();
                         }
                     });
                 });
@@ -1378,7 +2276,7 @@ impl eframe::App for KskApp {
 
             ui.separator();
 
-            // MENU PHÂN KHOA
+            // MENU 4 PHÂN HỆ CHÍNH: HÀNH CHÍNH, TIỀN SỬ, KHÁM BỆNH, KẾT LUẬN
             ui.horizontal_wrapped(|ui| {
                 let main_tabs = [
                     (0, "📋 1. HÀNH CHÍNH", "hchinh"),
@@ -1388,7 +2286,7 @@ impl eframe::App for KskApp {
                 ];
 
                 for (idx, title, role_key) in main_tabs {
-                    let can_edit = self.can_edit_dept(role_key) || (idx == 2 && self.current_role != "reception" && self.current_role != "client");
+                    let can_edit = self.can_edit_dept(role_key) || (idx == 2 && self.current_role != "reception" && self.current_role != "client") || self.current_role == "admin";
                     let mut btn_text = egui::RichText::new(title).size(15.0);
                     if can_edit {
                         btn_text = btn_text.strong().color(egui::Color32::from_rgb(14, 165, 233));
@@ -1403,7 +2301,7 @@ impl eframe::App for KskApp {
 
             egui::ScrollArea::vertical().show(ui, |ui| {
                 match self.dept_tab {
-                    // I. HÀNH CHÍNH & II. LẦN KHÁM
+                    // I. HÀNH CHÍNH
                     0 => {
                         let enabled = self.can_edit_dept("hchinh");
                         ui.add_enabled_ui(enabled, |ui| {
@@ -1479,8 +2377,11 @@ impl eframe::App for KskApp {
                             });
 
                             ui.add_space(8.0);
-                            Self::ui_multiline(ui, "Nơi làm việc, học tập hiện tại:", &mut self.form.noi_lam_viec_hoc_tap);
-                            Self::ui_multiline(ui, "Lý do khám sức khỏe (LY_DO_VV):", &mut self.form.ly_do_vv);
+                            ui.label("Nơi làm việc, học tập hiện tại:");
+                            ui.add(egui::TextEdit::multiline(&mut self.form.noi_lam_viec_hoc_tap).desired_rows(2).desired_width(ui.available_width()));
+                            ui.add_space(4.0);
+                            ui.label("Lý do khám sức khỏe (LY_DO_VV):");
+                            ui.add(egui::TextEdit::multiline(&mut self.form.ly_do_vv).desired_rows(2).desired_width(ui.available_width()));
                         });
                     }
 
@@ -1491,14 +2392,13 @@ impl eframe::App for KskApp {
                             // 1. TIỀN SỬ GIA ĐÌNH
                             ui.heading("1. Tiền sử gia đình:");
                             ui.horizontal(|ui| {
-                                ui.strong("Có ai trong gia đình mắc một trong các bệnh: truyền nhiễm, tim mạch, ĐTĐ, lao, hen, ung thư, động kinh, tâm thần?");
+                                ui.strong("Có ai trong gia đình mắc một trong các bệnh: truyền nhiễm, tim mạch, ĐTĐ, lao, hen, ung thư, động kinh, tâm thần:");
                                 Self::ui_radio_yn(ui, &mut self.form.tsgd_mac_benh);
                             });
 
-                            // CHỈ HIỆN CHỌN ICD GIA ĐÌNH KHI CHỌN "CÓ"
                             if self.form.tsgd_mac_benh == 1 {
                                 ui.add_space(4.0);
-                                egui::Frame::group(ui.style()).fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(254, 242, 242) }).rounding(8.0).show(ui, |ui| {
+                                egui::Frame::group(ui.style()).fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(240, 249, 255) }).show(ui, |ui| {
                                     ui.strong("👉 Tiền sử bệnh, tật của gia đình (Mã ICD-10, chọn nhiều):");
                                     let icds = Self::cat_items(&self.catalogs, "icd10", None);
                                     multi_icd(ui, "icd_tsgd", &mut self.form.tsgd_ma_benh, &icds);
@@ -1506,7 +2406,7 @@ impl eframe::App for KskApp {
                             }
 
                             ui.separator();
-                            ui.heading("2. Tiền sử bản thân (22 chỉ số bệnh lý):");
+                            ui.heading("2. Tiền sử bản thân:");
                             ui.horizontal(|ui| {
                                 // CỘT 1 (STT 1 -> 11)
                                 ui.vertical(|ui| {
@@ -1516,13 +2416,13 @@ impl eframe::App for KskApp {
 
                                         ui.label("1"); ui.label("Có bệnh hay bị thương trong 5 năm qua"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_trong_5_nam_qua); ui.end_row();
                                         ui.label("2"); ui.label("Có bệnh thần kinh hay bị thương ở đầu"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_than_kinh); ui.end_row();
-                                        ui.label("3"); ui.label("Bệnh mắt hoặc giảm thị lực (trừ đeo kính)"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_mat); ui.end_row();
+                                        ui.label("3"); ui.label("Bệnh mắt hoặc giảm thị lực (trừ trường hợp đeo kính thuốc)"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_mat); ui.end_row();
                                         ui.label("4"); ui.label("Bệnh ở tai, giảm sức nghe hoặc thăng bằng"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tai); ui.end_row();
-                                        ui.label("5"); ui.label("Bệnh ở tim, nhồi máu cơ tim, tim mạch khác"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tim); ui.end_row();
-                                        ui.label("6"); ui.label("Phẫu thuật can thiệp tim - mạch"); Self::ui_radio_yn(ui, &mut self.form.tsbt_phau_thuat_tim); ui.end_row();
+                                        ui.label("5"); ui.label("Bệnh ở tim, hoặc nhồi máu cơ tim, các bệnh tim mạch khác"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tim); ui.end_row();
+                                        ui.label("6"); ui.label("Phẫu thuật can thiệp tim - mạch (thay van, bắc cầu nối, tạo hình mạch, máy tạo nhịp tim, đặt stent, ghép tim)"); Self::ui_radio_yn(ui, &mut self.form.tsbt_phau_thuat_tim); ui.end_row();
                                         ui.label("7"); ui.label("Tăng huyết áp"); Self::ui_radio_yn(ui, &mut self.form.tsbt_tang_huyet_ap); ui.end_row();
                                         ui.label("8"); ui.label("Khó thở"); Self::ui_radio_yn(ui, &mut self.form.tsbt_kho_tho); ui.end_row();
-                                        ui.label("9"); ui.label("Bệnh phổi, hen, khí phế thũng, phế quản mạn"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_phoi); ui.end_row();
+                                        ui.label("9"); ui.label("Bệnh phổi, hen, khí phế thũng, viêm phế quản mạn tính"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_phoi); ui.end_row();
                                         ui.label("10"); ui.label("Bệnh thận, lọc máu"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_than); ui.end_row();
                                         ui.label("11"); ui.label("Nghiện rượu, bia"); Self::ui_radio_yn(ui, &mut self.form.tsbt_nghien_ruou); ui.end_row();
                                     });
@@ -1535,12 +2435,12 @@ impl eframe::App for KskApp {
                                     egui::Grid::new("grid_tsbt_col2").num_columns(3).spacing([8.0, 6.0]).show(ui, |ui| {
                                         ui.strong("STT"); ui.strong("Tiền sử bệnh lý"); ui.strong("Chọn"); ui.end_row();
 
-                                        ui.label("12"); ui.label("Đái tháo đường hoặc tăng đường huyết"); Self::ui_radio_yn(ui, &mut self.form.tsbt_dai_thao_duong); ui.end_row();
+                                        ui.label("12"); ui.label("Đái tháo đường hoặc kiểm soát tăng đường huyết"); Self::ui_radio_yn(ui, &mut self.form.tsbt_dai_thao_duong); ui.end_row();
                                         ui.label("13"); ui.label("Bệnh tâm thần"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tam_than); ui.end_row();
                                         ui.label("14"); ui.label("Mất ý thức, rối loạn ý thức"); Self::ui_radio_yn(ui, &mut self.form.tsbt_mat_y_thuc); ui.end_row();
                                         ui.label("15"); ui.label("Ngất, chóng mặt"); Self::ui_radio_yn(ui, &mut self.form.tsbt_ngat); ui.end_row();
                                         ui.label("16"); ui.label("Bệnh tiêu hóa"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_tieu_hoa); ui.end_row();
-                                        ui.label("17"); ui.label("Rối loạn giấc ngủ, ngừng thở, ngáy to"); Self::ui_radio_yn(ui, &mut self.form.tsbt_roi_loan_giac_ngu); ui.end_row();
+                                        ui.label("17"); ui.label("Rối loạn giấc ngủ, ngừng thở khi ngủ, ngủ rũ ban ngày, ngáy to"); Self::ui_radio_yn(ui, &mut self.form.tsbt_roi_loan_giac_ngu); ui.end_row();
                                         ui.label("18"); ui.label("Tai biến mạch máu não hoặc liệt"); Self::ui_radio_yn(ui, &mut self.form.tsbt_tai_bien); ui.end_row();
                                         ui.label("19"); ui.label("Bệnh hoặc tổn thương cột sống"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_cot_song); ui.end_row();
                                         ui.label("20"); ui.label("Sử dụng rượu thường xuyên, liên tục"); Self::ui_radio_yn(ui, &mut self.form.tsbt_ruou_thuong_xuyen); ui.end_row();
@@ -1548,13 +2448,11 @@ impl eframe::App for KskApp {
                                         ui.label("22"); ui.label("Bệnh khác (ghi rõ)"); Self::ui_radio_yn(ui, &mut self.form.tsbt_benh_khac); ui.end_row();
                                     });
 
-                                    // CHỈ HIỆN MÃ BỆNH KHÁC KHI CHỌN "CÓ"
                                     if self.form.tsbt_benh_khac == 1 {
                                         ui.add_space(4.0);
-                                        egui::Frame::group(ui.style()).fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(254, 242, 242) }).rounding(8.0).show(ui, |ui| {
-                                            ui.strong("👉 Ghi rõ tên bệnh khác (Mã ICD-10, chọn nhiều):");
-                                            let icds_bt = Self::cat_items(&self.catalogs, "icd10", None);
-                                            multi_icd(ui, "icd_tsbt", &mut self.form.tsbt_ma_benh_khac, &icds_bt);
+                                        ui.horizontal(|ui| {
+                                            ui.label("Tên bệnh khác:");
+                                            ui.add(egui::TextEdit::singleline(&mut self.form.tsbt_ma_benh_khac).hint_text("Ghi cụ thể tên bệnh đang mắc hoặc đã mắc (nếu có)").desired_width(280.0));
                                         });
                                     }
                                 });
@@ -1570,13 +2468,13 @@ impl eframe::App for KskApp {
                             });
                             if self.form.tsbt_dang_dieu_tri_benh == 1 {
                                 egui::Grid::new("grid_dang_dt").num_columns(2).spacing([12.0, 6.0]).show(ui, |ui| {
-                                    ui.label("Tên bệnh đang điều trị (Mã ICD-10):");
+                                    ui.label("Tên bệnh đang điều trị (Mã bệnh ICD-10):");
                                     let icds_dt = Self::cat_items(&self.catalogs, "icd10", None);
                                     multi_icd(ui, "icd_tsbt_dt", &mut self.form.tsbt_ma_benh, &icds_dt);
                                     ui.end_row();
 
                                     ui.label("Thuốc đang sử dụng và liều lượng:");
-                                    ui.text_edit_singleline(&mut self.form.tsbt_ten_thuoc_lieu_luong);
+                                    ui.add(egui::TextEdit::singleline(&mut self.form.tsbt_ten_thuoc_lieu_luong).hint_text("Nhập tên thuốc đang dùng").desired_width(320.0));
                                     ui.end_row();
                                 });
                             }
@@ -1590,39 +2488,39 @@ impl eframe::App for KskApp {
                                 });
                                 if self.form.tsbt_thai_san == 1 {
                                     egui::Grid::new("grid_thai_san").num_columns(2).spacing([12.0, 6.0]).show(ui, |ui| {
-                                        ui.label("Cụ thể tên bệnh thai sản (Mã ICD-10):");
+                                        ui.label("Cụ thể tên bệnh thai sản (Mã bệnh ICD-10):");
                                         let icds_ts = Self::cat_items(&self.catalogs, "icd10", None);
                                         multi_icd(ui, "icd_tsbt_ts", &mut self.form.tsbt_ma_benh_thai_san, &icds_ts);
                                         ui.end_row();
 
                                         ui.label("Thuốc đang sử dụng điều trị thai sản:");
-                                        ui.text_edit_singleline(&mut self.form.tsbt_ten_thuoc_thai_san);
+                                        ui.add(egui::TextEdit::singleline(&mut self.form.tsbt_ten_thuoc_thai_san).hint_text("Nhập thuốc đang sử dụng").desired_width(320.0));
                                         ui.end_row();
                                     });
                                 }
                             } else {
-                                // Nếu là nam, tự reset tiền sử thai sản về 0
                                 self.form.tsbt_thai_san = 0;
                             }
                         });
                     }
+
                     // 2: KHÁM BỆNH (GỒM THỂ LỰC, CÁC KHOA LÂM SÀNG VÀ CẬN LÂM SÀNG)
                     2 => {
                         ui.horizontal_wrapped(|ui| {
                             let sub_depts = [
-                                (0, "Thể Lực", "theluc"),
-                                (1, "Nội Khoa", "noi"),
-                                (2, "Ngoại Khoa", "ngoai"),
-                                (3, "Da Liễu", "dalieu"),
-                                (4, "Sản Phụ Khoa", "san"),
-                                (5, "Mắt", "mat"),
-                                (6, "Tai Mũi Họng", "tmh"),
-                                (7, "Răng Hàm Mặt", "rhm"),
-                                (8, "Cận Lâm Sàng", "cls"),
+                                (0, "🏃 Thể Lực", "theluc"),
+                                (1, "🩺 Nội Khoa", "noi"),
+                                (2, "🔪 Ngoại Khoa", "ngoai"),
+                                (3, "🧴 Da Liễu", "dalieu"),
+                                (4, "🌸 Sản Phụ Khoa", "san"),
+                                (5, "👁 Mắt", "mat"),
+                                (6, "👂 Tai Mũi Họng", "tmh"),
+                                (7, "🦷 Răng Hàm Mặt", "rhm"),
+                                (8, "🔬 Cận Lâm Sàng", "cls"),
                             ];
                             for (s_idx, s_title, s_role) in sub_depts {
-                                let can_edit = self.can_edit_dept(s_role);
-                                let mut text = egui::RichText::new(s_title);
+                                let can_edit = self.can_edit_dept(s_role) || self.current_role == "admin";
+                                let mut text = egui::RichText::new(s_title).size(14.0);
                                 if can_edit {
                                     text = text.strong().color(egui::Color32::from_rgb(16, 185, 129));
                                 }
@@ -1634,556 +2532,273 @@ impl eframe::App for KskApp {
                         ui.separator();
 
                         match self.kham_sub_tab {
+                            // THỂ LỰC
                             0 => {
-                        let enabled = self.can_edit_dept("theluc");
-                        ui.add_enabled_ui(enabled, |ui| {
-                            egui::Grid::new("grid_tl").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
-                                ui.label("Chiều cao (cm):");
-                                if ui.text_edit_singleline(&mut self.form.chieu_cao).changed() {
-                                    if let (Ok(h), Ok(w)) = (self.form.chieu_cao.parse::<f64>(), self.form.can_nang.parse::<f64>()) {
-                                        if h > 0.0 { self.form.chi_so_bmi = format!("{:.2}", w / ((h/100.0)*(h/100.0))); }
-                                    }
-                                }
-                                ui.label("Cân nặng (kg):");
-                                if ui.text_edit_singleline(&mut self.form.can_nang).changed() {
-                                    if let (Ok(h), Ok(w)) = (self.form.chieu_cao.parse::<f64>(), self.form.can_nang.parse::<f64>()) {
-                                        if h > 0.0 { self.form.chi_so_bmi = format!("{:.2}", w / ((h/100.0)*(h/100.0))); }
-                                    }
-                                }
-                                ui.end_row();
+                                let enabled = self.can_edit_dept("theluc") || self.current_role == "admin";
+                                ui.add_enabled_ui(enabled, |ui| {
+                                    ui.heading("Khám Thể Lực & Phân Loại Chỉ Số Thể Trạng");
+                                    ui.add_space(6.0);
+                                    egui::Grid::new("grid_tl").num_columns(4).spacing([16.0, 10.0]).show(ui, |ui| {
+                                        ui.strong("Chiều cao (cm):");
+                                        if ui.text_edit_singleline(&mut self.form.chieu_cao).changed() {
+                                            if let (Ok(h), Ok(w)) = (self.form.chieu_cao.parse::<f64>(), self.form.can_nang.parse::<f64>()) {
+                                                if h > 0.0 { self.form.chi_so_bmi = format!("{:.2}", w / ((h/100.0)*(h/100.0))); }
+                                            }
+                                            self.update_global_health_score();
+                                        }
 
-                                ui.label("Chỉ số BMI (Tự tính):"); ui.text_edit_singleline(&mut self.form.chi_so_bmi);
-                                ui.label("Mạch (lần/phút):"); ui.text_edit_singleline(&mut self.form.mach);
-                                ui.end_row();
+                                        ui.strong("Cân nặng (kg):");
+                                        if ui.text_edit_singleline(&mut self.form.can_nang).changed() {
+                                            if let (Ok(h), Ok(w)) = (self.form.chieu_cao.parse::<f64>(), self.form.can_nang.parse::<f64>()) {
+                                                if h > 0.0 { self.form.chi_so_bmi = format!("{:.2}", w / ((h/100.0)*(h/100.0))); }
+                                            }
+                                            self.update_global_health_score();
+                                        }
+                                        ui.end_row();
 
-                                ui.label("Huyết áp (mmHg):"); ui.text_edit_singleline(&mut self.form.huyet_ap);
-                                ui.label("Phân loại thể lực (1-5):");
-                                Self::ui_radio_pl_num(ui, &mut self.form.kham_the_luc_pl);
-                                ui.end_row();
-                            });
-                        });
-                    }
+                                        ui.strong("Chỉ số BMI (Tự tính):");
+                                        ui.label(egui::RichText::new(&self.form.chi_so_bmi).strong().color(egui::Color32::from_rgb(14, 165, 233)));
 
-                    // V.A. NỘI KHOA
+                                        ui.strong("Mạch (lần/phút):");
+                                        ui.text_edit_singleline(&mut self.form.mach);
+                                        ui.end_row();
+
+                                        ui.strong("Huyết áp (mmHg):");
+                                        ui.text_edit_singleline(&mut self.form.huyet_ap);
+
+                                        ui.strong("Phân loại thể lực (1-5):");
+                                        ui.horizontal(|ui| {
+                                            for i in 1..=5 {
+                                                if ui.radio_value(&mut self.form.kham_the_luc_pl, i, format!("Loại {}", i)).clicked() {
+                                                    self.update_global_health_score();
+                                                }
+                                            }
+                                        });
+                                        ui.end_row();
+                                    });
+                                });
+                            }
+
+                            // NỘI KHOA (GỒM 8 CHUYÊN KHOA CON THEO QĐ 1613/BYT)
                             1 => {
-                        let enabled = self.can_edit_dept("noi");
-                        ui.add_enabled_ui(enabled, |ui| {
-                            egui::Grid::new("grid_noi").num_columns(3).spacing([14.0, 8.0]).show(ui, |ui| {
-                                ui.strong("Chuyên khoa"); ui.strong("Kết quả khám lâm sàng chi tiết"); ui.strong("Phân loại");
-                                ui.end_row();
+                                let enabled = self.can_edit_dept("noi") || self.current_role == "admin";
+                                ui.add_enabled_ui(enabled, |ui| {
+                                    let noi_subtabs = [
+                                        (0, "CK_NOI_TIM_MACH", "❤️ Tim Mạch"),
+                                        (1, "CK_NOI_HO_HAP", "🫁 Hô Hấp"),
+                                        (2, "CK_NOI_TIEU_HOA", "🥣 Tiêu Hóa"),
+                                        (3, "CK_NOI_TIET_NIEU_SD", "💧 Thận - TN - SD"),
+                                        (4, "CK_NOI_THAN_KINH", "🧠 Thần Kinh"),
+                                        (5, "CK_NOI_TAM_THAN", "🧘 Tâm Thần"),
+                                        (6, "CK_NOI_NOITIET", "🧪 Nội Tiết"),
+                                        (7, "CK_NOI_CO_XUONG_KHOP", "🦴 Cơ Xương Khớp"),
+                                    ];
 
-                                ui.label("Tuần hoàn:");
-                                ui.add(egui::TextEdit::multiline(&mut self.form.noi_khoa_tuan_hoan).desired_rows(2).desired_width(450.0));
-                                Self::ui_radio_pl_num(ui, &mut self.form.noi_khoa_tuan_hoan_pl);
-                                ui.end_row();
+                                    ui.horizontal_wrapped(|ui| {
+                                        for (idx, _, label) in &noi_subtabs {
+                                            if ui.selectable_label(self.noi_khoa_sub_tab == *idx, *label).clicked() {
+                                                self.noi_khoa_sub_tab = *idx;
+                                            }
+                                        }
+                                    });
+                                    ui.separator();
 
-                                ui.label("Hô hấp:");
-                                ui.add(egui::TextEdit::multiline(&mut self.form.noi_khoa_ho_hap).desired_rows(2).desired_width(450.0));
-                                Self::ui_radio_pl_num(ui, &mut self.form.noi_khoa_ho_hap_pl);
-                                ui.end_row();
+                                    let (_, cur_spec_id, _) = noi_subtabs[self.noi_khoa_sub_tab];
+                                    self.render_qd1613_specialty(ui, cur_spec_id, Some("Nội khoa"));
+                                });
+                            }
 
-                                ui.label("Tiêu hóa:");
-                                ui.add(egui::TextEdit::multiline(&mut self.form.noi_khoa_tieu_hoa).desired_rows(2).desired_width(450.0));
-                                Self::ui_radio_pl_num(ui, &mut self.form.noi_khoa_tieu_hoa_pl);
-                                ui.end_row();
-
-                                ui.label("Thận - Tiết niệu - Sinh dục:");
-                                ui.add(egui::TextEdit::multiline(&mut self.form.noi_khoa_than_tn_sd).desired_rows(2).desired_width(450.0));
-                                Self::ui_radio_pl_num(ui, &mut self.form.noi_khoa_than_tn_sd_pl);
-                                ui.end_row();
-
-                                ui.label("Nội tiết:");
-                                ui.add(egui::TextEdit::multiline(&mut self.form.noi_khoa_noi_tiet).desired_rows(2).desired_width(450.0));
-                                Self::ui_radio_pl_num(ui, &mut self.form.noi_khoa_noi_tiet_pl);
-                                ui.end_row();
-
-                                ui.label("Cơ - Xương - Khớp:");
-                                ui.add(egui::TextEdit::multiline(&mut self.form.noi_khoa_co_xuong_khop).desired_rows(2).desired_width(450.0));
-                                Self::ui_radio_pl_num(ui, &mut self.form.noi_khoa_co_xuong_khop_pl);
-                                ui.end_row();
-
-                                ui.label("Thần kinh:");
-                                ui.add(egui::TextEdit::multiline(&mut self.form.noi_khoa_than_kinh).desired_rows(2).desired_width(450.0));
-                                Self::ui_radio_pl_num(ui, &mut self.form.noi_khoa_than_kinh_pl);
-                                ui.end_row();
-
-                                ui.label("Tâm thần:");
-                                ui.add(egui::TextEdit::multiline(&mut self.form.noi_khoa_tam_than).desired_rows(2).desired_width(450.0));
-                                Self::ui_radio_pl_num(ui, &mut self.form.noi_khoa_tam_than_pl);
-                                ui.end_row();
-                            });
-                        });
-                    }
-
-                    // V.B. NGOẠI KHOA
+                            // NGOẠI KHOA
                             2 => {
-                        let enabled = self.can_edit_dept("ngoai");
-                        ui.add_enabled_ui(enabled, |ui| {
-                            Self::ui_multiline(ui, "Kết quả khám Ngoại khoa (Mô tả chi tiết tổn thương):", &mut self.form.ket_qua_kham_ngoai_khoa);
-                            ui.horizontal(|ui| {
-                                ui.label("Phân loại Ngoại khoa:");
-                                Self::ui_radio_pl_num(ui, &mut self.form.kham_ngoai_khoa_pl);
-                            });
-                        });
-                    }
+                                let enabled = self.can_edit_dept("ngoai") || self.current_role == "admin";
+                                ui.add_enabled_ui(enabled, |ui| {
+                                    self.render_qd1613_specialty(ui, "CK_NGOAI", None);
+                                });
+                            }
 
-                    // V.C. DA LIỄU
+                            // DA LIỄU
                             3 => {
-                        let enabled = self.can_edit_dept("dalieu");
-                        ui.add_enabled_ui(enabled, |ui| {
-                            Self::ui_multiline(ui, "Kết quả khám Da liễu:", &mut self.form.ket_qua_kham_da_lieu);
-                            ui.horizontal(|ui| {
-                                ui.label("Phân loại Da liễu:");
-                                Self::ui_radio_pl_num(ui, &mut self.form.kham_da_lieu_pl);
-                            });
-                        });
-                    }
+                                let enabled = self.can_edit_dept("dalieu") || self.current_role == "admin";
+                                ui.add_enabled_ui(enabled, |ui| {
+                                    self.render_qd1613_specialty(ui, "CK_DA_LIEU", None);
+                                });
+                            }
 
-                    // V.D. SẢN PHỤ KHOA
+                            // SẢN PHỤ KHOA
                             4 => {
-                        let enabled = self.can_edit_dept("san");
-                        ui.add_enabled_ui(enabled, |ui| {
-                            Self::ui_multiline(ui, "Kết quả khám Sản phụ khoa (theo Phụ lục XXV TT 32/2023):", &mut self.form.ket_qua_kham_san_phu_khoa);
-                            ui.horizontal(|ui| {
-                                ui.label("Phân loại Sản phụ khoa:");
-                                Self::ui_radio_pl_num(ui, &mut self.form.kham_san_phu_khoa_pl);
-                            });
-                        });
-                    }
+                                let enabled = self.can_edit_dept("san") || self.current_role == "admin";
+                                ui.add_enabled_ui(enabled, |ui| {
+                                    self.render_qd1613_specialty(ui, "CK_PHU_SAN", None);
+                                });
+                            }
 
-                    // V.E. MẮT
+                            // MẮT
                             5 => {
-                        let enabled = self.can_edit_dept("mat");
-                        ui.add_enabled_ui(enabled, |ui| {
-                            egui::Grid::new("grid_mat").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
-                                ui.label("Không kính - Phải:"); ui.text_edit_singleline(&mut self.form.khong_kinh_mat_phai);
-                                ui.label("Không kính - Trái:"); ui.text_edit_singleline(&mut self.form.khong_kinh_mat_trai);
-                                ui.end_row();
+                                let enabled = self.can_edit_dept("mat") || self.current_role == "admin";
+                                ui.add_enabled_ui(enabled, |ui| {
+                                    self.render_qd1613_specialty(ui, "CK_MAT", None);
+                                });
+                            }
 
-                                ui.label("Có kính - Phải:"); ui.text_edit_singleline(&mut self.form.co_kinh_mat_phai);
-                                ui.label("Có kính - Trái:"); ui.text_edit_singleline(&mut self.form.co_kinh_mat_trai);
-                                ui.end_row();
-                            });
-                                                        Self::ui_qd1613_disease_picker(ui, &self.conn, "CK_MAT", &mut self.form.benh_khac_mat, &mut self.form.kham_mat_pl);
-                            Self::ui_multiline(ui, "Các bệnh về mắt (theo QĐ 1613/BYT):", &mut self.form.benh_khac_mat);
-                            ui.horizontal(|ui| {
-                                ui.label("Phân loại Mắt:");
-                                Self::ui_radio_pl_num(ui, &mut self.form.kham_mat_pl);
-                            });
-                        });
-                    }
-
-                    // V.F. TAI MŨI HỌNG
+                            // TAI MŨI HỌNG
                             6 => {
-                        let enabled = self.can_edit_dept("tmh");
-                        ui.add_enabled_ui(enabled, |ui| {
-                            egui::Grid::new("grid_tmh").num_columns(4).spacing([14.0, 8.0]).show(ui, |ui| {
-                                ui.label("Nói thường - Phải (m):"); ui.text_edit_singleline(&mut self.form.tai_phai_noi_thuong);
-                                ui.label("Nói thường - Trái (m):"); ui.text_edit_singleline(&mut self.form.tai_trai_noi_thuong);
-                                ui.end_row();
+                                let enabled = self.can_edit_dept("tmh") || self.current_role == "admin";
+                                ui.add_enabled_ui(enabled, |ui| {
+                                    self.render_qd1613_specialty(ui, "CK_TMH", None);
+                                });
+                            }
 
-                                ui.label("Nói thầm - Phải (m):"); ui.text_edit_singleline(&mut self.form.tai_phai_noi_tham);
-                                ui.label("Nói thầm - Trái (m):"); ui.text_edit_singleline(&mut self.form.tai_trai_noi_tham);
-                                ui.end_row();
-                            });
-                            Self::ui_multiline(ui, "Các bệnh Tai Mũi Họng khác:", &mut self.form.benh_khac_tai_mui_hong);
-                            ui.horizontal(|ui| {
-                                ui.label("Phân loại TMH:");
-                                Self::ui_radio_pl_num(ui, &mut self.form.kham_tai_mui_hong_pl);
-                            });
-                        });
-                    }
-
-                    // V.G. RĂNG HÀM MẶT
+                            // RĂNG HÀM MẶT
                             7 => {
-                        let enabled = self.can_edit_dept("rhm");
-                        ui.add_enabled_ui(enabled, |ui| {
-                            egui::Grid::new("grid_rhm").num_columns(2).spacing([14.0, 8.0]).show(ui, |ui| {
-                                ui.label("Hàm trên:"); ui.text_edit_singleline(&mut self.form.ham_tren);
-                                ui.end_row();
-                                ui.label("Hàm dưới:"); ui.text_edit_singleline(&mut self.form.ham_duoi);
-                                ui.end_row();
-                            });
-                            Self::ui_multiline(ui, "Các bệnh Răng Hàm Mặt khác:", &mut self.form.benh_khac_rang_ham_mat);
-                            ui.horizontal(|ui| {
-                                ui.label("Phân loại RHM:");
-                                Self::ui_radio_pl_num(ui, &mut self.form.kham_rang_ham_mat_pl);
-                            });
-                        });
+                                let enabled = self.can_edit_dept("rhm") || self.current_role == "admin";
+                                ui.add_enabled_ui(enabled, |ui| {
+                                    self.render_qd1613_specialty(ui, "CK_RHM", None);
+                                });
+                            }
+
+                            // CẬN LÂM SÀNG
+                            8 => {
+                                let enabled = self.can_edit_dept("cls") || self.current_role == "admin";
+                                ui.add_enabled_ui(enabled, |ui| {
+                                    ui.horizontal(|ui| {
+                                        ui.heading("Khám Cận Lâm Sàng & Kết Quả Xét Nghiệm / CĐHA");
+                                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                            if ui.button("➕ Thêm Dòng Chỉ Số").clicked() {
+                                                self.form.cls_list.push(ClsItem::default());
+                                            }
+                                        });
+                                    });
+                                    ui.separator();
+
+                                    let mut del_idx = None;
+                                    egui::Grid::new("grid_cls_table").striped(true).min_col_width(80.0).spacing([8.0, 6.0]).show(ui, |ui| {
+                                        ui.strong("STT"); ui.strong("Mã Dịch Vụ"); ui.strong("Mã Chỉ Số"); ui.strong("Giá Trị");
+                                        ui.strong("Đơn Vị"); ui.strong("Mô Tả"); ui.strong("Kết Luận"); ui.strong("Xóa");
+                                        ui.end_row();
+
+                                        for (i, item) in self.form.cls_list.iter_mut().enumerate() {
+                                            ui.label((i + 1).to_string());
+                                            ui.text_edit_singleline(&mut item.ma_dich_vu);
+                                            ui.text_edit_singleline(&mut item.ma_chi_so);
+                                            ui.text_edit_singleline(&mut item.gia_tri);
+                                            ui.text_edit_singleline(&mut item.don_vi_do);
+                                            ui.text_edit_singleline(&mut item.mo_ta);
+                                            ui.text_edit_singleline(&mut item.ket_luan);
+                                            if ui.button("Xóa").clicked() {
+                                                del_idx = Some(i);
+                                            }
+                                            ui.end_row();
+                                        }
+                                    });
+                                    if let Some(idx) = del_idx {
+                                        self.form.cls_list.remove(idx);
+                                    }
+                                });
+                            }
+                            _ => {}
+                        }
                     }
 
-                    // VI. CẬN LÂM SÀNG (LƯỚI ĐỘNG CÁC CHỈ SỐ)
-                            8 => {
-                        let enabled = self.can_edit_dept("cls");
+                    // 3: KẾT LUẬN TOÀN DIỆN
+                    3 => {
+                        let enabled = self.can_edit_dept("ketluan") || self.current_role == "admin";
                         ui.add_enabled_ui(enabled, |ui| {
-                            ui.horizontal(|ui| {
-                                ui.strong("DANH SÁCH CHỈ SỐ CẬN LÂM SÀNG");
-                                if ui.button("+ Thêm Dòng Chỉ Số").clicked() {
-                                    self.form.cls_list.push(ClsItem::default());
-                                }
-                            });
-                            ui.separator();
+                            ui.heading("Kết Luận Phân Loại Sức Khỏe Toàn Diện");
+                            ui.add_space(6.0);
 
-                            let mut del_idx = None;
-                            egui::Grid::new("grid_cls_table").striped(true).min_col_width(80.0).show(ui, |ui| {
-                                ui.strong("STT"); ui.strong("Mã Dịch Vụ"); ui.strong("Mã Chỉ Số"); ui.strong("Giá Trị");
-                                ui.strong("Đơn Vị"); ui.strong("Mô Tả"); ui.strong("Kết Luận"); ui.strong("Xóa");
-                                ui.end_row();
+                            self.update_global_health_score();
 
-                                for (i, item) in self.form.cls_list.iter_mut().enumerate() {
-                                    ui.label((i + 1).to_string());
-                                    ui.text_edit_singleline(&mut item.ma_dich_vu);
-                                    ui.text_edit_singleline(&mut item.ma_chi_so);
-                                    ui.text_edit_singleline(&mut item.gia_tri);
-                                    ui.text_edit_singleline(&mut item.don_vi_do);
-                                    ui.text_edit_singleline(&mut item.mo_ta);
-                                    ui.text_edit_singleline(&mut item.ket_luan);
-                                    if ui.button("Xóa").clicked() {
-                                        del_idx = Some(i);
+                            egui::Frame::group(ui.style())
+                                .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(240, 249, 255) })
+                                .stroke(egui::Stroke::new(2.0_f32, egui::Color32::from_rgb(56, 189, 248)))
+                                .inner_margin(16.0)
+                                .show(ui, |ui| {
+                                    ui.horizontal(|ui| {
+                                        ui.strong(egui::RichText::new("⚖ PHÂN LOẠI SỨC KHỎE TỔNG HỢP:").size(15.0));
+                                        ui_score_badge(ui, self.form.phan_loai_sk, false);
+                                        ui.strong(format!("Tự động tính từ các chuyên khoa: LOẠI {}", self.form.phan_loai_sk));
+                                    });
+
+                                    ui.add_space(8.0);
+                                    ui.horizontal(|ui| {
+                                        ui.label("Chọn mức phân loại sức khỏe chung:");
+                                        let pl_options = [
+                                            (1, "Loại I (Rất khỏe)"),
+                                            (2, "Loại II (Khỏe)"),
+                                            (3, "Loại III (Trung bình)"),
+                                            (4, "Loại IV (Yếu)"),
+                                            (5, "Loại V (Rất yếu)"),
+                                        ];
+                                        for (pl_num, pl_text) in pl_options {
+                                            ui.radio_value(&mut self.form.phan_loai_sk, pl_num, pl_text);
+                                        }
+                                    });
+                                });
+
+                            ui.add_space(10.0);
+                            ui.strong("BẢNG TỔNG HỢP KẾT LUẬN CỦA TẤT CẢ CÁC CHUYÊN KHOA:");
+                            ui.add_space(4.0);
+
+                            let summary_list = [
+                                ("Thể lực", &self.form.chi_so_bmi, self.form.kham_the_luc_pl),
+                                ("Tuần hoàn", &self.form.noi_khoa_tuan_hoan, self.form.noi_khoa_tuan_hoan_pl),
+                                ("Hô hấp", &self.form.noi_khoa_ho_hap, self.form.noi_khoa_ho_hap_pl),
+                                ("Tiêu hóa", &self.form.noi_khoa_tieu_hoa, self.form.noi_khoa_tieu_hoa_pl),
+                                ("Thận - Tiết niệu - SD", &self.form.noi_khoa_than_tn_sd, self.form.noi_khoa_than_tn_sd_pl),
+                                ("Nội tiết", &self.form.noi_khoa_noi_tiet, self.form.noi_khoa_noi_tiet_pl),
+                                ("Cơ - Xương - Khớp", &self.form.noi_khoa_co_xuong_khop, self.form.noi_khoa_co_xuong_khop_pl),
+                                ("Thần kinh", &self.form.noi_khoa_than_kinh, self.form.noi_khoa_than_kinh_pl),
+                                ("Tâm thần", &self.form.noi_khoa_tam_than, self.form.noi_khoa_tam_than_pl),
+                                ("Ngoại khoa", &self.form.ket_qua_kham_ngoai_khoa, self.form.kham_ngoai_khoa_pl),
+                                ("Da liễu", &self.form.ket_qua_kham_da_lieu, self.form.kham_da_lieu_pl),
+                                ("Sản phụ khoa", &self.form.ket_qua_kham_san_phu_khoa, self.form.kham_san_phu_khoa_pl),
+                                ("Mắt", &self.form.benh_khac_mat, self.form.kham_mat_pl),
+                                ("Tai Mũi Họng", &self.form.benh_khac_tai_mui_hong, self.form.kham_tai_mui_hong_pl),
+                                ("Răng Hàm Mặt", &self.form.benh_khac_rang_ham_mat, self.form.kham_rang_ham_mat_pl),
+                            ];
+
+                            egui::Grid::new("grid_summary_all_specs").striped(true).min_col_width(120.0).spacing([14.0, 8.0]).show(ui, |ui| {
+                                ui.strong("STT"); ui.strong("Chuyên Khoa"); ui.strong("Phân Loại"); ui.strong("Kết Luận / Bệnh Lý Ghi Nhận"); ui.end_row();
+                                for (idx, (s_name, s_concl, s_sc)) in summary_list.iter().enumerate() {
+                                    ui.label((idx + 1).to_string());
+                                    ui.strong(*s_name);
+                                    ui_score_badge(ui, *s_sc, false);
+                                    if *s_sc > 1 {
+                                        ui.colored_label(egui::Color32::from_rgb(220, 38, 38), egui::RichText::new(*s_concl).strong());
+                                    } else {
+                                        ui.label(*s_concl);
                                     }
                                     ui.end_row();
                                 }
                             });
-                            if let Some(idx) = del_idx {
-                                self.form.cls_list.remove(idx);
-                            }
-                        });
-                    }
 
+                            ui.add_space(12.0);
+                            ui.strong("Kết luận tình trạng bệnh / Đủ sức khỏe (KET_LUAN_BENH):");
+                            ui.add(egui::TextEdit::singleline(&mut self.form.ket_luan_benh).desired_width(ui.available_width()));
 
-                            _ => {}
-                        }
-                    }
-                    // VII. KẾT LUẬN & ICD-10
-                    3 => {
-                        let enabled = self.can_edit_dept("ketluan");
-                        ui.add_enabled_ui(enabled, |ui| {
-                            // TỔNG HỢP VÀ TỰ ĐỘNG TÍNH PHÂN LOẠI TOÀN DIỆN TỪ CÁC KHOA LÂM SÀNG
-                            let max_pl = self.form.kham_the_luc_pl
-                                .max(self.form.noi_khoa_tuan_hoan_pl)
-                                .max(self.form.noi_khoa_ho_hap_pl)
-                                .max(self.form.noi_khoa_tieu_hoa_pl)
-                                .max(self.form.noi_khoa_than_tn_sd_pl)
-                                .max(self.form.noi_khoa_noi_tiet_pl)
-                                .max(self.form.noi_khoa_co_xuong_khop_pl)
-                                .max(self.form.noi_khoa_than_kinh_pl)
-                                .max(self.form.noi_khoa_tam_than_pl)
-                                .max(self.form.kham_ngoai_khoa_pl)
-                                .max(self.form.kham_da_lieu_pl)
-                                .max(if self.form.gioi_tinh == 2 { self.form.kham_san_phu_khoa_pl } else { 1 })
-                                .max(self.form.kham_mat_pl)
-                                .max(self.form.kham_tai_mui_hong_pl)
-                                .max(self.form.kham_rang_ham_mat_pl);
-
-                            egui::Frame::group(ui.style()).fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(240, 253, 250) }).rounding(8.0).show(ui, |ui| {
-                                ui.horizontal(|ui| {
-                                    ui.strong("⚖ Gợi ý phân loại sức khỏe chung (theo mức kém nhất của các khoa):");
-                                    ui.colored_label(egui::Color32::from_rgb(14, 116, 144), format!("Loại {}", max_pl));
-                                    if ui.button(" Áp dụng gợi ý ").clicked() {
-                                        self.form.phan_loai_sk = max_pl;
-                                    }
-                                });
-                            });
                             ui.add_space(6.0);
-
-                            ui.horizontal(|ui| {
-                                ui.strong("1. Phân loại sức khỏe chung *:");
-                                Self::ui_radio_pl_num(ui, &mut self.form.phan_loai_sk);
-                            });
-                            ui.add_space(8.0);
-
-                            ui.strong("2. Mã bệnh ICD-10 kết luận (chọn nhiều, tìm theo mã hoặc tên bệnh):");
-                            let icds = Self::cat_items(&self.catalogs, "icd10", None);
-                            multi_icd(ui, "icd_kl", &mut self.form.ket_luan_benh, &icds);
-
-                            ui.add_space(8.0);
-                            Self::ui_multiline(ui, "3. Tình trạng sức khỏe; mắc các bệnh, tật nếu có (CAC_BENH_TAT_NEU_CO):", &mut self.form.cac_benh_tat_neu_co);
+                            ui.strong("Các bệnh tật (nếu có) / Hướng điều trị tiếp theo (CAC_BENH_TAT_NEU_CO):");
+                            ui.add(egui::TextEdit::multiline(&mut self.form.cac_benh_tat_neu_co).desired_rows(3).desired_width(ui.available_width()));
                         });
                     }
-
                     _ => {}
                 }
-
-                ui.add_space(40.0);
             });
         });
     }
 }
 
-fn main() {
-    std::panic::set_hook(Box::new(|info| {
-        let msg = format!("CRASH ERROR:\n{}", info);
-        let _ = fs::write("crash_log.txt", &msg);
-    }));
-
+fn main() -> Result<(), eframe::Error> {
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([1220.0, 820.0])
-            .with_min_inner_size([1000.0, 700.0])
-            .with_title("Hệ Thống Nhập Liệu KSK - Chuẩn Quyết định 3176/QĐ-BYT"),
-        renderer: eframe::Renderer::Glow,
+            .with_inner_size([1280.0, 820.0])
+            .with_min_inner_size([1024.0, 680.0])
+            .with_title("Hệ Thống Khám Sức Khỏe Định Kỳ - QĐ 3176/QĐ-BYT & QĐ 1613/BYT"),
         ..Default::default()
     };
-
-    if let Err(e) = eframe::run_native(
-        "KskApp3176",
+    eframe::run_native(
+        "Hệ Thống Khám Sức Khỏe Định Kỳ",
         native_options,
         Box::new(|cc| Box::new(KskApp::new(cc))),
-    ) {
-        let _ = fs::write("crash_log.txt", format!("Lỗi: {:?}", e));
-    }
+    )
 }
-
-// ===================== WIDGET & THEME DÙNG CHUNG =====================
-
-fn fold_vn(s: &str) -> String {
-    s.chars().map(|c| {
-        let l = c.to_lowercase().next().unwrap_or(c);
-        match l {
-            'à'|'á'|'ạ'|'ả'|'ã'|'â'|'ầ'|'ấ'|'ậ'|'ẩ'|'ẫ'|'ă'|'ằ'|'ắ'|'ặ'|'ẳ'|'ẵ' => 'a',
-            'è'|'é'|'ẹ'|'ẻ'|'ẽ'|'ê'|'ề'|'ế'|'ệ'|'ể'|'ễ' => 'e',
-            'ì'|'í'|'ị'|'ỉ'|'ĩ' => 'i',
-            'ò'|'ó'|'ọ'|'ỏ'|'õ'|'ô'|'ồ'|'ố'|'ộ'|'ổ'|'ỗ'|'ơ'|'ờ'|'ớ'|'ợ'|'ở'|'ỡ' => 'o',
-            'ù'|'ú'|'ụ'|'ủ'|'ũ'|'ư'|'ừ'|'ứ'|'ự'|'ử'|'ữ' => 'u',
-            'ỳ'|'ý'|'ỵ'|'ỷ'|'ỹ' => 'y',
-            'đ' => 'd',
-            x => x,
-        }
-    }).collect()
-}
-
-fn apply_theme(ctx: &egui::Context, dark: bool) {
-    let mut v = if dark { egui::Visuals::dark() } else { egui::Visuals::light() };
-    let teal = egui::Color32::from_rgb(14, 116, 144);
-    v.selection.bg_fill = teal;
-    v.hyperlink_color = teal;
-    let r = egui::Rounding::same(6.0);
-    v.widgets.noninteractive.rounding = r;
-    v.widgets.inactive.rounding = r;
-    v.widgets.hovered.rounding = r;
-    v.widgets.active.rounding = r;
-    v.widgets.open.rounding = r;
-    v.window_rounding = egui::Rounding::same(10.0);
-    if !dark {
-        v.panel_fill = egui::Color32::from_rgb(241, 245, 249);
-        v.widgets.inactive.bg_fill = egui::Color32::from_rgb(226, 232, 240);
-        v.widgets.inactive.weak_bg_fill = egui::Color32::from_rgb(226, 232, 240);
-    }
-    ctx.set_visuals(v);
-    let mut style = (*ctx.style()).clone();
-    style.spacing.item_spacing = egui::vec2(8.0, 8.0);
-    style.spacing.button_padding = egui::vec2(12.0, 6.0);
-    style.spacing.interact_size.y = 26.0;
-    ctx.set_style(style);
-}
-
-/// Widget nhập ngày tháng: chỉ cho nhập số và gạch chéo (/), kiểm tra tính hợp lệ dd/mm/yyyy kèm Calendar popup chọn ngày trực quan
-fn date_input_picker(ui: &mut egui::Ui, id: &str, val: &mut String) {
-    ui.horizontal(|ui| {
-        let mut text = val.clone();
-        let resp = ui.add(egui::TextEdit::singleline(&mut text).hint_text("dd/mm/yyyy").desired_width(95.0));
-        if resp.changed() {
-            // Chỉ giữ lại ký tự số và dấu gạch chéo /
-            let mut filtered: String = text.chars().filter(|c| c.is_ascii_digit() || *c == '/').take(10).collect();
-            // Tự động thêm dấu / sau ngày (2 ký tự) và tháng (5 ký tự) khi người dùng gõ thuần số
-            if filtered.len() == 2 && !filtered.contains('/') {
-                filtered.push('/');
-            } else if filtered.len() == 5 && filtered.chars().filter(|c| *c == '/').count() == 1 {
-                filtered.push('/');
-            }
-            *val = filtered;
-        }
-
-        // Kiểm tra định dạng ngày
-        let is_valid = if val.is_empty() {
-            true
-        } else if val.len() == 10 {
-            chrono::NaiveDate::parse_from_str(val, "%d/%m/%Y").is_ok()
-        } else {
-            false
-        };
-
-        if !is_valid && !val.is_empty() {
-            ui.colored_label(egui::Color32::from_rgb(239, 68, 68), "⚠ Sai ngày");
-        }
-
-        // Popup Date-Picker (Lịch trực quan & Chọn nhanh)
-        let popup_id = ui.make_persistent_id(id);
-        let btn_resp = ui.small_button("📅");
-        if btn_resp.clicked() {
-            ui.memory_mut(|mem| mem.toggle_popup(popup_id));
-        }
-
-        egui::popup_below_widget(ui, popup_id, &btn_resp, |ui| {
-            ui.set_min_width(240.0);
-            let now = chrono::Local::now().date_naive();
-            let parsed_cur = chrono::NaiveDate::parse_from_str(val, "%d/%m/%Y").ok().unwrap_or(now);
-
-            // Lưu tháng và năm đang duyệt trong UI state
-            let view_state_id = ui.make_persistent_id(format!("{}_view", id));
-            let (mut view_year, mut view_month): (i32, u32) = ui.data_mut(|d| {
-                d.get_temp(view_state_id).unwrap_or((parsed_cur.year(), parsed_cur.month()))
-            });
-
-            ui.horizontal(|ui| {
-                if ui.button("◀").clicked() {
-                    if view_month == 1 { view_month = 12; view_year -= 1; } else { view_month -= 1; }
-                }
-                ui.strong(format!("Tháng {:02} / {}", view_month, view_year));
-                if ui.button("▶").clicked() {
-                    if view_month == 12 { view_month = 1; view_year += 1; } else { view_month += 1; }
-                }
-            });
-
-            ui.separator();
-
-            // Hiển thị thứ trong tuần
-            egui::Grid::new(format!("{}_cal_grid", id)).num_columns(7).spacing([6.0, 4.0]).show(ui, |ui| {
-                for day_name in ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] {
-                    ui.weak(day_name);
-                }
-                ui.end_row();
-
-                if let Some(first_day) = chrono::NaiveDate::from_ymd_opt(view_year, view_month, 1) {
-                    let weekday_offset = first_day.weekday().num_days_from_monday();
-                    for _ in 0..weekday_offset {
-                        ui.label(" ");
-                    }
-                    let mut cur_col = weekday_offset;
-
-                    let days_in_month = match view_month {
-                        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
-                        4 | 6 | 9 | 11 => 30,
-                        2 => if (view_year % 4 == 0 && view_year % 100 != 0) || (view_year % 400 == 0) { 29 } else { 28 },
-                        _ => 30,
-                    };
-
-                    for d in 1..=days_in_month {
-                        let is_selected = parsed_cur.year() == view_year && parsed_cur.month() == view_month && parsed_cur.day() == d;
-                        let text = if is_selected {
-                            egui::RichText::new(format!("{}", d)).strong().color(egui::Color32::WHITE)
-                        } else {
-                            egui::RichText::new(format!("{}", d))
-                        };
-                        let mut btn = egui::Button::new(text);
-                        if is_selected {
-                            btn = btn.fill(egui::Color32::from_rgb(14, 116, 144));
-                        }
-                        if ui.add(btn).clicked() {
-                            *val = format!("{:02}/{:02}/{}", d, view_month, view_year);
-                            ui.memory_mut(|mem| mem.close_popup());
-                        }
-                        cur_col += 1;
-                        if cur_col % 7 == 0 {
-                            ui.end_row();
-                        }
-                    }
-                    if cur_col % 7 != 0 {
-                        ui.end_row();
-                    }
-                }
-            });
-
-            ui.data_mut(|d| d.insert_temp(view_state_id, (view_year, view_month)));
-
-            ui.separator();
-            ui.horizontal(|ui| {
-                if ui.button(" Hôm nay ").clicked() {
-                    *val = now.format("%d/%m/%Y").to_string();
-                    ui.memory_mut(|mem| mem.close_popup());
-                }
-                if ui.button(" Hôm qua ").clicked() {
-                    let y = now - chrono::Duration::days(1);
-                    *val = y.format("%d/%m/%Y").to_string();
-                    ui.memory_mut(|mem| mem.close_popup());
-                }
-            });
-
-            ui.separator();
-            ui.weak("Chọn nhanh độ tuổi (Năm sinh):");
-            ui.horizontal_wrapped(|ui| {
-                for age in [18, 20, 25, 30, 35, 40, 45, 50, 55, 60] {
-                    let yr = now.year() - age;
-                    if ui.small_button(format!("{}t ({})", age, yr)).clicked() {
-                        *val = format!("01/01/{}", yr);
-                        ui.memory_mut(|mem| mem.close_popup());
-                    }
-                }
-            });
-        });
-    });
-}
-/// Dropdown có ô tìm kiếm (không phân biệt dấu). Trả về true nếu giá trị đổi.
-fn search_combo(ui: &mut egui::Ui, id: &str, value: &mut String, items: &[(String, String)]) -> bool {
-    let cur = items.iter().find(|(c, _)| c == value).map(|(_, n)| n.clone()).unwrap_or_else(|| "Chọn...".to_string());
-    let mut changed = false;
-    let fid = egui::Id::new(("sc_filter", id));
-    egui::ComboBox::from_id_source(id).width(260.0).selected_text(cur).show_ui(ui, |ui| {
-        let mut filter: String = ui.data_mut(|d| d.get_temp(fid).unwrap_or_default());
-        let r = ui.add(egui::TextEdit::singleline(&mut filter).hint_text("🔍 Tìm kiếm...").desired_width(240.0));
-        if !r.has_focus() && filter.is_empty() { r.request_focus(); }
-        let f = fold_vn(&filter);
-        egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
-            let mut shown = 0;
-            for (code, name) in items {
-                if f.is_empty() || fold_vn(name).contains(&f) || fold_vn(code).contains(&f) {
-                    if ui.selectable_label(code == value, name).clicked() {
-                        *value = code.clone();
-                        changed = true;
-                    }
-                    shown += 1;
-                    if shown >= 200 { ui.weak("... gõ thêm để thu hẹp"); break; }
-                }
-            }
-            if shown == 0 { ui.weak("Không tìm thấy"); }
-        });
-        ui.data_mut(|d| d.insert_temp(fid, filter));
-    });
-    changed
-}
-
-/// Chọn nhiều ICD-10 (lưu dạng "A;B;C"), hiển thị chip, có nút xóa.
-fn multi_icd(ui: &mut egui::Ui, id: &str, value: &mut String, icds: &[(String, String)]) {
-    let mut sel: Vec<String> = value.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
-    let mut remove: Option<usize> = None;
-    ui.vertical(|ui| {
-        ui.horizontal_wrapped(|ui| {
-            for (i, code) in sel.iter().enumerate() {
-                let name = icds.iter().find(|(c, _)| c == code).map(|(_, n)| n.as_str()).unwrap_or(code.as_str());
-                let label = egui::RichText::new(format!("{}  ✕", name)).color(egui::Color32::WHITE);
-                if ui.add(egui::Button::new(label).fill(egui::Color32::from_rgb(14, 116, 144)).rounding(12.0)).on_hover_text("Bấm để xóa").clicked() {
-                    remove = Some(i);
-                }
-            }
-            if sel.is_empty() { ui.weak("(chưa chọn mã bệnh)"); }
-        });
-        let fid = egui::Id::new(("icd_filter", id));
-        egui::ComboBox::from_id_source(id).width(320.0).selected_text("＋ Thêm mã ICD-10").show_ui(ui, |ui| {
-            let mut filter: String = ui.data_mut(|d| d.get_temp(fid).unwrap_or_default());
-            ui.add(egui::TextEdit::singleline(&mut filter).hint_text("🔍 Gõ mã hoặc tên bệnh...").desired_width(300.0));
-            let f = fold_vn(&filter);
-            egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
-                let mut shown = 0;
-                for (code, name) in icds {
-                    if sel.contains(code) { continue; }
-                    if f.is_empty() || fold_vn(name).contains(&f) || fold_vn(code).contains(&f) {
-                        if ui.selectable_label(false, name).clicked() { sel.push(code.clone()); }
-                        shown += 1;
-                        if shown >= 100 { ui.weak("... gõ thêm để thu hẹp"); break; }
-                    }
-                }
-                if shown == 0 { ui.weak("Không tìm thấy"); }
-            });
-            ui.data_mut(|d| d.insert_temp(fid, filter));
-        });
-    });
-    if let Some(i) = remove { sel.remove(i); }
-    *value = sel.join(";");
-}
-
-
-
-
-
-
-
