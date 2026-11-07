@@ -174,18 +174,26 @@ pub fn date_input_picker(ui: &mut egui::Ui, id_source: &str, date_str: &mut Stri
                 .fixed_pos(btn_resp.rect.left_bottom() + egui::vec2(0.0, 4.0))
                 .show(ui.ctx(), |ui| {
                     egui::Frame::popup(ui.style())
-                        .inner_margin(egui::Margin::same(10.0))
+                        .inner_margin(egui::Margin::same(8.0))
                         .show(ui, |ui| {
-                            ui.set_min_width(250.0);
-                            ui.vertical(|ui| {
-                                // Tiêu đề & Nút đóng
-                                ui.horizontal(|ui| {
-                                    ui.label(egui::RichText::new("📅 Chọn ngày").strong().size(12.5));
-                                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                        if ui.small_button("✕").on_hover_text("Đóng lịch").clicked() {
-                                            is_open = false;
-                                            ui.data_mut(|d| d.insert_temp(open_id, false));
-                                        }
+                            ui.allocate_ui_with_layout(
+                                egui::vec2(230.0, 0.0),
+                                egui::Layout::top_down(egui::Align::Min),
+                                |ui| {
+                                    ui.set_width(230.0);
+                                    ui.set_max_width(230.0);
+
+                                    // Cho phép bấm phím Escape để đóng nhanh lịch
+                                    if ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+                                        is_open = false;
+                                        ui.data_mut(|d| d.insert_temp(open_id, false));
+                                    }
+
+                                    // Tiêu đề, Hôm nay và nút Đóng (gọn gàng, kích thước cố định vừa vặn 230px)
+                                    ui.horizontal(|ui| {
+                                        ui.label(egui::RichText::new("📅 Chọn ngày").strong().size(12.0));
+                                        ui.add_space(8.0);
+
                                         let now = chrono::Local::now();
                                         if ui.small_button("⚡ Hôm nay").clicked() {
                                             *date_str = format!("{:02}/{:02}/{:04}", now.day(), now.month(), now.year());
@@ -195,94 +203,99 @@ pub fn date_input_picker(ui: &mut egui::Ui, id_source: &str, date_str: &mut Stri
                                             is_open = false;
                                             ui.data_mut(|d| d.insert_temp(open_id, false));
                                         }
-                                    });
-                                });
 
-                                ui.separator();
-
-                                // Navigation: Tháng / Năm với nút lùi tiến và DragValue
-                                ui.horizontal(|ui| {
-                                    if ui.button("««").on_hover_text("Lùi 5 năm").clicked() {
-                                        if view_date.1 >= 1925 { view_date.1 -= 5; }
-                                    }
-                                    if ui.button("«").on_hover_text("Lùi 1 tháng").clicked() {
-                                        if view_date.0 == 1 {
-                                            view_date.0 = 12;
-                                            view_date.1 -= 1;
-                                        } else {
-                                            view_date.0 -= 1;
-                                        }
-                                    }
-
-                                    ui.label(egui::RichText::new(format!("Tháng {}", view_date.0)).strong());
-                                    ui.add(egui::DragValue::new(&mut view_date.1).clamp_range(1920..=2050).speed(1));
-
-                                    if ui.button("»").on_hover_text("Tiến 1 tháng").clicked() {
-                                        if view_date.0 == 12 {
-                                            view_date.0 = 1;
-                                            view_date.1 += 1;
-                                        } else {
-                                            view_date.0 += 1;
-                                        }
-                                    }
-                                    if ui.button("»»").on_hover_text("Tiến 5 năm").clicked() {
-                                        if view_date.1 <= 2045 { view_date.1 += 5; }
-                                    }
-
-                                    ui.data_mut(|d| d.insert_temp(cal_id, view_date));
-                                });
-
-                                ui.separator();
-
-                                // Days grid: Tính chính xác thứ trong tuần
-                                let days_in_month = match view_date.0 {
-                                    1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
-                                    4 | 6 | 9 | 11 => 30,
-                                    2 => {
-                                        let y = view_date.1;
-                                        if (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0) { 29 } else { 28 }
-                                    }
-                                    _ => 30,
-                                };
-
-                                let first_weekday = chrono::NaiveDate::from_ymd_opt(view_date.1 as i32, view_date.0, 1)
-                                    .map(|d| d.weekday().num_days_from_monday())
-                                    .unwrap_or(0);
-
-                                let now = chrono::Local::now();
-
-                                egui::Grid::new(format!("{}_days", id_source)).spacing([3.0, 3.0]).show(ui, |ui| {
-                                    for col in ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] {
-                                        ui.label(egui::RichText::new(col).size(10.5).strong());
-                                    }
-                                    ui.end_row();
-
-                                    // Ô trống trước ngày 1
-                                    for _ in 0..first_weekday {
-                                        ui.label("");
-                                    }
-
-                                    for day in 1..=days_in_month {
-                                        let is_today = day == now.day() && view_date.0 == now.month() && view_date.1 == now.year() as u32;
-                                        let btn_text = if is_today {
-                                            egui::RichText::new(day.to_string()).strong().color(egui::Color32::from_rgb(37, 99, 235))
-                                        } else {
-                                            egui::RichText::new(day.to_string())
-                                        };
-
-                                        if ui.add_sized([26.0, 22.0], egui::Button::new(btn_text)).clicked() {
-                                            *date_str = format!("{:02}/{:02}/{:04}", day, view_date.0, view_date.1);
-                                            changed = true;
+                                        ui.add_space(10.0);
+                                        if ui.small_button(" ✕ ").on_hover_text("Đóng lịch (Esc)").clicked() {
                                             is_open = false;
                                             ui.data_mut(|d| d.insert_temp(open_id, false));
                                         }
+                                    });
 
-                                        if (first_weekday + day as u32) % 7 == 0 {
-                                            ui.end_row();
+                                    ui.separator();
+
+                                    // Navigation: Lùi / Tiến Năm và Tháng (gọn gàng vừa khít 230px)
+                                    ui.horizontal(|ui| {
+                                        if ui.small_button("««").on_hover_text("Lùi 5 năm").clicked() {
+                                            if view_date.1 >= 1925 { view_date.1 -= 5; }
                                         }
-                                    }
-                                });
-                            });
+                                        if ui.small_button("«").on_hover_text("Lùi 1 tháng").clicked() {
+                                            if view_date.0 == 1 {
+                                                view_date.0 = 12;
+                                                view_date.1 -= 1;
+                                            } else {
+                                                view_date.0 -= 1;
+                                            }
+                                        }
+
+                                        ui.label(egui::RichText::new(format!("Tháng {} / {}", view_date.0, view_date.1)).strong());
+
+                                        if ui.small_button("»").on_hover_text("Tiến 1 tháng").clicked() {
+                                            if view_date.0 == 12 {
+                                                view_date.0 = 1;
+                                                view_date.1 += 1;
+                                            } else {
+                                                view_date.0 += 1;
+                                            }
+                                        }
+                                        if ui.small_button("»»").on_hover_text("Tiến 5 năm").clicked() {
+                                            if view_date.1 <= 2045 { view_date.1 += 5; }
+                                        }
+
+                                        ui.data_mut(|d| d.insert_temp(cal_id, view_date));
+                                    });
+
+                                    ui.separator();
+
+                                    // Days grid: Tính chính xác thứ trong tuần
+                                    let days_in_month = match view_date.0 {
+                                        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+                                        4 | 6 | 9 | 11 => 30,
+                                        2 => {
+                                            let y = view_date.1;
+                                            if (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0) { 29 } else { 28 }
+                                        }
+                                        _ => 30,
+                                    };
+
+                                    let first_weekday = chrono::NaiveDate::from_ymd_opt(view_date.1 as i32, view_date.0, 1)
+                                        .map(|d| d.weekday().num_days_from_monday())
+                                        .unwrap_or(0);
+
+                                    let now = chrono::Local::now();
+
+                                    egui::Grid::new(format!("{}_days", id_source)).spacing([2.0, 2.0]).show(ui, |ui| {
+                                        for col in ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] {
+                                            ui.label(egui::RichText::new(col).size(10.5).strong());
+                                        }
+                                        ui.end_row();
+
+                                        // Ô trống trước ngày 1
+                                        for _ in 0..first_weekday {
+                                            ui.label("");
+                                        }
+
+                                        for day in 1..=days_in_month {
+                                            let is_today = day == now.day() && view_date.0 == now.month() && view_date.1 == now.year() as u32;
+                                            let btn_text = if is_today {
+                                                egui::RichText::new(day.to_string()).strong().color(egui::Color32::from_rgb(37, 99, 235))
+                                            } else {
+                                                egui::RichText::new(day.to_string())
+                                            };
+
+                                            if ui.add_sized([26.0, 22.0], egui::Button::new(btn_text)).clicked() {
+                                                *date_str = format!("{:02}/{:02}/{:04}", day, view_date.0, view_date.1);
+                                                changed = true;
+                                                is_open = false;
+                                                ui.data_mut(|d| d.insert_temp(open_id, false));
+                                            }
+
+                                            if (first_weekday + day as u32) % 7 == 0 {
+                                                ui.end_row();
+                                            }
+                                        }
+                                    });
+                                },
+                            );
                         });
                 });
         }

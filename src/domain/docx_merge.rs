@@ -405,20 +405,20 @@ fn parse_vision_val(s: &str) -> Option<i32> {
 }
 
 /// Sinh dãy 11 ô tick OMR Thị lực: 0, 1, 2, ..., 10 (/10)
-/// Đặt cỡ chữ 10pt (w:sz=20) để lề gọn gàng, nằm trọn trên 1 dòng duy nhất không bị rớt dòng
+/// Đặt cỡ chữ 8.5pt - 9pt (w:sz=17..18) để lề thụt 4 space nhưng vẫn nằm trọn trên 1 dòng duy nhất, không bao giờ bị rớt dòng
 fn run_omr_vision_boxes(label: &str, selected: Option<i32>, is_pre_exam: bool) -> String {
     let mut out = String::new();
-    out.push_str(&run_text_sz(label, true, Some(20)));
+    out.push_str(&run_text_sz(label, true, Some(18)));
     for v in 0..=10 {
         let checked = if is_pre_exam {
             false
         } else {
             selected == Some(v)
         };
-        out.push_str(&run_checkbox_sz(checked, Some(20)));
-        out.push_str(&run_text_sz(&format!("{} ", v), false, Some(19)));
+        out.push_str(&run_checkbox_sz(checked, Some(17)));
+        out.push_str(&run_text_sz(&format!("{} ", v), false, Some(17)));
     }
-    out.push_str(&run_text_sz("/10", true, Some(20)));
+    out.push_str(&run_text_sz("/10", true, Some(18)));
     out
 }
 
@@ -460,7 +460,7 @@ fn is_hearing_tham_match(val: &str, target_idx: usize) -> bool {
     }
 }
 
-/// Sinh dãy 9 ô tick OMR Thính lực nói thường: >5m, 5m, 4m, 3m, 2m, 1m, 0.5m, Sát tai, Điếc (cỡ chữ 9.5pt)
+/// Sinh dãy 9 ô tick OMR Thính lực nói thường: >5m, 5m, 4m, 3m, 2m, 1m, 0.5m, Sát tai, Điếc (cỡ chữ 8.5pt vừa khít ô)
 fn run_omr_hearing_thuong_boxes(val: &str, is_pre_exam: bool) -> String {
     let labels = [">5m", "5m", "4m", "3m", "2m", "1m", "0.5m", "Sát tai", "Điếc"];
     let mut out = String::new();
@@ -470,13 +470,13 @@ fn run_omr_hearing_thuong_boxes(val: &str, is_pre_exam: bool) -> String {
         } else {
             is_hearing_thuong_match(val, i)
         };
-        out.push_str(&run_checkbox_sz(checked, Some(19)));
-        out.push_str(&run_text_sz(&format!("{} ", lbl), false, Some(19)));
+        out.push_str(&run_checkbox_sz(checked, Some(17)));
+        out.push_str(&run_text_sz(&format!("{} ", lbl), false, Some(17)));
     }
     out
 }
 
-/// Sinh dãy 9 ô tick OMR Thính lực nói thầm: >0.5m, 0.5m, 0.4m, 0.3m, 0.2m, 0.1m, 0.05m, Sát tai, Điếc (cỡ chữ 9.5pt)
+/// Sinh dãy 9 ô tick OMR Thính lực nói thầm: >0.5m, 0.5m, 0.4m, 0.3m, 0.2m, 0.1m, 0.05m, Sát tai, Điếc (cỡ chữ 8.5pt vừa khít ô)
 fn run_omr_hearing_tham_boxes(val: &str, is_pre_exam: bool) -> String {
     let labels = [">0.5m", "0.5m", "0.4m", "0.3m", "0.2m", "0.1m", "0.05m", "Sát tai", "Điếc"];
     let mut out = String::new();
@@ -486,8 +486,8 @@ fn run_omr_hearing_tham_boxes(val: &str, is_pre_exam: bool) -> String {
         } else {
             is_hearing_tham_match(val, i)
         };
-        out.push_str(&run_checkbox_sz(checked, Some(19)));
-        out.push_str(&run_text_sz(&format!("{} ", lbl), false, Some(19)));
+        out.push_str(&run_checkbox_sz(checked, Some(17)));
+        out.push_str(&run_text_sz(&format!("{} ", lbl), false, Some(17)));
     }
     out
 }
@@ -921,24 +921,26 @@ fn merge_document_xml(
         );
     }
 
-    // Khám lâm sàng - Thị lực (11 ô OMR: 0..=10/10) - Đẩy lề sát, dùng nhãn gọn MP / MT
+    // Khám lâm sàng - Thị lực (11 ô OMR: 0..=10/10) - Cài lề phân cấp rõ ràng (- Không kính: / - Có kính: và thụt lề Mắt phải / Mắt trái)
     let p_khong_kinh = format!(
-        "{}{}{}{}{}",
-        run_text("Kết quả khám thị lực:  Không kính: ", true),
+        "{}{}{}{}{}{}{}",
+        run_text("Kết quả khám thị lực:", true),
         run_br(),
-        run_omr_vision_boxes("  Mắt phải: ", parse_vision_val(&d.khong_kinh_mat_phai), pre_exam_only),
+        run_text("- Không kính:", true),
         run_br(),
-        run_omr_vision_boxes("  Mắt trái: ", parse_vision_val(&d.khong_kinh_mat_trai), pre_exam_only),
+        run_omr_vision_boxes("    Mắt phải: ", parse_vision_val(&d.khong_kinh_mat_phai), pre_exam_only),
+        run_br(),
+        run_omr_vision_boxes("    Mắt trái:  ", parse_vision_val(&d.khong_kinh_mat_trai), pre_exam_only),
     );
     xml = replace_para_by_id(&xml, "67E0EE1A", &p_khong_kinh);
 
     let p_co_kinh = format!(
         "{}{}{}{}{}",
-        run_text("Có kính: ", true),
+        run_text("- Có kính:", true),
         run_br(),
-        run_omr_vision_boxes("  Mắt phải: ", parse_vision_val(&d.co_kinh_mat_phai), pre_exam_only),
+        run_omr_vision_boxes("    Mắt phải: ", parse_vision_val(&d.co_kinh_mat_phai), pre_exam_only),
         run_br(),
-        run_omr_vision_boxes("  Mắt trái: ", parse_vision_val(&d.co_kinh_mat_trai), pre_exam_only),
+        run_omr_vision_boxes("    Mắt trái:  ", parse_vision_val(&d.co_kinh_mat_trai), pre_exam_only),
     );
     xml = replace_para_by_id(&xml, "3B1B5834", &p_co_kinh);
 
@@ -964,32 +966,26 @@ fn merge_document_xml(
 
     // Khám lâm sàng - Thính lực (Nói thường 9 mức, Nói thầm 9 mức OMR) - Đẩy lề sát, nhãn căn thẳng
     let p_tai_trai = format!(
-        "{}{}{}{}{}{}",
+        "{}{}{}{}{}{}{}",
         run_text("Tai trái:", true),
         run_br(),
-        run_text(" - Thường:  ", true),
+        run_text("  - Thường: ", true),
         run_omr_hearing_thuong_boxes(&d.tai_trai_noi_thuong, pre_exam_only),
         run_br(),
-        format!(
-            "{}{}",
-            run_text(" - Thầm:    ", true),
-            run_omr_hearing_tham_boxes(&d.tai_trai_noi_tham, pre_exam_only)
-        ),
+        run_text("  - Thầm:   ", true),
+        run_omr_hearing_tham_boxes(&d.tai_trai_noi_tham, pre_exam_only),
     );
     xml = replace_para_by_id(&xml, "7A0DA69A", &p_tai_trai);
 
     let p_tai_phai = format!(
-        "{}{}{}{}{}{}",
+        "{}{}{}{}{}{}{}",
         run_text("Tai phải:", true),
         run_br(),
-        run_text(" - Thường:  ", true),
+        run_text("  - Thường: ", true),
         run_omr_hearing_thuong_boxes(&d.tai_phai_noi_thuong, pre_exam_only),
         run_br(),
-        format!(
-            "{}{}",
-            run_text(" - Thầm:    ", true),
-            run_omr_hearing_tham_boxes(&d.tai_phai_noi_tham, pre_exam_only)
-        ),
+        run_text("  - Thầm:   ", true),
+        run_omr_hearing_tham_boxes(&d.tai_phai_noi_tham, pre_exam_only),
     );
     xml = replace_para_by_id(&xml, "78BD496B", &p_tai_phai);
 
@@ -1186,6 +1182,63 @@ fn merge_document_xml(
         );
     }
 
-    xml
+    // Đảm bảo tất cả bảng nhiều hàng đều có lặp lại tiêu đề khi qua trang (Repeat Header)
+    ensure_table_headers(xml)
+}
+
+/// Đảm bảo tất cả các bảng nhiều hàng trong tài liệu Word đều có <w:tblHeader/> và <w:cantSplit/>
+/// ở hàng đầu tiên (Header Row), giúp bảng tự động lặp lại tiêu đề khi nhảy sang trang mới.
+fn ensure_table_headers(mut doc_xml: String) -> String {
+    let mut search_pos = 0;
+    while let Some(tbl_start) = doc_xml[search_pos..].find("<w:tbl") {
+        let abs_tbl_start = search_pos + tbl_start;
+        let Some(tbl_end_rel) = doc_xml[abs_tbl_start..].find("</w:tbl>") else {
+            break;
+        };
+        let abs_tbl_end = abs_tbl_start + tbl_end_rel + "</w:tbl>".len();
+        let tbl_content = &doc_xml[abs_tbl_start..abs_tbl_end];
+
+        let tr_count = tbl_content.matches("<w:tr").count();
+        if tr_count > 1 {
+            if let Some(first_tr_rel) = tbl_content.find("<w:tr") {
+                let abs_first_tr = abs_tbl_start + first_tr_rel;
+                if let Some(first_tr_end_rel) = doc_xml[abs_first_tr..abs_tbl_end].find("</w:tr>") {
+                    let abs_first_tr_end = abs_first_tr + first_tr_end_rel + "</w:tr>".len();
+                    let first_tr_str = &doc_xml[abs_first_tr..abs_first_tr_end];
+
+                    let has_header = first_tr_str.contains("<w:tblHeader");
+                    let has_cant_split = first_tr_str.contains("<w:cantSplit");
+
+                    if !has_header || !has_cant_split {
+                        let mut to_add = String::new();
+                        if !has_header {
+                            to_add.push_str("<w:tblHeader/>");
+                        }
+                        if !has_cant_split {
+                            to_add.push_str("<w:cantSplit/>");
+                        }
+
+                        let modified_tr = if let Some(trpr_start) = first_tr_str.find("<w:trPr>") {
+                            let insert_pos = trpr_start + "<w:trPr>".len();
+                            format!("{}{}{}", &first_tr_str[..insert_pos], to_add, &first_tr_str[insert_pos..])
+                        } else if first_tr_str.contains("<w:trPr/>") {
+                            first_tr_str.replacen("<w:trPr/>", &format!("<w:trPr>{}</w:trPr>", to_add), 1)
+                        } else if let Some(gt_pos) = first_tr_str.find('>') {
+                            format!("{}> <w:trPr>{}</w:trPr>{}", &first_tr_str[..gt_pos], to_add, &first_tr_str[gt_pos + 1..])
+                        } else {
+                            first_tr_str.to_string()
+                        };
+
+                        let len_diff = modified_tr.len() as isize - first_tr_str.len() as isize;
+                        doc_xml.replace_range(abs_first_tr..abs_first_tr_end, &modified_tr);
+                        search_pos = (abs_tbl_end as isize + len_diff) as usize;
+                        continue;
+                    }
+                }
+            }
+        }
+        search_pos = abs_tbl_end;
+    }
+    doc_xml
 }
 
