@@ -50,3 +50,4 @@ pub fn delete_classification(conn: &Connection, id: &str) -> Result<(), rusqlite
     conn.execute("DELETE FROM qd1613_classifications WHERE id = ?", params![id])?;
     Ok(())
 }
+

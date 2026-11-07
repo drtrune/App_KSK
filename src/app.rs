@@ -149,8 +149,8 @@ impl KskApp {
     }
 
     pub fn handle_login(&mut self) {
-        let u = self.login_user.trim();
-        let p = self.login_pass.trim();
+        let u = self.login_user.trim().to_string();
+        let p = self.login_pass.trim().to_string();
 
         if let Ok(users) = db::users::load_users(&self.conn) {
             if let Some(user) = users.into_iter().find(|user| user.username == u) {
@@ -158,11 +158,18 @@ impl KskApp {
                     self.login_error = Some("Tài khoản này đã bị khóa.".into());
                     return;
                 }
-                let hashed = crate::auth::hash_password(p);
-                if user.password == hashed {
+                let hashed = crate::auth::hash_password(&p);
+                if user.password == hashed || user.password == p {
                     self.logged_in = true;
                     self.login_error = None;
                     self.login_pass.clear();
+
+                    // Tự động nâng cấp mật khẩu sang dạng hash nếu đang là plain text
+                    if user.password == p {
+                        let mut upgraded_user = user.clone();
+                        upgraded_user.password = hashed;
+                        let _ = db::users::save_user(&self.conn, &upgraded_user);
+                    }
 
                     // Load role permissions
                     if let Ok(roles) = db::users::load_roles(&self.conn) {

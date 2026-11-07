@@ -31,3 +31,4 @@ pub struct Qd1613CatalogData {
     pub diseases: Vec<QdDisease>,
     pub classifications: Vec<QdClassification>,
 }
+

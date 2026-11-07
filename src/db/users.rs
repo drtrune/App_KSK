@@ -87,3 +87,4 @@ pub fn delete_role(conn: &Connection, code: &str) -> Result<(), rusqlite::Error>
     conn.execute("DELETE FROM roles WHERE code = ?", params![code])?;
     Ok(())
 }
+

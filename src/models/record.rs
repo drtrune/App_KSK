@@ -292,3 +292,4 @@ pub struct RecordItem {
     pub status: i32, // 0: Đang soạn, 1: Đã xác nhận / Khóa
     pub data: KskRecordPayload,
 }
+

@@ -44,3 +44,4 @@ pub fn delete_record(conn: &Connection, id: i64) -> Result<(), rusqlite::Error> 
     conn.execute("DELETE FROM records WHERE id = ?", params![id])?;
     Ok(())
 }
+

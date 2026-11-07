@@ -44,3 +44,4 @@ pub fn delete_catalog(conn: &Connection, id: i64) -> Result<(), rusqlite::Error>
     conn.execute("DELETE FROM catalogs WHERE id = ?", params![id])?;
     Ok(())
 }
+

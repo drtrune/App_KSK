@@ -11,3 +11,4 @@ pub fn hash_password(plain: &str) -> String {
     let res = h.finalize();
     res.iter().map(|b| format!("{:02x}", b)).collect()
 }
+

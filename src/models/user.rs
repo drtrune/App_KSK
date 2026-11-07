@@ -18,3 +18,4 @@ pub struct RoleRecord {
     pub is_system: bool,
     pub permissions: Vec<String>,
 }
+

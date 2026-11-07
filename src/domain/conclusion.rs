@@ -192,3 +192,4 @@ pub fn update_global_health_score(form: &mut KskRecordPayload) {
     let max_val = scores.into_iter().max().unwrap_or(1).clamp(1, 5);
     form.phan_loai_sk = max_val;
 }
+

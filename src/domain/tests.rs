@@ -42,3 +42,4 @@ mod tests {
         assert_eq!(sc2, 2);
     }
 }
+

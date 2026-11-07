@@ -56,3 +56,4 @@ pub fn apply_theme(ctx: &egui::Context, dark: bool) {
     visuals.window_rounding = 6.0.into();
     ctx.set_visuals(visuals);
 }
+

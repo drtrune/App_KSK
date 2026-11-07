@@ -85,3 +85,4 @@ pub fn run_migrations(conn: &Connection) -> Result<(), rusqlite::Error> {
 
     Ok(())
 }
+

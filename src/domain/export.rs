@@ -78,3 +78,4 @@ pub fn export_records_to_csv(records: &[RecordItem]) -> Result<String, String> {
     let bytes = wtr.into_inner().map_err(|e| e.to_string())?;
     String::from_utf8(bytes).map_err(|e| e.to_string())
 }
+

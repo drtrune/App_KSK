@@ -37,3 +37,4 @@ pub fn calculate_age(ngay_sinh: &str) -> u32 {
     }
     30 // Mặc định 30 nếu chưa nhập ngày sinh
 }
+
