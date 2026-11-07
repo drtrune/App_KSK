@@ -833,6 +833,7 @@ struct KskApp {
     noi_khoa_sub_tab: usize, // 0..7
     qd_rule_filter_spec: String,
     qd_rule_search: String,
+    exam_simple_mode: bool, // false: Chế độ danh mục QĐ 1613, true: Chế độ đơn giản
 }
 
 impl KskApp {
@@ -948,6 +949,7 @@ impl KskApp {
             noi_khoa_sub_tab: 0,
             qd_rule_filter_spec: "all".into(),
             qd_rule_search: "".into(),
+            exam_simple_mode: false,
         };
 
         app.seed_default_catalogs();
@@ -1509,6 +1511,296 @@ impl KskApp {
     }
 
     // ===================================================================
+    // UI: RENDER CHẾ ĐỘ ĐƠN GIẢN (NHẬP NHANH PHÂN LOẠI & KẾT LUẬN)
+    // ===================================================================
+    fn render_specialty_simple(&mut self, ui: &mut egui::Ui, spec_id: &str, parent_title: Option<&str>) {
+        let spec_name = self.qd_specialties.iter().find(|s| s.id == spec_id).map(|s| s.name.clone()).unwrap_or_else(|| spec_id.to_string());
+
+        // 1. TIÊU ĐỀ CHUYÊN KHOA & NÚT CHUYỂN SANG CHẾ ĐỘ DANH MỤC
+        ui.horizontal(|ui| {
+            ui.vertical(|ui| {
+                let title = if let Some(p) = parent_title {
+                    format!("Chuyên khoa: {} › {}", p, spec_name)
+                } else {
+                    format!("Chuyên khoa: {}", spec_name)
+                };
+                ui.heading(egui::RichText::new(title).strong().size(17.0));
+                ui.colored_label(egui::Color32::from_rgb(100, 116, 139), "⚡ Chế độ đơn giản: Bác sĩ trực tiếp chọn mức phân loại và nhập kết luận / bệnh lý.");
+            });
+
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui.button(egui::RichText::new("📚 Mở Chế độ Danh mục QĐ 1613").strong().color(egui::Color32::from_rgb(14, 165, 233))).clicked() {
+                    self.exam_simple_mode = false;
+                }
+            });
+        });
+
+        ui.add_space(8.0);
+
+        // 2. CÁC CHỈ SỐ ĐẶC THÙ RIÊNG THEO CHUYÊN KHOA
+        if spec_id == "CK_MAT" {
+            egui::Frame::group(ui.style())
+                .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(239, 246, 255) })
+                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(147, 197, 253)))
+                .inner_margin(12.0)
+                .show(ui, |ui| {
+                    let base_v = calc_vision_score(&self.form.khong_kinh_mat_phai, &self.form.khong_kinh_mat_trai);
+                    let has_gl = !self.form.co_kinh_mat_phai.trim().is_empty() || !self.form.co_kinh_mat_trai.trim().is_empty();
+                    let eff_v = if has_gl { calc_vision_score(&self.form.co_kinh_mat_phai, &self.form.co_kinh_mat_trai) } else { base_v };
+
+                    ui.horizontal(|ui| {
+                        ui.strong(egui::RichText::new("👁 Đo thị lực mắt").size(14.0).color(egui::Color32::from_rgb(29, 78, 216)));
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            ui_score_badge(ui, eff_v, false);
+                            ui.strong(format!("Gợi ý phân loại thị lực: Loại {}", eff_v));
+                        });
+                    });
+                    ui.add_space(6.0);
+                    egui::Grid::new("grid_vision_simple").num_columns(3).spacing([20.0, 8.0]).show(ui, |ui| {
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Tay thuận:").strong().size(12.0));
+                            ui.horizontal(|ui| {
+                                ui.radio_value(&mut self.form.dominant_hand, "right".into(), "Phải");
+                                ui.radio_value(&mut self.form.dominant_hand, "left".into(), "Trái");
+                            });
+                        });
+
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Thị lực KHÔNG KÍNH * (bắt buộc):").strong().size(12.0));
+                            ui.horizontal(|ui| {
+                                ui.label("MP:");
+                                ui.add(egui::TextEdit::singleline(&mut self.form.khong_kinh_mat_phai).desired_width(50.0));
+                                ui.label("/10   MT:");
+                                ui.add(egui::TextEdit::singleline(&mut self.form.khong_kinh_mat_trai).desired_width(50.0));
+                                ui.label("/10");
+                            });
+                        });
+
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Thị lực CÓ KÍNH (không bắt buộc):").strong().size(12.0));
+                            ui.horizontal(|ui| {
+                                ui.label("MP:");
+                                ui.add(egui::TextEdit::singleline(&mut self.form.co_kinh_mat_phai).desired_width(50.0));
+                                ui.label("/10   MT:");
+                                ui.add(egui::TextEdit::singleline(&mut self.form.co_kinh_mat_trai).desired_width(50.0));
+                                ui.label("/10");
+                            });
+                        });
+                    });
+                });
+            ui.add_space(8.0);
+        } else if spec_id == "CK_TMH" {
+            egui::Frame::group(ui.style())
+                .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(254, 243, 199) })
+                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(252, 211, 77)))
+                .inner_margin(12.0)
+                .show(ui, |ui| {
+                    let (h_score, _h_desc) = calc_hearing_from_distances(
+                        &self.form.tai_phai_noi_thuong, &self.form.tai_trai_noi_thuong,
+                        &self.form.tai_phai_noi_tham, &self.form.tai_trai_noi_tham,
+                    );
+
+                    ui.horizontal(|ui| {
+                        ui.strong(egui::RichText::new("👂 Đo sức nghe Tai Mũi Họng").size(14.0).color(egui::Color32::from_rgb(180, 83, 9)));
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            ui_score_badge(ui, h_score, false);
+                            ui.strong(format!("Gợi ý phân loại: Loại {}", h_score));
+                        });
+                    });
+                    ui.add_space(6.0);
+                    egui::Grid::new("grid_hearing_simple").num_columns(2).spacing([28.0, 8.0]).show(ui, |ui| {
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Tiếng nói thường (chuẩn 5m):").strong().size(12.0));
+                            ui.horizontal(|ui| {
+                                ui.label("P:");
+                                ui.add(egui::TextEdit::singleline(&mut self.form.tai_phai_noi_thuong).desired_width(50.0));
+                                ui.label("m   T:");
+                                ui.add(egui::TextEdit::singleline(&mut self.form.tai_trai_noi_thuong).desired_width(50.0));
+                                ui.label("m");
+                            });
+                        });
+
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("Tiếng nói thầm:").strong().size(12.0));
+                            ui.horizontal(|ui| {
+                                ui.label("P:");
+                                ui.add(egui::TextEdit::singleline(&mut self.form.tai_phai_noi_tham).desired_width(50.0));
+                                ui.label("m   T:");
+                                ui.add(egui::TextEdit::singleline(&mut self.form.tai_trai_noi_tham).desired_width(50.0));
+                                ui.label("m");
+                            });
+                        });
+                    });
+                });
+            ui.add_space(8.0);
+        } else if spec_id == "CK_NOI_TIM_MACH" {
+            let age = calculate_age(&self.form.ngay_sinh);
+            let (bp_score, bp_desc) = calc_blood_pressure_score(&self.form.huyet_ap, age);
+            let (pulse_score, pulse_desc) = calc_pulse_score(&self.form.mach);
+
+            egui::Frame::group(ui.style())
+                .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(255, 241, 242) })
+                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(254, 205, 211)))
+                .inner_margin(12.0)
+                .show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.strong(egui::RichText::new("❤️ Chỉ số Tim Mạch (từ Thể lực & Tuổi)").size(14.0).color(egui::Color32::from_rgb(190, 18, 60)));
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            ui.label("Mạch:");
+                            ui_score_badge(ui, pulse_score, false);
+                            ui.label(" | Huyết áp:");
+                            ui_score_badge(ui, bp_score, false);
+                        });
+                    });
+                    ui.add_space(6.0);
+                    ui.horizontal(|ui| {
+                        let bp_txt = if self.form.huyet_ap.trim().is_empty() { "120/80" } else { &self.form.huyet_ap };
+                        let pulse_txt = if self.form.mach.trim().is_empty() { "75" } else { &self.form.mach };
+                        ui.label(format!("Tuổi: {} | HA: {} mmHg ({}) | Mạch: {} lần/phút ({})", age, bp_txt, bp_desc, pulse_txt, pulse_desc));
+                    });
+                });
+            ui.add_space(8.0);
+        } else if spec_id == "CK_RHM" {
+            egui::Frame::group(ui.style())
+                .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else { egui::Color32::from_rgb(248, 250, 252) })
+                .stroke(egui::Stroke::new(1.0_f32, egui::Color32::from_rgb(226, 232, 240)))
+                .inner_margin(12.0)
+                .show(ui, |ui| {
+                    ui.strong("🦷 Khám Răng Hàm Mặt chi tiết:");
+                    ui.add_space(4.0);
+                    egui::Grid::new("grid_rhm_simple").num_columns(2).spacing([16.0, 6.0]).show(ui, |ui| {
+                        ui.label("Hàm trên:");
+                        ui.add(egui::TextEdit::singleline(&mut self.form.ham_tren).desired_width(280.0));
+                        ui.end_row();
+
+                        ui.label("Hàm dưới:");
+                        ui.add(egui::TextEdit::singleline(&mut self.form.ham_duoi).desired_width(280.0));
+                        ui.end_row();
+                    });
+                });
+            ui.add_space(8.0);
+        }
+
+        // 3. KHỐI NHẬP LIỆU CHÍNH ĐƠN GIẢN: PHÂN LOẠI & KẾT LUẬN
+        let mut cur_score = match spec_id {
+            "CK_NOI_TIM_MACH" => self.form.noi_khoa_tuan_hoan_pl,
+            "CK_NOI_HO_HAP" => self.form.noi_khoa_ho_hap_pl,
+            "CK_NOI_TIEU_HOA" => self.form.noi_khoa_tieu_hoa_pl,
+            "CK_NOI_TIET_NIEU_SD" => self.form.noi_khoa_than_tn_sd_pl,
+            "CK_NOI_THAN_KINH" => self.form.noi_khoa_than_kinh_pl,
+            "CK_NOI_TAM_THAN" => self.form.noi_khoa_tam_than_pl,
+            "CK_NOI_NOITIET" => self.form.noi_khoa_noi_tiet_pl,
+            "CK_NOI_CO_XUONG_KHOP" => self.form.noi_khoa_co_xuong_khop_pl,
+            "CK_NGOAI" => self.form.kham_ngoai_khoa_pl,
+            "CK_DA_LIEU" => self.form.kham_da_lieu_pl,
+            "CK_PHU_SAN" => self.form.kham_san_phu_khoa_pl,
+            "CK_MAT" => self.form.kham_mat_pl,
+            "CK_TMH" => self.form.kham_tai_mui_hong_pl,
+            "CK_RHM" => self.form.kham_rang_ham_mat_pl,
+            _ => 1,
+        };
+
+        let mut cur_concl = match spec_id {
+            "CK_NOI_TIM_MACH" => self.form.noi_khoa_tuan_hoan.clone(),
+            "CK_NOI_HO_HAP" => self.form.noi_khoa_ho_hap.clone(),
+            "CK_NOI_TIEU_HOA" => self.form.noi_khoa_tieu_hoa.clone(),
+            "CK_NOI_TIET_NIEU_SD" => self.form.noi_khoa_than_tn_sd.clone(),
+            "CK_NOI_THAN_KINH" => self.form.noi_khoa_than_kinh.clone(),
+            "CK_NOI_TAM_THAN" => self.form.noi_khoa_tam_than.clone(),
+            "CK_NOI_NOITIET" => self.form.noi_khoa_noi_tiet.clone(),
+            "CK_NOI_CO_XUONG_KHOP" => self.form.noi_khoa_co_xuong_khop.clone(),
+            "CK_NGOAI" => self.form.ket_qua_kham_ngoai_khoa.clone(),
+            "CK_DA_LIEU" => self.form.ket_qua_kham_da_lieu.clone(),
+            "CK_PHU_SAN" => self.form.ket_qua_kham_san_phu_khoa.clone(),
+            "CK_MAT" => self.form.benh_khac_mat.clone(),
+            "CK_TMH" => self.form.benh_khac_tai_mui_hong.clone(),
+            "CK_RHM" => self.form.benh_khac_rang_ham_mat.clone(),
+            _ => "Bình thường".into(),
+        };
+
+        let mut changed = false;
+
+        egui::Frame::group(ui.style())
+            .fill(if self.dark_mode { egui::Color32::from_rgb(30, 41, 59) } else {
+                if cur_score > 1 { egui::Color32::from_rgb(254, 242, 242) } else { egui::Color32::from_rgb(240, 253, 250) }
+            })
+            .stroke(egui::Stroke::new(1.5_f32, if cur_score > 1 { egui::Color32::from_rgb(248, 113, 113) } else { egui::Color32::from_rgb(94, 234, 212) }))
+            .inner_margin(16.0)
+            .show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    ui.strong(egui::RichText::new("⚖ Phân loại chuyên khoa:").size(14.5));
+                    ui_score_badge(ui, cur_score, false);
+                    ui.add_space(12.0);
+                    for n in 1..=5 {
+                        let label_text = match n {
+                            1 => "Loại 1 (Rất khỏe / Bình thường)",
+                            2 => "Loại 2 (Khỏe)",
+                            3 => "Loại 3 (Trung bình)",
+                            4 => "Loại 4 (Yếu)",
+                            _ => "Loại 5 (Rất yếu)",
+                        };
+                        if ui.radio_value(&mut cur_score, n, label_text).clicked() {
+                            changed = true;
+                        }
+                    }
+                });
+
+                ui.add_space(12.0);
+
+                ui.horizontal(|ui| {
+                    ui.strong(egui::RichText::new("📝 Kết luận / Bệnh lý ghi nhận:").size(14.5));
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        if ui.button("Xóa trắng").clicked() {
+                            cur_concl = "".into();
+                            changed = true;
+                        }
+                        if ui.button("Chưa phát hiện bệnh").clicked() {
+                            cur_concl = "Chưa phát hiện bệnh lý".into();
+                            cur_score = 1;
+                            changed = true;
+                        }
+                        if ui.button(egui::RichText::new("✔ Bình thường").strong().color(egui::Color32::from_rgb(16, 185, 129))).clicked() {
+                            cur_concl = "Bình thường".into();
+                            cur_score = 1;
+                            changed = true;
+                        }
+                    });
+                });
+
+                ui.add_space(6.0);
+                if ui.add(egui::TextEdit::multiline(&mut cur_concl)
+                    .desired_rows(3)
+                    .desired_width(ui.available_width())
+                    .hint_text("Nhập tên bệnh lý, tổn thương hoặc kết luận khám của chuyên khoa này..."))
+                    .changed()
+                {
+                    changed = true;
+                }
+            });
+
+        if changed {
+            match spec_id {
+                "CK_NOI_TIM_MACH" => { self.form.noi_khoa_tuan_hoan = cur_concl; self.form.noi_khoa_tuan_hoan_pl = cur_score; }
+                "CK_NOI_HO_HAP" => { self.form.noi_khoa_ho_hap = cur_concl; self.form.noi_khoa_ho_hap_pl = cur_score; }
+                "CK_NOI_TIEU_HOA" => { self.form.noi_khoa_tieu_hoa = cur_concl; self.form.noi_khoa_tieu_hoa_pl = cur_score; }
+                "CK_NOI_TIET_NIEU_SD" => { self.form.noi_khoa_than_tn_sd = cur_concl; self.form.noi_khoa_than_tn_sd_pl = cur_score; }
+                "CK_NOI_THAN_KINH" => { self.form.noi_khoa_than_kinh = cur_concl; self.form.noi_khoa_than_kinh_pl = cur_score; }
+                "CK_NOI_TAM_THAN" => { self.form.noi_khoa_tam_than = cur_concl; self.form.noi_khoa_tam_than_pl = cur_score; }
+                "CK_NOI_NOITIET" => { self.form.noi_khoa_noi_tiet = cur_concl; self.form.noi_khoa_noi_tiet_pl = cur_score; }
+                "CK_NOI_CO_XUONG_KHOP" => { self.form.noi_khoa_co_xuong_khop = cur_concl; self.form.noi_khoa_co_xuong_khop_pl = cur_score; }
+                "CK_NGOAI" => { self.form.ket_qua_kham_ngoai_khoa = cur_concl; self.form.kham_ngoai_khoa_pl = cur_score; }
+                "CK_DA_LIEU" => { self.form.ket_qua_kham_da_lieu = cur_concl; self.form.kham_da_lieu_pl = cur_score; }
+                "CK_PHU_SAN" => { self.form.ket_qua_kham_san_phu_khoa = cur_concl; self.form.kham_san_phu_khoa_pl = cur_score; }
+                "CK_MAT" => { self.form.benh_khac_mat = cur_concl; self.form.kham_mat_pl = cur_score; }
+                "CK_TMH" => { self.form.benh_khac_tai_mui_hong = cur_concl; self.form.kham_tai_mui_hong_pl = cur_score; }
+                "CK_RHM" => { self.form.benh_khac_rang_ham_mat = cur_concl; self.form.kham_rang_ham_mat_pl = cur_score; }
+                _ => {}
+            }
+            self.update_global_health_score();
+        }
+    }
+
+    // ===================================================================
     // UI: RENDER FULL CONTENT CHO MỖI CHUYÊN KHOA THEO QĐ 1613/BYT
     // ===================================================================
     fn render_qd1613_specialty(&mut self, ui: &mut egui::Ui, spec_id: &str, parent_title: Option<&str>) {
@@ -1528,6 +1820,9 @@ impl KskApp {
             });
 
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui.button(egui::RichText::new("⚡ Sang Chế độ Đơn giản").strong().color(egui::Color32::from_rgb(14, 165, 233))).clicked() {
+                    self.exam_simple_mode = true;
+                }
                 if ui.button("Thu gọn tất cả").clicked() {
                     for d in &diseases {
                         self.expanded_diseases.remove(&d.id);
@@ -2835,6 +3130,29 @@ impl eframe::App for KskApp {
                         });
                         ui.separator();
 
+                        // THANH ĐIỀU HƯỚNG CHỌN CHẾ ĐỘ: ĐƠN GIẢN vs DANH MỤC QĐ 1613
+                        ui.horizontal(|ui| {
+                            ui.label(egui::RichText::new("Chế độ khám:").size(13.0).strong());
+                            let simple_btn = egui::RichText::new("⚡ Chế độ đơn giản (Nhập nhanh)").size(13.0);
+                            let catalog_btn = egui::RichText::new("📚 Chế độ danh mục bệnh (QĐ 1613)").size(13.0);
+
+                            if ui.selectable_label(self.exam_simple_mode, simple_btn).clicked() {
+                                self.exam_simple_mode = true;
+                            }
+                            if ui.selectable_label(!self.exam_simple_mode, catalog_btn).clicked() {
+                                self.exam_simple_mode = false;
+                            }
+
+                            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                if self.exam_simple_mode {
+                                    ui.colored_label(egui::Color32::from_rgb(14, 165, 233), "Chế độ: Bác sĩ trực tiếp chọn phân loại và gõ kết luận");
+                                } else {
+                                    ui.colored_label(egui::Color32::from_rgb(16, 185, 129), "Chế độ: Đầy đủ danh mục bệnh tật theo chuẩn QĐ 1613");
+                                }
+                            });
+                        });
+                        ui.separator();
+
                         match self.kham_sub_tab {
                             // THỂ LỰC
                             0 => {
@@ -2914,7 +3232,11 @@ impl eframe::App for KskApp {
                                     ui.separator();
 
                                     let (_, cur_spec_id, _) = noi_subtabs[self.noi_khoa_sub_tab];
-                                    self.render_qd1613_specialty(ui, cur_spec_id, Some("Nội khoa"));
+                                    if self.exam_simple_mode {
+                                        self.render_specialty_simple(ui, cur_spec_id, Some("Nội khoa"));
+                                    } else {
+                                        self.render_qd1613_specialty(ui, cur_spec_id, Some("Nội khoa"));
+                                    }
                                 });
                             }
 
@@ -2922,7 +3244,11 @@ impl eframe::App for KskApp {
                             2 => {
                                 let enabled = self.can_edit_dept("ngoai") || self.current_role == "admin";
                                 ui.add_enabled_ui(enabled, |ui| {
-                                    self.render_qd1613_specialty(ui, "CK_NGOAI", None);
+                                    if self.exam_simple_mode {
+                                        self.render_specialty_simple(ui, "CK_NGOAI", None);
+                                    } else {
+                                        self.render_qd1613_specialty(ui, "CK_NGOAI", None);
+                                    }
                                 });
                             }
 
@@ -2930,7 +3256,11 @@ impl eframe::App for KskApp {
                             3 => {
                                 let enabled = self.can_edit_dept("dalieu") || self.current_role == "admin";
                                 ui.add_enabled_ui(enabled, |ui| {
-                                    self.render_qd1613_specialty(ui, "CK_DA_LIEU", None);
+                                    if self.exam_simple_mode {
+                                        self.render_specialty_simple(ui, "CK_DA_LIEU", None);
+                                    } else {
+                                        self.render_qd1613_specialty(ui, "CK_DA_LIEU", None);
+                                    }
                                 });
                             }
 
@@ -2938,7 +3268,11 @@ impl eframe::App for KskApp {
                             4 => {
                                 let enabled = self.can_edit_dept("san") || self.current_role == "admin";
                                 ui.add_enabled_ui(enabled, |ui| {
-                                    self.render_qd1613_specialty(ui, "CK_PHU_SAN", None);
+                                    if self.exam_simple_mode {
+                                        self.render_specialty_simple(ui, "CK_PHU_SAN", None);
+                                    } else {
+                                        self.render_qd1613_specialty(ui, "CK_PHU_SAN", None);
+                                    }
                                 });
                             }
 
@@ -2946,7 +3280,11 @@ impl eframe::App for KskApp {
                             5 => {
                                 let enabled = self.can_edit_dept("mat") || self.current_role == "admin";
                                 ui.add_enabled_ui(enabled, |ui| {
-                                    self.render_qd1613_specialty(ui, "CK_MAT", None);
+                                    if self.exam_simple_mode {
+                                        self.render_specialty_simple(ui, "CK_MAT", None);
+                                    } else {
+                                        self.render_qd1613_specialty(ui, "CK_MAT", None);
+                                    }
                                 });
                             }
 
@@ -2954,7 +3292,11 @@ impl eframe::App for KskApp {
                             6 => {
                                 let enabled = self.can_edit_dept("tmh") || self.current_role == "admin";
                                 ui.add_enabled_ui(enabled, |ui| {
-                                    self.render_qd1613_specialty(ui, "CK_TMH", None);
+                                    if self.exam_simple_mode {
+                                        self.render_specialty_simple(ui, "CK_TMH", None);
+                                    } else {
+                                        self.render_qd1613_specialty(ui, "CK_TMH", None);
+                                    }
                                 });
                             }
 
@@ -2962,7 +3304,11 @@ impl eframe::App for KskApp {
                             7 => {
                                 let enabled = self.can_edit_dept("rhm") || self.current_role == "admin";
                                 ui.add_enabled_ui(enabled, |ui| {
-                                    self.render_qd1613_specialty(ui, "CK_RHM", None);
+                                    if self.exam_simple_mode {
+                                        self.render_specialty_simple(ui, "CK_RHM", None);
+                                    } else {
+                                        self.render_qd1613_specialty(ui, "CK_RHM", None);
+                                    }
                                 });
                             }
 
