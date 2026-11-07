@@ -1678,7 +1678,7 @@ impl KskApp {
             ui.add_space(8.0);
         }
 
-        // 4. BẢNG ĐO TIM MẠCH NẾU LÀ NỘI KHOA TIM MẠCH (CK_NOI_TIM_MACH): TỰ TÍNH THEO ĐỘ TUỔI
+        // 4. BẢNG HIỂN THỊ TIM MẠCH NẾU LÀ NỘI KHOA TIM MẠCH (CK_NOI_TIM_MACH): TỰ TÍNH THEO ĐỘ TUỔI VÀ DỮ LIỆU THỂ LỰC
         let age = calculate_age(&self.form.ngay_sinh);
         let (bp_score, bp_desc) = calc_blood_pressure_score(&self.form.huyet_ap, age);
         let (pulse_score, pulse_desc) = calc_pulse_score(&self.form.mach);
@@ -1690,7 +1690,7 @@ impl KskApp {
                 .inner_margin(12.0)
                 .show(ui, |ui| {
                     ui.horizontal(|ui| {
-                        ui.strong(egui::RichText::new("❤️ Đo & Phân loại Tim Mạch tự động (theo độ tuổi)").size(14.0).color(egui::Color32::from_rgb(190, 18, 60)));
+                        ui.strong(egui::RichText::new("❤️ Phân loại Tim Mạch tự động (theo Độ tuổi & Chỉ số Thể lực)").size(14.0).color(egui::Color32::from_rgb(190, 18, 60)));
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             ui.label("Mạch:");
                             ui_score_badge(ui, pulse_score, false);
@@ -1703,32 +1703,32 @@ impl KskApp {
                     egui::Grid::new("grid_tim_mach_auto").num_columns(3).spacing([24.0, 8.0]).show(ui, |ui| {
                         ui.vertical(|ui| {
                             ui.label(egui::RichText::new("Độ tuổi bệnh nhân:").strong().size(12.0));
-                            ui.colored_label(egui::Color32::from_rgb(190, 18, 60), egui::RichText::new(format!("{} tuổi", age)).strong());
+                            ui.colored_label(egui::Color32::from_rgb(190, 18, 60), egui::RichText::new(format!("{} tuổi", age)).strong().size(13.0));
                             ui.weak(format!("(tính từ ngày sinh: {})", if self.form.ngay_sinh.is_empty() { "mặc định" } else { &self.form.ngay_sinh }));
                         });
 
                         ui.vertical(|ui| {
-                            ui.label(egui::RichText::new("Huyết áp (mmHg):").strong().size(12.0));
+                            ui.label(egui::RichText::new("Huyết áp (lấy từ Thể lực):").strong().size(12.0));
                             ui.horizontal(|ui| {
-                                if ui.add(egui::TextEdit::singleline(&mut self.form.huyet_ap).desired_width(100.0).hint_text("120/80")).changed() {
-                                    self.sync_specialty_result(spec_id);
-                                }
-                                ui.colored_label(egui::Color32::GRAY, "(Tâm thu / Tâm trương)");
+                                let bp_display = if self.form.huyet_ap.trim().is_empty() { "120/80" } else { &self.form.huyet_ap };
+                                ui.strong(egui::RichText::new(format!("{} mmHg", bp_display)).size(13.5).color(egui::Color32::from_rgb(159, 18, 57)));
+                                ui_score_badge(ui, bp_score, false);
                             });
                             ui.colored_label(egui::Color32::from_rgb(159, 18, 57), egui::RichText::new(&bp_desc).size(11.0));
                         });
 
                         ui.vertical(|ui| {
-                            ui.label(egui::RichText::new("Tần số tim / Mạch:").strong().size(12.0));
+                            ui.label(egui::RichText::new("Tần số tim / Mạch (lấy từ Thể lực):").strong().size(12.0));
                             ui.horizontal(|ui| {
-                                if ui.add(egui::TextEdit::singleline(&mut self.form.mach).desired_width(70.0).hint_text("75")).changed() {
-                                    self.sync_specialty_result(spec_id);
-                                }
-                                ui.label("lần/phút");
+                                let mach_display = if self.form.mach.trim().is_empty() { "75" } else { &self.form.mach };
+                                ui.strong(egui::RichText::new(format!("{} lần/phút", mach_display)).size(13.5).color(egui::Color32::from_rgb(159, 18, 57)));
+                                ui_score_badge(ui, pulse_score, false);
                             });
                             ui.colored_label(egui::Color32::from_rgb(159, 18, 57), egui::RichText::new(&pulse_desc).size(11.0));
                         });
                     });
+                    ui.add_space(4.0);
+                    ui.colored_label(egui::Color32::from_rgb(100, 116, 139), egui::RichText::new("*(Chỉ số Huyết áp và Mạch được tự động đồng bộ từ mục Khám Thể Lực)*").italics().size(11.0));
                 });
             ui.add_space(8.0);
         }
@@ -1934,7 +1934,20 @@ impl KskApp {
             }
         }
 
-        ui.add_space(10.0);
+        ui.add_space(8.0);
+        // NÚT BỔ SUNG: THÊM BỆNH LÝ NGOÀI DANH MỤC QĐ 1613
+        ui.horizontal(|ui| {
+            ui.label(egui::RichText::new("Bệnh ngoài danh mục QĐ 1613:").size(12.5).color(egui::Color32::from_rgb(100, 116, 139)));
+            if ui.button(egui::RichText::new("➕ Nhập bệnh ngoài danh sách").strong().color(egui::Color32::from_rgb(14, 165, 233))).clicked() {
+                self.form.specialty_extras.entry(spec_id.to_string()).or_default().manual_rows.push(ManualConclusionRow {
+                    classification: 2,
+                    classification_id: "Ngoài danh mục".into(),
+                    manifestation: "".into(),
+                });
+                self.sync_specialty_result(spec_id);
+            }
+        });
+        ui.add_space(8.0);
 
         // 6. KHỐI KẾT LUẬN CHUYÊN KHOA (BÌNH THƯỜNG / CHI TIẾT BỆNH LÝ)
         let extra = self.form.specialty_extras.entry(spec_id.to_string()).or_default().clone();
@@ -2005,7 +2018,17 @@ impl KskApp {
                         });
                     });
                     ui.add_space(4.0);
-                    ui.colored_label(egui::Color32::from_rgb(100, 116, 139), egui::RichText::new("* Kết luận được hệ thống tự động xác định. Nếu phát hiện bất thường, tick chọn tiêu chuẩn phù hợp ở các mục bên trên.").italics().size(11.0));
+                    ui.horizontal(|ui| {
+                        ui.colored_label(egui::Color32::from_rgb(100, 116, 139), egui::RichText::new("* Kết luận được hệ thống tự động xác định. Nếu phát hiện bất thường ngoài danh mục:").italics().size(11.0));
+                        if ui.button(egui::RichText::new("➕ Nhập bệnh ngoài danh sách").strong().color(egui::Color32::from_rgb(180, 83, 9))).clicked() {
+                            self.form.specialty_extras.entry(spec_id.to_string()).or_default().manual_rows.push(ManualConclusionRow {
+                                classification: 2,
+                                classification_id: "Ngoài danh mục".into(),
+                                manifestation: "".into(),
+                            });
+                            self.sync_specialty_result(spec_id);
+                        }
+                    });
                 });
         } else {
             // Trường hợp có bệnh lý > Loại 1: HIỂN THỊ BẢNG KẾT LUẬN & TEXT THỂ HIỆN CHO PHÉP SỬA
@@ -2024,7 +2047,7 @@ impl KskApp {
 
                     ui.separator();
 
-                    ui.strong("CÁC BỆNH GHI NHẬN (PHÂN LOẠI > 1):");
+                    ui.strong("CÁC BỆNH GHI NHẬN (THEO DANH MỤC & NGOÀI DANH SÁCH):");
                     ui.add_space(4.0);
 
                     let mut changed_anything = false;
@@ -2032,8 +2055,8 @@ impl KskApp {
                     egui::Grid::new(format!("grid_concl_{}", spec_id)).striped(true).min_col_width(70.0).spacing([12.0, 8.0]).show(ui, |ui| {
                         ui.strong("STT");
                         ui.strong("Phân loại");
-                        ui.strong("Text phân loại (theo danh mục)");
-                        ui.strong("Text thể hiện (chỉnh sửa được)");
+                        ui.strong("Nguồn / Tiêu chuẩn");
+                        ui.strong("Tên bệnh / Thể hiện (chỉnh sửa được)");
                         ui.strong("Hành động");
                         ui.end_row();
 
@@ -2062,7 +2085,7 @@ impl KskApp {
                             stt += 1;
                         }
 
-                        // Các hàng nhập tay
+                        // Các hàng nhập tay (Bệnh ngoài danh sách)
                         let mut remove_idx = None;
                         let extra_ref = self.form.specialty_extras.entry(spec_id.to_string()).or_default();
                         for (idx, row) in extra_ref.manual_rows.iter_mut().enumerate() {
@@ -2079,11 +2102,11 @@ impl KskApp {
                                         }
                                     });
 
-                                ui.label(&row.classification_id);
-                                if ui.add(egui::TextEdit::singleline(&mut row.manifestation).desired_width(320.0)).changed() {
+                                ui.colored_label(egui::Color32::from_rgb(180, 83, 9), egui::RichText::new("Ngoài danh mục").strong().size(11.5));
+                                if ui.add(egui::TextEdit::singleline(&mut row.manifestation).hint_text("Nhập tên bệnh ngoài danh mục hoặc mô tả...").desired_width(320.0)).changed() {
                                     changed_anything = true;
                                 }
-                                if ui.button("Xóa").clicked() {
+                                if ui.button(egui::RichText::new("Xóa").color(egui::Color32::from_rgb(220, 38, 38))).clicked() {
                                     remove_idx = Some(idx);
                                 }
                             });
@@ -2097,11 +2120,11 @@ impl KskApp {
                         }
                     });
 
-                    ui.add_space(6.0);
-                    if ui.button("➕ Thêm dòng thủ công").clicked() {
+                    ui.add_space(8.0);
+                    if ui.button(egui::RichText::new("➕ Thêm bệnh ngoài danh sách").strong().color(egui::Color32::from_rgb(14, 165, 233))).clicked() {
                         self.form.specialty_extras.entry(spec_id.to_string()).or_default().manual_rows.push(ManualConclusionRow {
                             classification: 2,
-                            classification_id: "Thủ công".into(),
+                            classification_id: "Ngoài danh mục".into(),
                             manifestation: "".into(),
                         });
                         changed_anything = true;
@@ -2841,11 +2864,17 @@ impl eframe::App for KskApp {
                                         ui.label(egui::RichText::new(&self.form.chi_so_bmi).strong().color(egui::Color32::from_rgb(14, 165, 233)));
 
                                         ui.strong("Mạch (lần/phút):");
-                                        ui.text_edit_singleline(&mut self.form.mach);
+                                        if ui.text_edit_singleline(&mut self.form.mach).changed() {
+                                            self.sync_specialty_result("CK_NOI_TIM_MACH");
+                                            self.update_global_health_score();
+                                        }
                                         ui.end_row();
 
                                         ui.strong("Huyết áp (mmHg):");
-                                        ui.text_edit_singleline(&mut self.form.huyet_ap);
+                                        if ui.text_edit_singleline(&mut self.form.huyet_ap).changed() {
+                                            self.sync_specialty_result("CK_NOI_TIM_MACH");
+                                            self.update_global_health_score();
+                                        }
 
                                         ui.strong("Phân loại thể lực (1-5):");
                                         ui.horizontal(|ui| {
