@@ -51,6 +51,7 @@ mod tests {
         p.ho_ten = "NGUYỄN VĂN KIỂM TRA".into();
         p.so_cccd = "052090009999".into();
         p.ma_y_te = "HD01-0001".into();
+        p.ma_lk = "LK.2026.03.01.0001".into();
         p.cls_duong_mau = "5.3".into();
         p.sync_quick_cls_to_list();
 
@@ -83,6 +84,10 @@ mod tests {
 
         let barcode = generate_barcode_png_bytes(&rec.data.ma_lk).expect("barcode png");
         assert!(barcode.len() > 100);
+
+        // Kiểm tra barcode chứa dấu chấm '.', gạch chéo '/', gạch ngang '-'
+        let bc_with_dots = generate_barcode_png_bytes("LK.2026.03.01-0001/A.B").expect("barcode with dots");
+        assert!(bc_with_dots.len() > 100);
 
         let cfg = AppConfig::default();
         let test_docx = PathBuf::from("target/test_mau03_barcode.docx");

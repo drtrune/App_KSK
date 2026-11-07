@@ -21,9 +21,10 @@ fn xml_escape(s: &str) -> String {
 /// Tạo ảnh PNG Mã vạch 1D Code 128 cho Mã tiếp nhận (`ma_lk`)
 pub fn generate_barcode_png_bytes(ma_lk: &str) -> Result<Vec<u8>, String> {
     let clean_code = ma_lk.trim();
+    // Giữ lại các ký tự ASCII hiển thị hợp lệ cho Code 128 (chữ, số, dấu chấm '.', gạch ngang '-', gạch dưới '_', gạch chéo '/', v.v.)
     let safe_code: String = clean_code
         .chars()
-        .filter(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '_')
+        .filter(|c| c.is_ascii_graphic() || *c == ' ')
         .collect();
     let final_code = if safe_code.is_empty() {
         "LK000001".to_string()
