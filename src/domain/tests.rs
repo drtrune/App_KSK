@@ -90,9 +90,24 @@ mod tests {
         assert!(bc_with_dots.len() > 100);
 
         let cfg = AppConfig::default();
-        let test_docx = PathBuf::from("target/test_mau03_barcode.docx");
-        export_record_to_mau03_docx(&rec, &cfg, None, &test_docx, true).expect("mau03 docx");
-        assert!(test_docx.exists());
+        let test_docx_pre = PathBuf::from("target/test_mau03_barcode_pre.docx");
+        export_record_to_mau03_docx(&rec, &cfg, None, &test_docx_pre, true).expect("mau03 docx pre");
+        assert!(test_docx_pre.exists());
+
+        // Kiểm tra bản đầy đủ sau khám
+        let mut rec_full = rec.clone();
+        rec_full.data.khong_kinh_mat_phai = "10/10".into();
+        rec_full.data.khong_kinh_mat_trai = "9/10".into();
+        rec_full.data.kham_mat_pl = 1;
+        rec_full.data.tai_phai_noi_thuong = ">5m".into();
+        rec_full.data.tai_phai_noi_tham = ">0.5m".into();
+        rec_full.data.kham_tai_mui_hong_pl = 1;
+        rec_full.data.noi_khoa_tuan_hoan_pl = 1;
+        rec_full.data.phan_loai_sk = 1;
+
+        let test_docx_full = PathBuf::from("target/test_mau03_barcode_full.docx");
+        export_record_to_mau03_docx(&rec_full, &cfg, None, &test_docx_full, false).expect("mau03 docx full");
+        assert!(test_docx_full.exists());
 
         let test_xlsm = PathBuf::from("target/test_import_ksk.xlsm");
         export_to_xlsm_file(&[rec], &test_xlsm).expect("xlsm export");

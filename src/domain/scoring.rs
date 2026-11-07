@@ -63,10 +63,19 @@ pub fn calc_pulse_score(pulse_str: &str) -> (i32, String) {
     }
 }
 
-// TỰ ĐỘNG PHÂN LOẠI THỊ LỰC (QĐ 1613/BYT)
+// TỰ ĐỘNG PHÂN LOẠI THỊ LỰC (QĐ 1613/BYT - thang 0..10)
 pub fn calc_vision_score(right_s: &str, left_s: &str) -> i32 {
-    let r: f64 = right_s.trim().parse::<f64>().unwrap_or(10.0).min(10.0_f64).max(0.0_f64);
-    let l: f64 = left_s.trim().parse::<f64>().unwrap_or(10.0).min(10.0_f64).max(0.0_f64);
+    let parse_v = |s: &str| -> f64 {
+        let t = s.trim();
+        if t.contains('/') {
+            if let Some(first) = t.split('/').next() {
+                return first.trim().parse::<f64>().unwrap_or(10.0);
+            }
+        }
+        t.parse::<f64>().unwrap_or(10.0)
+    };
+    let r = parse_v(right_s).min(10.0).max(0.0);
+    let l = parse_v(left_s).min(10.0).max(0.0);
     let max_v = r.max(l);
     let sum_v = r + l;
 
@@ -83,31 +92,92 @@ pub fn calc_vision_score(right_s: &str, left_s: &str) -> i32 {
     }
 }
 
-// TỰ ĐỘNG PHÂN LOẠI THÍNH LỰC TỪ KHOẢNG CÁCH NÓI THƯỜNG (5M) VÀ NÓI THẦM (QĐ 1613/BYT)
+pub fn parse_hearing_dist_thuong(s: &str) -> f64 {
+    let t = s.trim().to_lowercase();
+    if t.contains("diec") || t.contains("điếc") {
+        return 0.0;
+    }
+    if t.contains("sat") || t.contains("sát") {
+        return 0.2; // sát tai / cách 1 gang tay sát vành tai
+    }
+    if t.contains(">5") || t.contains("> 5") {
+        return 6.0;
+    }
+    if t.contains("0.5") || t.contains("0,5") {
+        return 0.5;
+    }
+    let clean: String = t.chars().filter(|c| c.is_ascii_digit() || *c == '.' || *c == ',').collect();
+    let clean = clean.replace(',', ".");
+    clean.parse::<f64>().unwrap_or(5.0)
+}
+
+pub fn parse_hearing_dist_tham(s: &str) -> f64 {
+    let t = s.trim().to_lowercase();
+    if t.contains("diec") || t.contains("điếc") {
+        return 0.0;
+    }
+    if t.contains("sat") || t.contains("sát") {
+        return 0.01;
+    }
+    if t.contains(">0.5") || t.contains("> 0.5") || t.contains(">0,5") || t.contains("> 0,5") {
+        return 0.6;
+    }
+    let clean: String = t.chars().filter(|c| c.is_ascii_digit() || *c == '.' || *c == ',').collect();
+    let clean = clean.replace(',', ".");
+    clean.parse::<f64>().unwrap_or(0.5)
+}
+
+fn score_single_ear(d_thuong: f64, d_tham: f64) -> i32 {
+    let s_thuong = if d_thuong >= 5.0 {
+        1
+    } else if d_thuong >= 4.0 {
+        2
+    } else if d_thuong >= 1.0 {
+        3
+    } else if d_thuong >= 0.5 {
+        4
+    } else {
+        5
+    };
+
+    let s_tham = if d_tham >= 0.5 {
+        1
+    } else if d_tham >= 0.4 {
+        2
+    } else if d_tham >= 0.1 {
+        3
+    } else if d_tham >= 0.05 {
+        4
+    } else {
+        5
+    };
+
+    s_thuong.max(s_tham)
+}
+
+// TỰ ĐỘNG PHÂN LOẠI THÍNH LỰC THEO BẢNG TÍNH THIẾU HỤT SỨC NGHE SƠ BỘ (BYT)
 pub fn calc_hearing_from_distances(
     r_thuong: &str, l_thuong: &str,
     r_tham: &str, l_tham: &str,
 ) -> (i32, String) {
-    let rt = r_tham.trim().parse::<f64>().unwrap_or(5.0);
-    let lt = l_tham.trim().parse::<f64>().unwrap_or(5.0);
-    let rth = r_thuong.trim().parse::<f64>().unwrap_or(5.0);
-    let lth = l_thuong.trim().parse::<f64>().unwrap_or(5.0);
+    let r_th = parse_hearing_dist_thuong(r_thuong);
+    let l_th = parse_hearing_dist_thuong(l_thuong);
+    let r_tm = parse_hearing_dist_tham(r_tham);
+    let l_tm = parse_hearing_dist_tham(l_tham);
 
-    let min_tham = rt.min(lt);
-    let max_tham = rt.max(lt);
-    let min_thuong = rth.min(lth);
+    let score_r = score_single_ear(r_th, r_tm);
+    let score_l = score_single_ear(l_th, l_tm);
+    let final_score = score_r.max(score_l);
 
-    if min_tham >= 4.9 && min_thuong >= 4.9 {
-        (1, "Nói thầm 5m cả hai tai (Bình thường)".into())
-    } else if (max_tham >= 3.9 && min_tham >= 1.9) || min_thuong >= 4.0 {
-        (2, "Nói thầm 1 bên 4m, bên kia 2m".into())
-    } else if (max_tham >= 2.9 && min_tham >= 0.9) || min_thuong >= 3.0 {
-        (3, "Nói thầm 1 bên 3m, bên kia 1m".into())
-    } else if (max_tham >= 1.9 && min_tham >= 0.4) || min_thuong >= 2.0 {
-        (4, "Nói thầm 1 bên 2m, bên kia 0.5m".into())
-    } else {
-        (5, "Nói thầm 1 bên 1m, bên kia < 0.1m".into())
-    }
+    let desc = match final_score {
+        1 => "Sức nghe tốt (Nói thường >= 5m, Nói thầm >= 0.5m)",
+        2 => "Thiếu hụt sức nghe sơ bộ (Nói thường 4m, Nói thầm 0.4m)",
+        3 => "Thiếu hụt sức nghe 35% - 65% (Nói thường 1m - 3m, Nói thầm 0.1m - 0.3m)",
+        4 => "Thiếu hụt sức nghe 65% - 85% (Nói thường 0.5m, Nói thầm 0.05m)",
+        _ => "Thiếu hụt sức nghe 85% - 100% (Sát tai / Điếc)",
+    };
+
+    (final_score, desc.to_string())
 }
 
 pub fn calc_classification_score(

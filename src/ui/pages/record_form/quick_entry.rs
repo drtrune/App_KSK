@@ -228,15 +228,30 @@ impl QuickEntryView {
                             ui.add_space(4.0);
                             ui.horizontal_wrapped(|ui| {
                                 ui.label(RichText::new("5. Mắt - Không kính (MP/MT):").strong());
-                                ui.add(egui::TextEdit::singleline(&mut form.khong_kinh_mat_phai).desired_width(50.0));
+                                ui.add(egui::TextEdit::singleline(&mut form.khong_kinh_mat_phai).desired_width(45.0));
                                 ui.label("/");
-                                ui.add(egui::TextEdit::singleline(&mut form.khong_kinh_mat_trai).desired_width(50.0));
-                                ui.label("Có kính (MP/MT):");
-                                ui.add(egui::TextEdit::singleline(&mut form.co_kinh_mat_phai).desired_width(50.0));
+                                ui.add(egui::TextEdit::singleline(&mut form.khong_kinh_mat_trai).desired_width(45.0));
+                                if ui.small_button("10/10").clicked() {
+                                    form.khong_kinh_mat_phai = "10/10".into();
+                                    form.khong_kinh_mat_trai = "10/10".into();
+                                    form.kham_mat_pl = 1;
+                                }
+                                if ui.small_button("9/10").clicked() {
+                                    form.khong_kinh_mat_phai = "9/10".into();
+                                    form.khong_kinh_mat_trai = "9/10".into();
+                                    form.kham_mat_pl = 2;
+                                }
+                                if ui.small_button("0/10").clicked() {
+                                    form.khong_kinh_mat_phai = "0/10".into();
+                                    form.khong_kinh_mat_trai = "0/10".into();
+                                    form.kham_mat_pl = 5;
+                                }
+                                ui.label("Có kính:");
+                                ui.add(egui::TextEdit::singleline(&mut form.co_kinh_mat_phai).desired_width(45.0));
                                 ui.label("/");
-                                ui.add(egui::TextEdit::singleline(&mut form.co_kinh_mat_trai).desired_width(50.0));
+                                ui.add(egui::TextEdit::singleline(&mut form.co_kinh_mat_trai).desired_width(45.0));
                                 ui.label("Bệnh mắt:");
-                                ui.add(egui::TextEdit::singleline(&mut form.benh_khac_mat).desired_width(150.0));
+                                ui.add(egui::TextEdit::singleline(&mut form.benh_khac_mat).desired_width(120.0));
                                 for sc in 1..=5 {
                                     ui.selectable_value(&mut form.kham_mat_pl, sc, format!("L{}", sc));
                                 }
@@ -252,8 +267,29 @@ impl QuickEntryView {
                                 ui.add(egui::TextEdit::singleline(&mut form.tai_phai_noi_thuong).desired_width(40.0));
                                 ui.label("/");
                                 ui.add(egui::TextEdit::singleline(&mut form.tai_phai_noi_tham).desired_width(40.0));
+                                if ui.small_button("Chuẩn (5m/0.5m)").clicked() {
+                                    form.tai_trai_noi_thuong = "5m".into();
+                                    form.tai_trai_noi_tham = "0.5m".into();
+                                    form.tai_phai_noi_thuong = "5m".into();
+                                    form.tai_phai_noi_tham = "0.5m".into();
+                                    form.kham_tai_mui_hong_pl = 1;
+                                }
+                                if ui.small_button(">5m").clicked() {
+                                    form.tai_trai_noi_thuong = ">5m".into();
+                                    form.tai_trai_noi_tham = ">0.5m".into();
+                                    form.tai_phai_noi_thuong = ">5m".into();
+                                    form.tai_phai_noi_tham = ">0.5m".into();
+                                    form.kham_tai_mui_hong_pl = 1;
+                                }
+                                if ui.small_button("Điếc").clicked() {
+                                    form.tai_trai_noi_thuong = "Điếc".into();
+                                    form.tai_trai_noi_tham = "Điếc".into();
+                                    form.tai_phai_noi_thuong = "Điếc".into();
+                                    form.tai_phai_noi_tham = "Điếc".into();
+                                    form.kham_tai_mui_hong_pl = 5;
+                                }
                                 ui.label("Bệnh TMH:");
-                                ui.add(egui::TextEdit::singleline(&mut form.benh_khac_tai_mui_hong).desired_width(150.0));
+                                ui.add(egui::TextEdit::singleline(&mut form.benh_khac_tai_mui_hong).desired_width(120.0));
                                 for sc in 1..=5 {
                                     ui.selectable_value(&mut form.kham_tai_mui_hong_pl, sc, format!("L{}", sc));
                                 }

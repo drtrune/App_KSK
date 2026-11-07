@@ -377,20 +377,42 @@ impl SpecialtyCatalogView {
                         // Không kính (bắt buộc)
                         ui.label(RichText::new("Không kính (*):").strong().size(12.0));
                         ui.horizontal(|ui| {
-                            ui.label("Mắt phải:");
-                            ui.add(egui::TextEdit::singleline(&mut form.khong_kinh_mat_phai).desired_width(50.0).hint_text("10/10"));
-                            ui.label("Mắt trái:");
-                            ui.add(egui::TextEdit::singleline(&mut form.khong_kinh_mat_trai).desired_width(50.0).hint_text("10/10"));
+                            ui.label("MP:");
+                            ui.add(egui::TextEdit::singleline(&mut form.khong_kinh_mat_phai).desired_width(45.0).hint_text("10/10"));
+                            ui.label("MT:");
+                            ui.add(egui::TextEdit::singleline(&mut form.khong_kinh_mat_trai).desired_width(45.0).hint_text("10/10"));
+                            ui.separator();
+                            if ui.button("10/10").clicked() {
+                                form.khong_kinh_mat_phai = "10/10".into();
+                                form.khong_kinh_mat_trai = "10/10".into();
+                            }
+                            if ui.button("9/10").clicked() {
+                                form.khong_kinh_mat_phai = "9/10".into();
+                                form.khong_kinh_mat_trai = "9/10".into();
+                            }
+                            if ui.button("8/10").clicked() {
+                                form.khong_kinh_mat_phai = "8/10".into();
+                                form.khong_kinh_mat_trai = "8/10".into();
+                            }
+                            if ui.button("0/10").clicked() {
+                                form.khong_kinh_mat_phai = "0/10".into();
+                                form.khong_kinh_mat_trai = "0/10".into();
+                            }
                         });
                         ui.end_row();
 
                         // Có kính (không bắt buộc)
                         ui.label(RichText::new("Có kính:").size(12.0));
                         ui.horizontal(|ui| {
-                            ui.label("Mắt phải:");
-                            ui.add(egui::TextEdit::singleline(&mut form.co_kinh_mat_phai).desired_width(50.0).hint_text("10/10"));
-                            ui.label("Mắt trái:");
-                            ui.add(egui::TextEdit::singleline(&mut form.co_kinh_mat_trai).desired_width(50.0).hint_text("10/10"));
+                            ui.label("MP:");
+                            ui.add(egui::TextEdit::singleline(&mut form.co_kinh_mat_phai).desired_width(45.0).hint_text("10/10"));
+                            ui.label("MT:");
+                            ui.add(egui::TextEdit::singleline(&mut form.co_kinh_mat_trai).desired_width(45.0).hint_text("10/10"));
+                            ui.separator();
+                            if ui.button("10/10 (Kính)").clicked() {
+                                form.co_kinh_mat_phai = "10/10".into();
+                                form.co_kinh_mat_trai = "10/10".into();
+                            }
                         });
                         ui.end_row();
                     });
@@ -427,19 +449,49 @@ impl SpecialtyCatalogView {
                     .show(ui, |ui| {
                         ui.label(RichText::new("Nói thường (m):").strong().size(12.0));
                         ui.horizontal(|ui| {
-                            ui.label("Tai phải (m):");
-                            ui.add(egui::TextEdit::singleline(&mut form.tai_phai_noi_thuong).desired_width(50.0).hint_text("5"));
-                            ui.label("Tai trái (m):");
-                            ui.add(egui::TextEdit::singleline(&mut form.tai_trai_noi_thuong).desired_width(50.0).hint_text("5"));
+                            ui.label("Phải:");
+                            ui.add(egui::TextEdit::singleline(&mut form.tai_phai_noi_thuong).desired_width(45.0).hint_text("5m"));
+                            ui.label("Trái:");
+                            ui.add(egui::TextEdit::singleline(&mut form.tai_trai_noi_thuong).desired_width(45.0).hint_text("5m"));
+                            ui.separator();
+                            if ui.button("5m").clicked() {
+                                form.tai_phai_noi_thuong = "5m".into();
+                                form.tai_trai_noi_thuong = "5m".into();
+                            }
+                            if ui.button(">5m").clicked() {
+                                form.tai_phai_noi_thuong = ">5m".into();
+                                form.tai_trai_noi_thuong = ">5m".into();
+                            }
+                            if ui.button("4m").clicked() {
+                                form.tai_phai_noi_thuong = "4m".into();
+                                form.tai_trai_noi_thuong = "4m".into();
+                            }
+                            if ui.button("Điếc").clicked() {
+                                form.tai_phai_noi_thuong = "Điếc".into();
+                                form.tai_trai_noi_thuong = "Điếc".into();
+                            }
                         });
                         ui.end_row();
 
                         ui.label(RichText::new("Nói thầm (m):").strong().size(12.0));
                         ui.horizontal(|ui| {
-                            ui.label("Tai phải (m):");
-                            ui.add(egui::TextEdit::singleline(&mut form.tai_phai_noi_tham).desired_width(50.0).hint_text("0.5"));
-                            ui.label("Tai trái (m):");
-                            ui.add(egui::TextEdit::singleline(&mut form.tai_trai_noi_tham).desired_width(50.0).hint_text("0.5"));
+                            ui.label("Phải:");
+                            ui.add(egui::TextEdit::singleline(&mut form.tai_phai_noi_tham).desired_width(45.0).hint_text("0.5m"));
+                            ui.label("Trái:");
+                            ui.add(egui::TextEdit::singleline(&mut form.tai_trai_noi_tham).desired_width(45.0).hint_text("0.5m"));
+                            ui.separator();
+                            if ui.button("0.5m").clicked() {
+                                form.tai_phai_noi_tham = "0.5m".into();
+                                form.tai_trai_noi_tham = "0.5m".into();
+                            }
+                            if ui.button(">0.5m").clicked() {
+                                form.tai_phai_noi_tham = ">0.5m".into();
+                                form.tai_trai_noi_tham = ">0.5m".into();
+                            }
+                            if ui.button("Điếc").clicked() {
+                                form.tai_phai_noi_tham = "Điếc".into();
+                                form.tai_trai_noi_tham = "Điếc".into();
+                            }
                         });
                         ui.end_row();
                     });

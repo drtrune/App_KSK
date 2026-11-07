@@ -364,6 +364,137 @@ fn run_checkbox(checked: bool) -> String {
     )
 }
 
+fn run_br() -> &'static str {
+    "<w:r><w:br/></w:r>"
+}
+
+fn parse_vision_val(s: &str) -> Option<i32> {
+    let t = s.trim();
+    if t.is_empty() {
+        return None;
+    }
+    let num_str = if let Some(idx) = t.find('/') {
+        &t[..idx]
+    } else {
+        t
+    };
+    if let Ok(v) = num_str.trim().parse::<i32>() {
+        if (0..=10).contains(&v) {
+            return Some(v);
+        }
+    }
+    if let Ok(f) = num_str.trim().parse::<f64>() {
+        let v = f.round() as i32;
+        if (0..=10).contains(&v) {
+            return Some(v);
+        }
+    }
+    None
+}
+
+/// Sinh dãy 11 ô tick OMR Thị lực: 0, 1, 2, ..., 10 (/10)
+fn run_omr_vision_boxes(label: &str, selected: Option<i32>, is_pre_exam: bool) -> String {
+    let mut out = String::new();
+    out.push_str(&run_text(label, true));
+    for v in 0..=10 {
+        let checked = if is_pre_exam {
+            false
+        } else {
+            selected == Some(v)
+        };
+        out.push_str(&run_checkbox(checked));
+        out.push_str(&run_text(&format!("{} ", v), false));
+    }
+    out.push_str(&run_text("/10", true));
+    out
+}
+
+fn is_hearing_thuong_match(val: &str, target_idx: usize) -> bool {
+    let v = val.trim().to_lowercase();
+    if v.is_empty() {
+        return false;
+    }
+    match target_idx {
+        0 => v.contains(">5") || v.contains("> 5"), // >5m
+        1 => (v == "5" || v == "5m" || v == "=5m" || v == "= 5m") && !v.contains(">") && !v.contains("0.5"), // 5m
+        2 => v == "4" || v == "4m", // 4m
+        3 => v == "3" || v == "3m", // 3m
+        4 => v == "2" || v == "2m", // 2m
+        5 => (v == "1" || v == "1m") && !v.contains("0.1"), // 1m
+        6 => v.contains("0.5") || v.contains("0,5"), // 0.5m
+        7 => v.contains("sat") || v.contains("sát"), // Sát tai
+        8 => v.contains("diec") || v.contains("điếc"), // Điếc
+        _ => false,
+    }
+}
+
+fn is_hearing_tham_match(val: &str, target_idx: usize) -> bool {
+    let v = val.trim().to_lowercase();
+    if v.is_empty() {
+        return false;
+    }
+    match target_idx {
+        0 => v.contains(">0.5") || v.contains("> 0.5") || v.contains(">0,5") || v.contains("> 0,5"), // >0.5m
+        1 => (v == "0.5" || v == "0.5m" || v == "0,5" || v == "0,5m" || v == "=0.5m" || v == "= 0.5m") && !v.contains(">"), // 0.5m
+        2 => v.contains("0.4") || v.contains("0,4"), // 0.4m
+        3 => v.contains("0.3") || v.contains("0,3"), // 0.3m
+        4 => v.contains("0.2") || v.contains("0,2"), // 0.2m
+        5 => (v.contains("0.1") || v.contains("0,1")) && !v.contains("0.05"), // 0.1m
+        6 => v.contains("0.05") || v.contains("0,05"), // 0.05m
+        7 => v.contains("sat") || v.contains("sát"), // Sát tai
+        8 => v.contains("diec") || v.contains("điếc"), // Điếc
+        _ => false,
+    }
+}
+
+/// Sinh dãy 9 ô tick OMR Thính lực nói thường: >5m, 5m, 4m, 3m, 2m, 1m, 0.5m, Sát tai, Điếc
+fn run_omr_hearing_thuong_boxes(val: &str, is_pre_exam: bool) -> String {
+    let labels = [">5m", "5m", "4m", "3m", "2m", "1m", "0.5m", "Sát tai", "Điếc"];
+    let mut out = String::new();
+    for (i, lbl) in labels.iter().enumerate() {
+        let checked = if is_pre_exam {
+            false
+        } else {
+            is_hearing_thuong_match(val, i)
+        };
+        out.push_str(&run_checkbox(checked));
+        out.push_str(&run_text(&format!("{} ", lbl), false));
+    }
+    out
+}
+
+/// Sinh dãy 9 ô tick OMR Thính lực nói thầm: >0.5m, 0.5m, 0.4m, 0.3m, 0.2m, 0.1m, 0.05m, Sát tai, Điếc
+fn run_omr_hearing_tham_boxes(val: &str, is_pre_exam: bool) -> String {
+    let labels = [">0.5m", "0.5m", "0.4m", "0.3m", "0.2m", "0.1m", "0.05m", "Sát tai", "Điếc"];
+    let mut out = String::new();
+    for (i, lbl) in labels.iter().enumerate() {
+        let checked = if is_pre_exam {
+            false
+        } else {
+            is_hearing_tham_match(val, i)
+        };
+        out.push_str(&run_checkbox(checked));
+        out.push_str(&run_text(&format!("{} ", lbl), false));
+    }
+    out
+}
+
+/// Sinh dãy 5 ô tick OMR Phân loại chuyên khoa: [ I ] [ II ] [ III ] [ IV ] [ V ]
+fn run_omr_classification_boxes(score: i32, is_pre_exam: bool) -> String {
+    let mut out = String::new();
+    let labels = ["I", "II", "III", "IV", "V"];
+    for (i, lbl) in labels.iter().enumerate() {
+        let checked = if is_pre_exam {
+            false
+        } else {
+            score == (i as i32 + 1)
+        };
+        out.push_str(&run_checkbox(checked));
+        out.push_str(&run_text(&format!(" {}   ", lbl), true));
+    }
+    out
+}
+
 #[allow(dead_code)]
 fn inline_qr_drawing_xml(rel_id: &str) -> String {
     // 720000 EMUs = ~2.0 cm x 2.0 cm crisp QR code in header
@@ -777,7 +908,233 @@ fn merge_document_xml(
         );
     }
 
-    // Nếu xuất bản đầy đủ sau khi khám (pre_exam_only == false), điền cả Thể lực, Lâm sàng, CLS, Kết luận
+    // Khám lâm sàng - Thị lực (11 ô OMR: 0..=10/10)
+    let p_khong_kinh = format!(
+        "{}{}{}{}{}",
+        run_text("Kết quả khám thị lực:  Không kính: ", true),
+        run_br(),
+        run_omr_vision_boxes("  Mắt phải: ", parse_vision_val(&d.khong_kinh_mat_phai), pre_exam_only),
+        run_br(),
+        run_omr_vision_boxes("  Mắt trái:  ", parse_vision_val(&d.khong_kinh_mat_trai), pre_exam_only),
+    );
+    xml = replace_para_by_id(&xml, "67E0EE1A", &p_khong_kinh);
+
+    let p_co_kinh = format!(
+        "{}{}{}{}{}",
+        run_text("Có kính: ", true),
+        run_br(),
+        run_omr_vision_boxes("  Mắt phải: ", parse_vision_val(&d.co_kinh_mat_phai), pre_exam_only),
+        run_br(),
+        run_omr_vision_boxes("  Mắt trái:  ", parse_vision_val(&d.co_kinh_mat_trai), pre_exam_only),
+    );
+    xml = replace_para_by_id(&xml, "3B1B5834", &p_co_kinh);
+
+    let p_benh_mat = if pre_exam_only {
+        run_text("Các bệnh về mắt (nếu có):…………………………………………………….", false)
+    } else {
+        run_text(
+            &format!(
+                "Các bệnh về mắt (nếu có): {}",
+                if d.benh_khac_mat.trim().is_empty() { "Không" } else { &d.benh_khac_mat }
+            ),
+            false,
+        )
+    };
+    xml = replace_para_by_id(&xml, "176B4C85", &p_benh_mat);
+
+    let p_pl_mat = format!(
+        "{}{}",
+        run_text("Phân loại: ", true),
+        run_omr_classification_boxes(d.kham_mat_pl, pre_exam_only),
+    );
+    xml = replace_para_by_id(&xml, "1344604A", &p_pl_mat);
+
+    // Khám lâm sàng - Thính lực (Nói thường 9 mức, Nói thầm 9 mức OMR)
+    let p_tai_trai = format!(
+        "{}{}{}{}",
+        run_text("Tai trái:   - Nói thường: ", true),
+        run_omr_hearing_thuong_boxes(&d.tai_trai_noi_thuong, pre_exam_only),
+        run_br(),
+        format!(
+            "{}{}",
+            run_text("                - Nói thầm:    ", true),
+            run_omr_hearing_tham_boxes(&d.tai_trai_noi_tham, pre_exam_only)
+        ),
+    );
+    xml = replace_para_by_id(&xml, "7A0DA69A", &p_tai_trai);
+
+    let p_tai_phai = format!(
+        "{}{}{}{}",
+        run_text("Tai phải:  - Nói thường: ", true),
+        run_omr_hearing_thuong_boxes(&d.tai_phai_noi_thuong, pre_exam_only),
+        run_br(),
+        format!(
+            "{}{}",
+            run_text("                - Nói thầm:    ", true),
+            run_omr_hearing_tham_boxes(&d.tai_phai_noi_tham, pre_exam_only)
+        ),
+    );
+    xml = replace_para_by_id(&xml, "78BD496B", &p_tai_phai);
+
+    let p_benh_tmh = if pre_exam_only {
+        run_text("Các bệnh về tai mũi họng (nếu có): …………………………………………………", false)
+    } else {
+        run_text(
+            &format!(
+                "Các bệnh về tai mũi họng (nếu có): {}",
+                if d.benh_khac_tai_mui_hong.trim().is_empty() { "Không" } else { &d.benh_khac_tai_mui_hong }
+            ),
+            false,
+        )
+    };
+    xml = replace_para_by_id(&xml, "01C9BD32", &p_benh_tmh);
+
+    let p_pl_tmh = format!(
+        "{}{}",
+        run_text("Phân loại: ", true),
+        run_omr_classification_boxes(d.kham_tai_mui_hong_pl, pre_exam_only),
+    );
+    xml = replace_para_by_id(&xml, "28538091", &p_pl_tmh);
+
+    // Khám lâm sàng - Răng Hàm Mặt
+    let p_ham_tren = if pre_exam_only {
+        run_text("Hàm trên: ……………………………………………………………………", false)
+    } else {
+        run_text(&format!("Hàm trên: {}", if d.ham_tren.trim().is_empty() { "Bình thường" } else { &d.ham_tren }), false)
+    };
+    xml = replace_para_by_id(&xml, "3DF4DB07", &p_ham_tren);
+
+    let p_ham_duoi = if pre_exam_only {
+        run_text("Hàm dưới: …………………………………………………………………..", false)
+    } else {
+        run_text(&format!("Hàm dưới: {}", if d.ham_duoi.trim().is_empty() { "Bình thường" } else { &d.ham_duoi }), false)
+    };
+    xml = replace_para_by_id(&xml, "758363D9", &p_ham_duoi);
+
+    let p_benh_rhm = if pre_exam_only {
+        run_text("Các bệnh về răng hàm mặt (nếu có):…………………………………………", false)
+    } else {
+        run_text(
+            &format!(
+                "Các bệnh về răng hàm mặt (nếu có): {}",
+                if d.benh_khac_rang_ham_mat.trim().is_empty() { "Không" } else { &d.benh_khac_rang_ham_mat }
+            ),
+            false,
+        )
+    };
+    xml = replace_para_by_id(&xml, "731CB55C", &p_benh_rhm);
+
+    let p_pl_rhm = format!(
+        "{}{}",
+        run_text("Phân loại: ", true),
+        run_omr_classification_boxes(d.kham_rang_ham_mat_pl, pre_exam_only),
+    );
+    xml = replace_para_by_id(&xml, "68A87DC9", &p_pl_rhm);
+
+    // Khám lâm sàng - Ngoại khoa, Da liễu, Sản phụ khoa
+    let p_ngoai_kham = if pre_exam_only {
+        run_text("Ngoại khoa: ……………………………………………………………", false)
+    } else {
+        run_text(
+            &format!(
+                "Ngoại khoa: {}",
+                if d.ket_qua_kham_ngoai_khoa.trim().is_empty() { "Bình thường" } else { &d.ket_qua_kham_ngoai_khoa }
+            ),
+            false,
+        )
+    };
+    xml = replace_para_by_id(&xml, "7F3DA171", &p_ngoai_kham);
+    let p_pl_ngoai = format!("{}{}", run_text("Phân loại: ", true), run_omr_classification_boxes(d.kham_ngoai_khoa_pl, pre_exam_only));
+    xml = replace_para_by_id(&xml, "3E29774F", &p_pl_ngoai);
+
+    let p_da_lieu_kham = if pre_exam_only {
+        run_text("Da liễu: …………………………………………………………………", false)
+    } else {
+        run_text(
+            &format!(
+                "Da liễu: {}",
+                if d.ket_qua_kham_da_lieu.trim().is_empty() { "Bình thường" } else { &d.ket_qua_kham_da_lieu }
+            ),
+            false,
+        )
+    };
+    xml = replace_para_by_id(&xml, "5699913B", &p_da_lieu_kham);
+    let p_pl_da_lieu = format!("{}{}", run_text("Phân loại: ", true), run_omr_classification_boxes(d.kham_da_lieu_pl, pre_exam_only));
+    xml = replace_para_by_id(&xml, "4152D987", &p_pl_da_lieu);
+
+    let p_san_kham = if pre_exam_only {
+        run_text("Sản phụ khoa: ……………………………………………………………………….", false)
+    } else {
+        run_text(
+            &format!(
+                "Sản phụ khoa: {}",
+                if d.ket_qua_kham_san_phu_khoa.trim().is_empty() { "Bình thường" } else { &d.ket_qua_kham_san_phu_khoa }
+            ),
+            false,
+        )
+    };
+    xml = replace_para_by_id(&xml, "6C57BBE7", &p_san_kham);
+    let p_pl_san = format!("{}{}", run_text("Phân loại: ", true), run_omr_classification_boxes(d.kham_san_phu_khoa_pl, pre_exam_only));
+    xml = replace_para_by_id(&xml, "0A910D0F", &p_pl_san);
+
+    // Khám lâm sàng - 8 chuyên khoa Nội khoa (Col 2: Khám + Phân loại OMR)
+    if !pre_exam_only && !d.noi_khoa_tuan_hoan.trim().is_empty() {
+        xml = replace_para_by_id(&xml, "38818360", &run_text(&d.noi_khoa_tuan_hoan, false));
+    }
+    xml = replace_para_by_id(&xml, "028B9A01", &run_omr_classification_boxes(d.noi_khoa_tuan_hoan_pl, pre_exam_only));
+
+    if !pre_exam_only && !d.noi_khoa_ho_hap.trim().is_empty() {
+        xml = replace_para_by_id(&xml, "4145B678", &run_text(&d.noi_khoa_ho_hap, false));
+    }
+    xml = replace_para_by_id(&xml, "245846FE", &run_omr_classification_boxes(d.noi_khoa_ho_hap_pl, pre_exam_only));
+
+    if !pre_exam_only && !d.noi_khoa_tieu_hoa.trim().is_empty() {
+        xml = replace_para_by_id(&xml, "781D6744", &run_text(&d.noi_khoa_tieu_hoa, false));
+    }
+    xml = replace_para_by_id(&xml, "7B69C077", &run_omr_classification_boxes(d.noi_khoa_tieu_hoa_pl, pre_exam_only));
+
+    if !pre_exam_only && !d.noi_khoa_than_tn_sd.trim().is_empty() {
+        xml = replace_para_by_id(&xml, "1129AE75", &run_text(&d.noi_khoa_than_tn_sd, false));
+    }
+    xml = replace_para_by_id(&xml, "104430BC", &run_omr_classification_boxes(d.noi_khoa_than_tn_sd_pl, pre_exam_only));
+
+    if !pre_exam_only && !d.noi_khoa_noi_tiet.trim().is_empty() {
+        xml = replace_para_by_id(&xml, "5AC60B19", &run_text(&d.noi_khoa_noi_tiet, false));
+    }
+    xml = replace_para_by_id(&xml, "6A5150A6", &run_omr_classification_boxes(d.noi_khoa_noi_tiet_pl, pre_exam_only));
+
+    if !pre_exam_only && !d.noi_khoa_co_xuong_khop.trim().is_empty() {
+        xml = replace_para_by_id(&xml, "114067FA", &run_text(&d.noi_khoa_co_xuong_khop, false));
+    }
+    xml = replace_para_by_id(&xml, "0FE1C4A1", &run_omr_classification_boxes(d.noi_khoa_co_xuong_khop_pl, pre_exam_only));
+
+    if !pre_exam_only && !d.noi_khoa_than_kinh.trim().is_empty() {
+        xml = replace_para_by_id(&xml, "72EF6D71", &run_text(&d.noi_khoa_than_kinh, false));
+    }
+    xml = replace_para_by_id(&xml, "72BEAC19", &run_omr_classification_boxes(d.noi_khoa_than_kinh_pl, pre_exam_only));
+
+    if !pre_exam_only && !d.noi_khoa_tam_than.trim().is_empty() {
+        xml = replace_para_by_id(&xml, "3B53584E", &run_text(&d.noi_khoa_tam_than, false));
+    }
+    xml = replace_para_by_id(&xml, "7AC5B481", &run_omr_classification_boxes(d.noi_khoa_tam_than_pl, pre_exam_only));
+
+    // Phân loại thể lực (7DFEADFB) - Có 5 ô tick OMR I..V
+    let p_pl_the_luc = format!(
+        "{}{}",
+        run_text("- Phân loại thể lực: ", true),
+        run_omr_classification_boxes(d.kham_the_luc_pl, pre_exam_only)
+    );
+    xml = replace_para_by_id(&xml, "7DFEADFB", &p_pl_the_luc);
+
+    // Phân loại sức khỏe chung (668D7EE4) - Có 5 ô tick OMR I..V
+    let p_pl_sk_chung = format!(
+        "{}{}",
+        run_text("2. Phân loại sức khỏe (theo quy định của Bộ Y tế): ", true),
+        run_omr_classification_boxes(d.phan_loai_sk, pre_exam_only)
+    );
+    xml = replace_para_by_id(&xml, "668D7EE4", &p_pl_sk_chung);
+
+    // Nếu xuất bản đầy đủ sau khi khám (pre_exam_only == false), điền thông số Thể lực & Kết luận bệnh
     if !pre_exam_only {
         xml = replace_para_by_id(
             &xml,
@@ -800,11 +1157,6 @@ fn merge_document_xml(
         );
         xml = replace_para_by_id(
             &xml,
-            "7DFEADFB",
-            &run_text(&format!("- Phân loại thể lực: Loại {}", d.kham_the_luc_pl), true),
-        );
-        xml = replace_para_by_id(
-            &xml,
             "71DF01BD",
             &run_text(
                 &format!(
@@ -812,14 +1164,6 @@ fn merge_document_xml(
                     d.ket_luan_benh,
                     if d.cac_benh_tat_neu_co.trim().is_empty() { "Không" } else { &d.cac_benh_tat_neu_co }
                 ),
-                true,
-            ),
-        );
-        xml = replace_para_by_id(
-            &xml,
-            "668D7EE4",
-            &run_text(
-                &format!("2. Phân loại sức khỏe (theo quy định của Bộ Y tế): Loại {}", d.phan_loai_sk),
                 true,
             ),
         );
