@@ -8,7 +8,215 @@ use zip::write::FileOptions;
 use zip::{ZipArchive, ZipWriter};
 use crate::config::AppConfig;
 use crate::domain::calc_age;
-use crate::models::RecordItem;
+use crate::models::{CatalogRecord, RecordItem};
+
+pub fn resolve_doi_tuong_name(code: &str, catalogs: Option<&[CatalogRecord]>) -> String {
+    let trimmed = code.trim();
+    if let Some(cats) = catalogs {
+        if let Some(c) = cats.iter().find(|c| c.cat_type == "priority" && c.code == trimmed) {
+            let name = c.name.trim();
+            if let Some(idx) = name.find(" - ") {
+                return name[idx + 3..].trim().to_string();
+            }
+            return name.to_string();
+        }
+    }
+    match trimmed {
+        "1" => "Người cao tuổi",
+        "2" => "Người khuyết tật",
+        "3" => "Người thuộc hộ nghèo, cận nghèo",
+        "4" => "Người có công",
+        "5" => "Người mắc bệnh mạn tính",
+        "6" => "Vùng đồng bào DTTS & miền núi",
+        "7" => "Vùng ĐK KT-XH khó khăn",
+        "8" => "Người sống tại xã đảo",
+        "9" => "Người sống tại đặc khu",
+        "10" => "Trẻ em mầm non",
+        "11" => "Học sinh phổ thông",
+        "12" => "Sinh viên",
+        "13" => "Người lao động",
+        "14" => "Người lao động không chính thức",
+        "15" => "Người chưa có BHYT",
+        "16" | "99" => "Các đối tượng khác",
+        other => {
+            if other.chars().any(|c| c.is_alphabetic()) {
+                other
+            } else {
+                "Người lao động"
+            }
+        }
+    }
+    .to_string()
+}
+
+pub fn resolve_dan_toc_name(code: &str, catalogs: Option<&[CatalogRecord]>) -> String {
+    let trimmed = code.trim();
+    if let Some(cats) = catalogs {
+        if let Some(c) = cats.iter().find(|c| c.cat_type == "ethnicity" && c.code == trimmed) {
+            let name = c.name.trim();
+            if let Some(idx) = name.find(" - ") {
+                return name[idx + 3..].trim().to_string();
+            }
+            return name.to_string();
+        }
+    }
+    match trimmed {
+        "01" | "1" => "Kinh",
+        "02" | "2" => "Tày",
+        "03" | "3" => "Thái",
+        "04" | "4" => "Mường",
+        "05" | "5" => "H'Mông",
+        "06" | "6" => "Dao",
+        "10" => "Gia Rai",
+        "11" => "Ba Na",
+        "12" => "Ê Đê",
+        "13" => "Chăm",
+        "14" => "Sán Dìu",
+        "15" => "Hoa",
+        other => {
+            if other.chars().any(|c| c.is_alphabetic()) {
+                other
+            } else {
+                "Kinh"
+            }
+        }
+    }
+    .to_string()
+}
+
+pub fn resolve_occupation_name(code: &str, catalogs: Option<&[CatalogRecord]>) -> String {
+    let trimmed = code.trim();
+    if let Some(cats) = catalogs {
+        if let Some(c) = cats.iter().find(|c| c.cat_type == "occupation" && c.code == trimmed) {
+            let name = c.name.trim();
+            if let Some(idx) = name.find(" - ") {
+                return name[idx + 3..].trim().to_string();
+            }
+            return name.to_string();
+        }
+    }
+    match trimmed {
+        "22" => "Kỹ sư, Chuyên viên",
+        "52" => "Nhân viên bán hàng",
+        "71" => "Công nhân xây dựng",
+        "83" => "Lái xe",
+        "99" => "Khác",
+        other => {
+            if other.chars().any(|c| c.is_alphabetic()) {
+                other
+            } else if other.is_empty() {
+                "Người lao động"
+            } else {
+                "Người lao động"
+            }
+        }
+    }
+    .to_string()
+}
+
+pub fn resolve_province_name(code: &str, catalogs: Option<&[CatalogRecord]>) -> String {
+    let trimmed = code.trim();
+    if let Some(cats) = catalogs {
+        if let Some(c) = cats.iter().find(|c| c.cat_type == "province" && c.code == trimmed) {
+            let name = c.name.trim();
+            if let Some(idx) = name.find(" - ") {
+                return name[idx + 3..].trim().to_string();
+            }
+            return name.to_string();
+        }
+    }
+    match trimmed {
+        "01" => "Hà Nội",
+        "02" => "Hà Giang",
+        "04" => "Cao Bằng",
+        "06" => "Bắc Kạn",
+        "08" => "Tuyên Quang",
+        "10" => "Lào Cai",
+        "11" => "Điện Biên",
+        "12" => "Lai Châu",
+        "14" => "Sơn La",
+        "15" => "Yên Bái",
+        "17" => "Hòa Bình",
+        "19" => "Thái Nguyên",
+        "20" => "Lạng Sơn",
+        "22" => "Quảng Ninh",
+        "24" => "Bắc Giang",
+        "25" => "Phú Thọ",
+        "26" => "Vĩnh Phúc",
+        "27" => "Bắc Ninh",
+        "30" => "Hải Dương",
+        "31" => "Hải Phòng",
+        "33" => "Hưng Yên",
+        "34" => "Thái Bình",
+        "35" => "Hà Nam",
+        "36" => "Nam Định",
+        "37" => "Ninh Bình",
+        "38" => "Thanh Hóa",
+        "40" => "Nghệ An",
+        "42" => "Hà Tĩnh",
+        "44" => "Quảng Bình",
+        "45" => "Quảng Trị",
+        "46" => "Thừa Thiên Huế",
+        "48" => "Đà Nẵng",
+        "49" => "Quảng Nam",
+        "51" => "Quảng Ngãi",
+        "52" => "Bình Định",
+        "54" => "Phú Yên",
+        "56" => "Khánh Hòa",
+        "58" => "Ninh Thuận",
+        "60" => "Bình Thuận",
+        "62" => "Kon Tum",
+        "64" => "Gia Lai",
+        "66" => "Đắk Lắk",
+        "67" => "Đắk Nông",
+        "68" => "Lâm Đồng",
+        "70" => "Bình Phước",
+        "72" => "Tây Ninh",
+        "74" => "Bình Dương",
+        "75" => "Đồng Nai",
+        "77" => "Bà Rịa - Vũng Tàu",
+        "79" => "TP. Hồ Chí Minh",
+        "80" => "Long An",
+        "82" => "Tiền Giang",
+        "83" => "Bến Tre",
+        "84" => "Trà Vinh",
+        "86" => "Vĩnh Long",
+        "87" => "Đồng Tháp",
+        "89" => "An Giang",
+        "91" => "Kiên Giang",
+        "92" => "Cần Thơ",
+        "93" => "Hậu Giang",
+        "94" => "Sóc Trăng",
+        "95" => "Bạc Liêu",
+        "96" => "Cà Mau",
+        other => {
+            if other.chars().any(|c| c.is_alphabetic()) {
+                other
+            } else {
+                ""
+            }
+        }
+    }
+    .to_string()
+}
+
+pub fn resolve_ward_name(code: &str, catalogs: Option<&[CatalogRecord]>) -> String {
+    let trimmed = code.trim();
+    if let Some(cats) = catalogs {
+        if let Some(c) = cats.iter().find(|c| c.cat_type == "ward" && c.code == trimmed) {
+            let name = c.name.trim();
+            if let Some(idx) = name.find(" - ") {
+                return name[idx + 3..].trim().to_string();
+            }
+            return name.to_string();
+        }
+    }
+    if trimmed.chars().any(|c| c.is_alphabetic()) {
+        trimmed.to_string()
+    } else {
+        "".to_string()
+    }
+}
 
 fn xml_escape(s: &str) -> String {
     s.replace('&', "&amp;")
@@ -177,11 +385,12 @@ fn inline_qr_drawing_xml(rel_id: &str) -> String {
 }
 
 /// Xuất phiếu khám Mẫu 03 (.docx) cho 1 hồ sơ:
-/// - `pre_exam_only = true`: Điền sẵn Hành chính + Tiền sử + Barcode tiếp nhận (Header căn phải), để trống `Số: ....../GKSK` và phần khám để bác sĩ ghi tay.
+/// - `pre_exam_only = true`: Điền sẵn Hành chính + Barcode tiếp nhận (Header căn phải), ĐỂ TRỐNG toàn bộ ô Tiền sử (☐ Có, ☐ Không) để người khám tự kê khai bằng bút, để trống `Số: ....../GKSK` và phần khám để bác sĩ ghi tay.
 /// - `pre_exam_only = false`: Điền đầy đủ cả Số lưu trữ + Kết quả Thể lực, Lâm sàng, Cận lâm sàng, Kết luận.
 pub fn export_record_to_mau03_docx(
     record: &RecordItem,
     config: &AppConfig,
+    catalogs: Option<&[CatalogRecord]>,
     output_path: &Path,
     pre_exam_only: bool,
 ) -> Result<(), String> {
@@ -242,7 +451,7 @@ pub fn export_record_to_mau03_docx(
             writer.write_all(s.as_bytes()).map_err(|e| e.to_string())?;
         } else if name == "word/document.xml" {
             let s = String::from_utf8_lossy(&buf).to_string();
-            let merged = merge_document_xml(&s, record, ma_tiep_nhan, config, pre_exam_only);
+            let merged = merge_document_xml(&s, record, ma_tiep_nhan, config, catalogs, pre_exam_only);
             writer.write_all(merged.as_bytes()).map_err(|e| e.to_string())?;
         } else {
             writer.write_all(&buf).map_err(|e| e.to_string())?;
@@ -294,6 +503,7 @@ fn merge_document_xml(
     record: &RecordItem,
     _ma_tiep_nhan: &str,
     config: &AppConfig,
+    catalogs: Option<&[CatalogRecord]>,
     pre_exam_only: bool,
 ) -> String {
     let d = &record.data;
@@ -370,22 +580,23 @@ fn merge_document_xml(
     );
     xml = replace_para_by_id(&xml, "5B4E914D", &p5);
 
-    // 6. Dân tộc & 7. Đối tượng (70291AD9)
-    let dt_txt = if d.ma_dan_toc == "01" || d.ma_dan_toc == "1" { "Kinh" } else { &d.ma_dan_toc };
+    // 6. Dân tộc & 7. Đối tượng (70291AD9) - Xuất VALUE chữ rõ ràng, không để mã số
+    let dt_txt = resolve_dan_toc_name(&d.ma_dan_toc, catalogs);
+    let doi_tuong_txt = resolve_doi_tuong_name(&d.doi_tuong, catalogs);
     let p6 = format!(
         "{}{}{}{}",
         run_text("6. Dân tộc: ", true),
-        run_text(dt_txt, false),
+        run_text(&dt_txt, false),
         run_text("          7. Đối tượng: ", true),
-        run_text(&d.doi_tuong, false)
+        run_text(&doi_tuong_txt, false)
     );
     xml = replace_para_by_id(&xml, "70291AD9", &p6);
 
     // 8. Nguồn chi trả & 9. Nhóm máu (73F7FBE7)
     let nct_txt = match d.nguon_chi_tra {
-        1 => "Ngân sách TW",
-        2 => "Ngân sách ĐP",
-        3 => "Quỹ BHYT",
+        1 => "Ngân sách Trung ương",
+        2 => "Ngân sách Địa phương",
+        3 => "Quỹ Bảo hiểm y tế",
         4 => "Người sử dụng lao động",
         5 => "Xã hội hóa",
         _ => "Khác",
@@ -395,29 +606,32 @@ fn merge_document_xml(
         run_text("8. Nguồn chi trả: ", true),
         run_text(nct_txt, false),
         run_text("          9. Nhóm máu: ", true),
-        run_text(&d.nhom_mau, false),
-        run_text(&format!("     Điện thoại: {}", d.dien_thoai), false),
+        run_text(if d.nhom_mau.is_empty() { "……" } else { &d.nhom_mau }, false),
+        run_text(&format!("     Điện thoại: {}", if d.dien_thoai.is_empty() { "………………" } else { &d.dien_thoai }), false),
     );
     xml = replace_para_by_id(&xml, "73F7FBE7", &p8);
 
-    // 10. Nơi ở hiện tại (717F0AE8)
+    // 10. Nơi ở hiện tại (717F0AE8) - Trình bày đúng chuẩn: Tỉnh/thành, Phường/xã, Số nhà/thôn/xóm (Không để mã số)
+    let tinh_name = resolve_province_name(&d.matinh_cu_tru, catalogs);
+    let xa_name = resolve_ward_name(&d.maxa_cu_tru, catalogs);
+    let tinh_str = if tinh_name.is_empty() { "……………" } else { &tinh_name };
+    let xa_str = if xa_name.is_empty() { "……………" } else { &xa_name };
+    let dia_chi_str = if d.dia_chi.is_empty() { "……………" } else { &d.dia_chi };
+
     let p10 = format!(
-        "{}{}",
-        run_text("10. Nơi ở hiện tại: ", true),
-        run_text(
-            &format!(
-                "{} (Mã Tỉnh: {}, Mã Xã: {})",
-                if d.dia_chi.is_empty() { "............................" } else { &d.dia_chi },
-                d.matinh_cu_tru,
-                d.maxa_cu_tru
-            ),
-            false
-        )
+        "{}{}{}{}{}{}",
+        run_text("10. Nơi ở hiện tại: Tỉnh/thành: ", true),
+        run_text(&format!("{}    ", tinh_str), false),
+        run_text("Phường/xã: ", true),
+        run_text(&format!("{}    ", xa_str), false),
+        run_text("Số nhà/thôn/xóm: ", true),
+        run_text(dia_chi_str, false),
     );
     xml = replace_para_by_id(&xml, "717F0AE8", &p10);
 
-    // 11. Nghề nghiệp (31D253D4)
-    let p11 = format!("{}{}", run_text("11. Nghề nghiệp: ", true), run_text(&d.ma_nghe_nghiep, false));
+    // 11. Nghề nghiệp (31D253D4) - Xuất VALUE tên nghề nghiệp, không để mã số
+    let nghe_nghiep_txt = resolve_occupation_name(&d.ma_nghe_nghiep, catalogs);
+    let p11 = format!("{}{}", run_text("11. Nghề nghiệp: ", true), run_text(&nghe_nghiep_txt, false));
     xml = replace_para_by_id(&xml, "31D253D4", &p11);
 
     // 12. Nơi làm việc, học tập (6CE6B511)
@@ -434,14 +648,32 @@ fn merge_document_xml(
     xml = replace_para_by_id(&xml, "69BD5132", &p13);
 
     // Tiền sử gia đình (78FED6C5)
-    let p_tsgd = format!(
-        "{}{}{}{}{}",
-        run_text("a) ", false),
-        run_checkbox(d.tsgd_mac_benh == 0),
-        run_text(" Không       b) ", false),
-        run_checkbox(d.tsgd_mac_benh == 1),
-        run_text(&format!(" Có; Nếu “có”, đề nghị ghi cụ thể tên bệnh: {}", d.tsgd_ma_benh), false),
-    );
+    // Nếu in trước khám (pre_exam_only): để trống cả 2 ô Có / Không để người khám tự kê khai bằng bút
+    let p_tsgd = if pre_exam_only {
+        format!(
+            "{}{}{}{}{}",
+            run_text("a) ", false),
+            run_checkbox(false),
+            run_text(" Không       b) ", false),
+            run_checkbox(false),
+            run_text(" Có; Nếu “có”, đề nghị ghi cụ thể tên bệnh: ……………………………………………………", false),
+        )
+    } else {
+        format!(
+            "{}{}{}{}{}",
+            run_text("a) ", false),
+            run_checkbox(d.tsgd_mac_benh == 0),
+            run_text(" Không       b) ", false),
+            run_checkbox(d.tsgd_mac_benh == 1),
+            run_text(
+                &format!(
+                    " Có; Nếu “có”, đề nghị ghi cụ thể tên bệnh: {}",
+                    if d.tsgd_mac_benh == 1 { &d.tsgd_ma_benh } else { "" }
+                ),
+                false
+            ),
+        )
+    };
     xml = replace_para_by_id(&xml, "78FED6C5", &p_tsgd);
 
     // Tiền sử bản thân 22 mục (Cột Có / Không)
@@ -469,52 +701,81 @@ fn merge_document_xml(
         (d.tsbt_ma_tuy, "605F59F1", "450A6F62"),
         (d.tsbt_benh_khac, "263462E7", "42C30385"),
     ];
-    for (val, yes_id, no_id) in tsbt_pairs {
-        xml = replace_para_by_id(&xml, yes_id, &run_checkbox(val == 1));
-        xml = replace_para_by_id(&xml, no_id, &run_checkbox(val == 0));
-    }
-
-    if !d.tsbt_ma_benh_khac.trim().is_empty() {
+    if pre_exam_only {
+        // Trước khám: Giữ nguyên ô trống ☐ cho cả 2 cột Có và Không để người đi khám tự kê khai
+        for (_val, yes_id, no_id) in tsbt_pairs {
+            xml = replace_para_by_id(&xml, yes_id, &run_checkbox(false));
+            xml = replace_para_by_id(&xml, no_id, &run_checkbox(false));
+        }
         xml = replace_para_by_id(
             &xml,
             "54F3C0B2",
-            &run_text(&format!("Bệnh khác (ghi rõ): {}", d.tsbt_ma_benh_khac), false),
+            &run_text("Bệnh khác (ghi rõ): …………………………………………………………………", false),
         );
+    } else {
+        for (val, yes_id, no_id) in tsbt_pairs {
+            xml = replace_para_by_id(&xml, yes_id, &run_checkbox(val == 1));
+            xml = replace_para_by_id(&xml, no_id, &run_checkbox(val == 0));
+        }
+        if !d.tsbt_ma_benh_khac.trim().is_empty() {
+            xml = replace_para_by_id(
+                &xml,
+                "54F3C0B2",
+                &run_text(&format!("Bệnh khác (ghi rõ): {}", d.tsbt_ma_benh_khac), false),
+            );
+        }
     }
 
-    // Câu 3a & 3b
-    xml = replace_para_by_id(&xml, "521E9DDD", &format!("{}{}", run_checkbox(d.tsbt_dang_dieu_tri_benh == 0), run_text(" Không", false)));
-    xml = replace_para_by_id(
-        &xml,
-        "7B9B041E",
-        &format!(
-            "{}{}",
-            run_checkbox(d.tsbt_dang_dieu_tri_benh == 1),
-            run_text(
-                &format!(
-                    " Có (Tên bệnh, thuốc đang dùng): {} {}",
-                    d.tsbt_ma_benh, d.tsbt_ten_thuoc_lieu_luong
-                ),
-                false
-            )
-        ),
-    );
-    xml = replace_para_by_id(&xml, "04F9F521", &format!("{}{}", run_checkbox(d.tsbt_thai_san == 0), run_text(" Không", false)));
-    xml = replace_para_by_id(
-        &xml,
-        "043D9AC7",
-        &format!(
-            "{}{}",
-            run_checkbox(d.tsbt_thai_san == 1),
-            run_text(
-                &format!(
-                    " Có (Tên bệnh thai sản, thuốc): {} {}",
-                    d.tsbt_ma_benh_thai_san, d.tsbt_ten_thuoc_thai_san
-                ),
-                false
-            )
-        ),
-    );
+    // Câu 3a & 3b (Đang điều trị bệnh & Thai sản)
+    if pre_exam_only {
+        xml = replace_para_by_id(&xml, "521E9DDD", &format!("{}{}", run_checkbox(false), run_text(" Không", false)));
+        xml = replace_para_by_id(
+            &xml,
+            "7B9B041E",
+            &format!("{}{}", run_checkbox(false), run_text(" Có (Nếu có, xin hãy liệt kê tên bệnh, các thuốc đang dùng và liều lượng): ……………………………………………………", false)),
+        );
+        xml = replace_para_by_id(&xml, "04F9F521", &format!("{}{}", run_checkbox(false), run_text(" Không", false)));
+        xml = replace_para_by_id(
+            &xml,
+            "043D9AC7",
+            &format!("{}{}", run_checkbox(false), run_text(" Có (Nếu có, xin hãy liệt kê tên bệnh, các thuốc đang dùng và liều lượng): ……………………………………………………", false)),
+        );
+    } else {
+        xml = replace_para_by_id(&xml, "521E9DDD", &format!("{}{}", run_checkbox(d.tsbt_dang_dieu_tri_benh == 0), run_text(" Không", false)));
+        xml = replace_para_by_id(
+            &xml,
+            "7B9B041E",
+            &format!(
+                "{}{}",
+                run_checkbox(d.tsbt_dang_dieu_tri_benh == 1),
+                run_text(
+                    &format!(
+                        " Có (Tên bệnh, thuốc đang dùng): {} {}",
+                        if d.tsbt_dang_dieu_tri_benh == 1 { &d.tsbt_ma_benh } else { "" },
+                        if d.tsbt_dang_dieu_tri_benh == 1 { &d.tsbt_ten_thuoc_lieu_luong } else { "" }
+                    ),
+                    false
+                )
+            ),
+        );
+        xml = replace_para_by_id(&xml, "04F9F521", &format!("{}{}", run_checkbox(d.tsbt_thai_san == 0), run_text(" Không", false)));
+        xml = replace_para_by_id(
+            &xml,
+            "043D9AC7",
+            &format!(
+                "{}{}",
+                run_checkbox(d.tsbt_thai_san == 1),
+                run_text(
+                    &format!(
+                        " Có (Tên bệnh thai sản, thuốc): {} {}",
+                        if d.tsbt_thai_san == 1 { &d.tsbt_ma_benh_thai_san } else { "" },
+                        if d.tsbt_thai_san == 1 { &d.tsbt_ten_thuoc_thai_san } else { "" }
+                    ),
+                    false
+                )
+            ),
+        );
+    }
 
     // Nếu xuất bản đầy đủ sau khi khám (pre_exam_only == false), điền cả Thể lực, Lâm sàng, CLS, Kết luận
     if !pre_exam_only {

@@ -91,7 +91,7 @@ mod tests {
 
         let cfg = AppConfig::default();
         let test_docx = PathBuf::from("target/test_mau03_barcode.docx");
-        export_record_to_mau03_docx(&rec, &cfg, &test_docx, true).expect("mau03 docx");
+        export_record_to_mau03_docx(&rec, &cfg, None, &test_docx, true).expect("mau03 docx");
         assert!(test_docx.exists());
 
         let test_xlsm = PathBuf::from("target/test_import_ksk.xlsm");

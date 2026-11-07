@@ -124,7 +124,7 @@ pub fn export_contract_full_dossier(
 
         let docx_path = dir_docx.join(format!("{}_Mau03.docx", person_tag));
         let pre_exam_only = rec.status == 0 && rec.data.so_luu_tru.trim().is_empty();
-        let _ = export_record_to_mau03_docx(rec, config, &docx_path, pre_exam_only);
+        let _ = export_record_to_mau03_docx(rec, config, None, &docx_path, pre_exam_only);
     }
 
     // 3. Xuất bộ dữ liệu BYT (Excel .xlsm + CSV + XML)

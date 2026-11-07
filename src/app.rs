@@ -311,9 +311,9 @@ impl KskApp {
             tag
         ));
         let out_path = dir.join(fname);
-        match export_record_to_mau03_docx(rec, &self.config, &out_path, pre_exam_only) {
+        match export_record_to_mau03_docx(rec, &self.config, Some(&self.catalogs), &out_path, pre_exam_only) {
             Ok(()) => {
-                self.toast = Some(format!("🖨 Đã xuất phiếu Mẫu 03 kèm QR: {}", out_path.display()));
+                self.toast = Some(format!("🖨 Đã xuất phiếu Mẫu 03 kèm Barcode tiếp nhận: {}", out_path.display()));
                 open_path_in_os(&out_path.to_string_lossy());
             }
             Err(e) => {
@@ -595,12 +595,12 @@ impl eframe::App for KskApp {
                                     r.data.ma_y_te,
                                     r.ho_ten.to_uppercase()
                                 ));
-                                if export_record_to_mau03_docx(r, &self.config, &dir.join(fname), true).is_ok() {
+                                if export_record_to_mau03_docx(r, &self.config, Some(&self.catalogs), &dir.join(fname), true).is_ok() {
                                     ok_cnt += 1;
                                 }
                             }
                             self.toast = Some(format!(
-                                "🖨 Đã trộn & xuất {} phiếu khám Mẫu 03 kèm QR Code tại '{}'",
+                                "🖨 Đã trộn & xuất {} phiếu khám Mẫu 03 kèm Barcode tiếp nhận tại '{}'",
                                 ok_cnt,
                                 dir.display()
                             ));
