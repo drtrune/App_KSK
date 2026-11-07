@@ -134,6 +134,14 @@ mod tests {
     }
 
     #[test]
+    fn test_egui_text_state() {
+        use eframe::egui;
+        let ccursor = egui::text::CCursor::new(5);
+        let range = egui::text_selection::CCursorRange::one(ccursor);
+        assert_eq!(range.primary.index, 5);
+    }
+
+    #[test]
     fn test_catalog_ward_filter() {
         use crate::models::catalog::CatalogRecord;
 

@@ -964,26 +964,30 @@ fn merge_document_xml(
 
     // Khám lâm sàng - Thính lực (Nói thường 9 mức, Nói thầm 9 mức OMR) - Đẩy lề sát, nhãn căn thẳng
     let p_tai_trai = format!(
-        "{}{}{}{}",
-        run_text("Tai trái: - Thường: ", true),
+        "{}{}{}{}{}{}",
+        run_text("Tai trái:", true),
+        run_br(),
+        run_text(" - Thường:  ", true),
         run_omr_hearing_thuong_boxes(&d.tai_trai_noi_thuong, pre_exam_only),
         run_br(),
         format!(
             "{}{}",
-            run_text("          - Thầm:     ", true),
+            run_text(" - Thầm:    ", true),
             run_omr_hearing_tham_boxes(&d.tai_trai_noi_tham, pre_exam_only)
         ),
     );
     xml = replace_para_by_id(&xml, "7A0DA69A", &p_tai_trai);
 
     let p_tai_phai = format!(
-        "{}{}{}{}",
-        run_text("Tai phải: - Thường: ", true),
+        "{}{}{}{}{}{}",
+        run_text("Tai phải:", true),
+        run_br(),
+        run_text(" - Thường:  ", true),
         run_omr_hearing_thuong_boxes(&d.tai_phai_noi_thuong, pre_exam_only),
         run_br(),
         format!(
             "{}{}",
-            run_text("          - Thầm:     ", true),
+            run_text(" - Thầm:    ", true),
             run_omr_hearing_tham_boxes(&d.tai_phai_noi_tham, pre_exam_only)
         ),
     );
