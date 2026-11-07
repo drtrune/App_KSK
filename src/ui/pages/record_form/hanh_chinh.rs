@@ -31,8 +31,8 @@ impl HanhChinhView {
                         ui.add(egui::TextEdit::singleline(&mut form.ma_gtin_cskcb).desired_width(120.0).interactive(false));
 
                         ui.add_space(14.0);
-                        ui.label(RichText::new("Mã LK (*):").strong().size(12.5));
-                        ui.add(egui::TextEdit::singleline(&mut form.ma_lk).desired_width(140.0));
+                        ui.label(RichText::new("Mã tiếp nhận (Mã LK) (*):").strong().size(12.5));
+                        ui.add(egui::TextEdit::singleline(&mut form.ma_lk).desired_width(140.0).hint_text("Mã tiếp nhận lượt khám..."));
 
                         ui.add_space(14.0);
                         ui.label(RichText::new("Ngày khám (*):").strong().size(12.5));

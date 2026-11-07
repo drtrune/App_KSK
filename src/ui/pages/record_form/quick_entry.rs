@@ -49,10 +49,10 @@ impl QuickEntryView {
                             ui.vertical(|ui| {
                                 ui.label(
                                     RichText::new(format!(
-                                        "👤 {}   |   CCCD: {}   |   Mã Y Tế (QR): {}",
+                                        "👤 {}   |   CCCD: {}   |   Mã tiếp nhận: {}",
                                         if form.ho_ten.is_empty() { "CHƯA NHẬP HỌ TÊN" } else { &form.ho_ten },
                                         if form.so_cccd.is_empty() { "---" } else { &form.so_cccd },
-                                        &form.ma_y_te
+                                        if !form.ma_lk.is_empty() { &form.ma_lk } else { &form.ma_y_te }
                                     ))
                                     .strong()
                                     .size(13.5),

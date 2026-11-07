@@ -17,3 +17,4 @@ zip = { version = "0.6", default-features = false, features = ["deflate"] }
 qrcode = "0.14"
 image = { version = "0.24", default-features = false, features = ["png"] }
 rfd = "0.14"
+barcoders = { version = "2.0.0", features = ["image"] }

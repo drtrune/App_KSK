@@ -58,3 +58,4 @@ pub struct AttachmentRecord {
     pub doc_type: String, // "Hợp đồng", "Phiếu khám Mẫu 03", "Kết quả CLS", "Tài liệu khác"
     pub uploaded_at: String,
 }
+

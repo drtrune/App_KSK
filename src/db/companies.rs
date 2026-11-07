@@ -179,3 +179,4 @@ pub fn delete_attachment(conn: &Connection, id: i64) -> Result<(), rusqlite::Err
     conn.execute("DELETE FROM attachments WHERE id = ?", params![id])?;
     Ok(())
 }
+

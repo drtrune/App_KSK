@@ -104,7 +104,7 @@ impl RecordsPage {
 
             ui.add_space(10.0);
 
-            // THANH QUÉT MÃ QR NHẬP LIỆU NHANH 1 CỬA
+            // THANH BẮN MÃ VẠCH TIẾP NHẬN / MÃ LK (NHẬP LIỆU NHANH 1 CỬA)
             egui::Frame::none()
                 .fill(if dark_mode {
                     Color32::from_rgb(30, 41, 59)
@@ -116,10 +116,10 @@ impl RecordsPage {
                 .inner_margin(egui::Margin::symmetric(12.0, 8.0))
                 .show(ui, |ui| {
                     ui.horizontal(|ui| {
-                        ui.label(RichText::new("📷 QUÉT MÃ QR PHIẾU MẪU 03 (NHẬP LIỆU 1 CỬA):").strong().size(12.5).color(Color32::from_rgb(3, 105, 161)));
+                        ui.label(RichText::new("📷 BẮN MÃ VẠCH TIẾP NHẬN (BARCODE - F2):").strong().size(12.5).color(Color32::from_rgb(3, 105, 161)));
                         let resp = ui.add(
                             egui::TextEdit::singleline(qr_scan_input)
-                                .hint_text("Đặt con trỏ tại đây và bắn mã QR trên tờ phiếu khám Mẫu 03 (hoặc nhập Mã Y Tế / CCCD rồi nhấn Enter)...")
+                                .hint_text("Đặt con trỏ tại đây và bắn mã vạch trên tờ phiếu khám Mẫu 03 (hoặc nhập Mã tiếp nhận / CCCD)...")
                                 .desired_width(450.0),
                         );
                         let trigger_qr = (resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)))
@@ -127,7 +127,7 @@ impl RecordsPage {
 
                         if trigger_qr && !qr_scan_input.trim().is_empty() {
                             let raw = qr_scan_input.trim();
-                            // Parse KSK|<ma_y_te>|<so_cccd>|<ho_ten> or direct ma_y_te / so_cccd
+                            // Hỗ trợ mã tiếp nhận (LK...), Mã Y Tế, CCCD hoặc format KSK|...
                             let parts: Vec<&str> = raw.split('|').collect();
                             let code_key = if parts.len() >= 2 && parts[0].eq_ignore_ascii_case("KSK") {
                                 parts[1].trim().to_lowercase()
@@ -136,10 +136,10 @@ impl RecordsPage {
                             };
 
                             if let Some(found) = records.iter().find(|r| {
-                                r.ma_y_te.to_lowercase() == code_key
+                                r.data.ma_lk.to_lowercase() == code_key
+                                    || r.ma_y_te.to_lowercase() == code_key
                                     || r.data.ma_y_te.to_lowercase() == code_key
                                     || (!r.so_cccd.is_empty() && r.so_cccd.to_lowercase() == code_key)
-                                    || r.data.ma_lk.to_lowercase() == code_key
                             }) {
                                 action = RecordsAction::OpenFastEntry(found.id);
                                 qr_scan_input.clear();
@@ -155,7 +155,7 @@ impl RecordsPage {
                 ui.label(RichText::new("Tìm kiếm:").size(12.5));
                 ui.add(
                     egui::TextEdit::singleline(search_query)
-                        .hint_text("Tìm theo Số lưu trữ, Mã Y Tế, Họ tên, CCCD, Công ty...")
+                        .hint_text("Tìm theo Mã tiếp nhận, Số lưu trữ, Họ tên, CCCD, Công ty...")
                         .desired_width(320.0),
                 );
 
@@ -214,7 +214,7 @@ impl RecordsPage {
                             .show(ui, |ui| {
                                 ui.label(RichText::new("STT").strong().size(11.5));
                                 ui.label(RichText::new("Số Lưu Trữ (GKSK)").strong().size(11.5));
-                                ui.label(RichText::new("Mã Y Tế (QR)").strong().size(11.5));
+                                ui.label(RichText::new("Mã Tiếp Nhận").strong().size(11.5));
                                 ui.label(RichText::new("Họ và Tên").strong().size(11.5));
                                 ui.label(RichText::new("GT").strong().size(11.5));
                                 ui.label(RichText::new("Ngày sinh").strong().size(11.5));
@@ -233,7 +233,8 @@ impl RecordsPage {
                                     } else {
                                         ui.label(RichText::new(&r.data.so_luu_tru).monospace().strong().size(12.0).color(Color32::from_rgb(5, 150, 105)));
                                     }
-                                    ui.label(RichText::new(&r.data.ma_y_te).monospace().size(11.5));
+                                    let ma_tn = if !r.data.ma_lk.is_empty() { &r.data.ma_lk } else { &r.data.ma_y_te };
+                                    ui.label(RichText::new(ma_tn).monospace().size(11.5));
                                     ui.label(RichText::new(&r.ho_ten).strong().size(12.0));
                                     ui.label(if r.data.gioi_tinh == 2 { "Nữ" } else { "Nam" });
                                     ui.label(&r.data.ngay_sinh);

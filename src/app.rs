@@ -568,7 +568,7 @@ impl eframe::App for KskApp {
                                             }
                                             self.reload_all_data();
                                             self.toast = Some(format!(
-                                                "📥 Đã import {} nhân viên vào Hợp đồng '{}' (Đã sinh Mã Y Tế, để trống Số lưu trữ)!",
+                                                "📥 Đã import {} nhân viên vào Hợp đồng '{}' (Đã sinh Mã tiếp nhận, để trống Số lưu trữ)!",
                                                 cnt, ct.so_hop_dong
                                             ));
                                         }

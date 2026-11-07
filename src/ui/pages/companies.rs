@@ -281,8 +281,8 @@ impl CompaniesPage {
                                     action = CompanyPageAction::NewRecordForContract(ct.id);
                                 }
                                 if ui
-                                    .button(RichText::new("🖨 2. Trộn & Xuất Phiếu Mẫu 03 (.docx + QR) Cả Đoàn [Trước Khám]").strong().color(Color32::from_rgb(217, 119, 6)))
-                                    .on_hover_text("Xuất hàng loạt phiếu khám Word Mẫu 03 đã điền Hành chính + Tiền sử + Mã QR (chưa có Số lưu trữ) để phát cho nhân viên đi khám")
+                                    .button(RichText::new("🖨 2. Trộn & Xuất Phiếu Mẫu 03 (.docx + Barcode) Cả Đoàn [Trước Khám]").strong().color(Color32::from_rgb(217, 119, 6)))
+                                    .on_hover_text("Xuất hàng loạt phiếu khám Word Mẫu 03 đã điền Hành chính + Mã vạch tiếp nhận (chưa có Số lưu trữ) để phát cho nhân viên đi khám")
                                     .clicked()
                                 {
                                     action = CompanyPageAction::BatchPrintMau03PreExam(ct.id);
@@ -312,7 +312,7 @@ impl CompaniesPage {
                     // Bảng danh sách nhân viên trong Hợp đồng
                     ui.horizontal(|ui| {
                         ui.label(RichText::new("Tìm nhân viên trong đoàn:").size(12.0));
-                        ui.add(egui::TextEdit::singleline(&mut state.search_emp).desired_width(260.0).hint_text("Nhập Họ tên, Mã Y Tế, CCCD, Số lưu trữ..."));
+                        ui.add(egui::TextEdit::singleline(&mut state.search_emp).desired_width(260.0).hint_text("Nhập Họ tên, Mã tiếp nhận, CCCD, Số lưu trữ..."));
                     });
                     ui.add_space(4.0);
 
@@ -323,7 +323,7 @@ impl CompaniesPage {
                             .spacing([12.0, 8.0])
                             .show(ui, |ui| {
                                 ui.label(RichText::new("STT").strong());
-                                ui.label(RichText::new("Mã Y Tế (QR)").strong());
+                                ui.label(RichText::new("Mã Tiếp Nhận").strong());
                                 ui.label(RichText::new("Số Lưu Trữ (GKSK)").strong());
                                 ui.label(RichText::new("Họ và Tên").strong());
                                 ui.label(RichText::new("GT").strong());
@@ -338,12 +338,14 @@ impl CompaniesPage {
                                 for (idx, r) in ct_records.iter().filter(|r| {
                                     q.is_empty()
                                         || r.ho_ten.to_lowercase().contains(&q)
+                                        || r.data.ma_lk.to_lowercase().contains(&q)
                                         || r.data.ma_y_te.to_lowercase().contains(&q)
                                         || r.data.so_luu_tru.to_lowercase().contains(&q)
                                         || r.so_cccd.to_lowercase().contains(&q)
                                 }).enumerate() {
                                     ui.label((idx + 1).to_string());
-                                    ui.label(RichText::new(&r.data.ma_y_te).monospace().strong());
+                                    let ma_tn = if !r.data.ma_lk.is_empty() { &r.data.ma_lk } else { &r.data.ma_y_te };
+                                    ui.label(RichText::new(ma_tn).monospace().strong());
                                     if r.data.so_luu_tru.trim().is_empty() {
                                         ui.label(RichText::new("Chưa cấp số").color(Color32::from_rgb(217, 119, 6)));
                                     } else {

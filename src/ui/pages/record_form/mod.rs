@@ -123,8 +123,8 @@ impl RecordFormView {
                     }
 
                     if ui
-                        .button(RichText::new("🖨 In Mẫu 03 + QR [Trước khám]").size(11.5).color(Color32::from_rgb(14, 165, 233)))
-                        .on_hover_text("Trộn phiếu Word Mẫu 03 có sẵn Hành chính + Tiền sử + Mã QR (Để trống Số lưu trữ & phần khám để phát cho người khám)")
+                        .button(RichText::new("🖨 In Mẫu 03 + Barcode [Trước khám]").size(11.5).color(Color32::from_rgb(14, 165, 233)))
+                        .on_hover_text("Trộn phiếu Word Mẫu 03 có sẵn Hành chính + Mã vạch tiếp nhận căn phải (Để trống Số lưu trữ & phần khám để in phát cho người khám)")
                         .clicked()
                     {
                         action = FormAction::PrintMau03PreExam;

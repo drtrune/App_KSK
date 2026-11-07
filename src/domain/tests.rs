@@ -81,8 +81,11 @@ mod tests {
         let qr = generate_qr_png_bytes(&rec.ma_y_te, &rec.so_cccd, &rec.ho_ten).expect("qr png");
         assert!(qr.len() > 100);
 
+        let barcode = generate_barcode_png_bytes(&rec.data.ma_lk).expect("barcode png");
+        assert!(barcode.len() > 100);
+
         let cfg = AppConfig::default();
-        let test_docx = PathBuf::from("target/test_mau03_qr.docx");
+        let test_docx = PathBuf::from("target/test_mau03_barcode.docx");
         export_record_to_mau03_docx(&rec, &cfg, &test_docx, true).expect("mau03 docx");
         assert!(test_docx.exists());
 

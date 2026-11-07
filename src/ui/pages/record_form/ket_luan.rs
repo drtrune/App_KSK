@@ -64,7 +64,8 @@ impl KetLuanView {
                                 );
                             }
                             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                ui.label(RichText::new(format!("Mã Y Tế (QR): {}", form.ma_y_te)).monospace().strong());
+                                let ma_tn = if !form.ma_lk.is_empty() { &form.ma_lk } else { &form.ma_y_te };
+                                ui.label(RichText::new(format!("Mã tiếp nhận: {}", ma_tn)).monospace().strong());
                             });
                         });
                     });

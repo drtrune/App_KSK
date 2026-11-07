@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{Cursor, Read, Write};
 use std::path::Path;
+use barcoders::sym::code128::Code128;
 use image::{ImageBuffer, Luma};
 use qrcode::QrCode;
 use zip::write::FileOptions;
@@ -15,6 +16,52 @@ fn xml_escape(s: &str) -> String {
         .replace('>', "&gt;")
         .replace('"', "&quot;")
         .replace('\'', "&apos;")
+}
+
+/// Tạo ảnh PNG Mã vạch 1D Code 128 cho Mã tiếp nhận (`ma_lk`)
+pub fn generate_barcode_png_bytes(ma_lk: &str) -> Result<Vec<u8>, String> {
+    let clean_code = ma_lk.trim();
+    let safe_code: String = clean_code
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '_')
+        .collect();
+    let final_code = if safe_code.is_empty() {
+        "LK000001".to_string()
+    } else {
+        safe_code
+    };
+
+    // Chuẩn Code 128 Set B (ký tự bắt đầu: \u{0181})
+    let payload = format!("\u{0181}{}", final_code);
+    let bc = Code128::new(&payload).map_err(|e| format!("Lỗi tạo Barcode Code 128: {:?}", e))?;
+    let encoded: Vec<u8> = bc.encode();
+
+    let module_width = 2u32;
+    let quiet_zone_modules = 15u32;
+    let total_modules = encoded.len() as u32 + quiet_zone_modules * 2;
+    let img_width = total_modules * module_width;
+    let img_height = 50u32;
+
+    let mut img: ImageBuffer<Luma<u8>, Vec<u8>> =
+        ImageBuffer::from_pixel(img_width, img_height, Luma([255u8]));
+
+    for (i, &bit) in encoded.iter().enumerate() {
+        if bit == 1 {
+            let start_x = (i as u32 + quiet_zone_modules) * module_width;
+            for x in start_x..(start_x + module_width) {
+                for y in 0..img_height {
+                    img.put_pixel(x, y, Luma([0u8]));
+                }
+            }
+        }
+    }
+
+    let mut png_bytes = Vec::new();
+    let dyn_img = image::DynamicImage::ImageLuma8(img);
+    dyn_img
+        .write_to(&mut Cursor::new(&mut png_bytes), image::ImageFormat::Png)
+        .map_err(|e| e.to_string())?;
+    Ok(png_bytes)
 }
 
 /// Tạo ảnh PNG Mã QR cho hồ sơ khám (`KSK|<ma_y_te>|<so_cccd>|<ho_ten>`)
@@ -108,6 +155,7 @@ fn run_checkbox(checked: bool) -> String {
     )
 }
 
+#[allow(dead_code)]
 fn inline_qr_drawing_xml(rel_id: &str) -> String {
     // 720000 EMUs = ~2.0 cm x 2.0 cm crisp QR code in header
     format!(
@@ -128,7 +176,7 @@ fn inline_qr_drawing_xml(rel_id: &str) -> String {
 }
 
 /// Xuất phiếu khám Mẫu 03 (.docx) cho 1 hồ sơ:
-/// - `pre_exam_only = true`: Điền sẵn Hành chính + Tiền sử + Mã QR, để trống `Số: ....../GKSK` và phần khám để bác sĩ ghi tay.
+/// - `pre_exam_only = true`: Điền sẵn Hành chính + Tiền sử + Barcode tiếp nhận (Header căn phải), để trống `Số: ....../GKSK` và phần khám để bác sĩ ghi tay.
 /// - `pre_exam_only = false`: Điền đầy đủ cả Số lưu trữ + Kết quả Thể lực, Lâm sàng, Cận lâm sàng, Kết luận.
 pub fn export_record_to_mau03_docx(
     record: &RecordItem,
@@ -142,13 +190,15 @@ pub fn export_record_to_mau03_docx(
     }
 
     let d = &record.data;
-    let ma_y_te = if d.ma_y_te.trim().is_empty() {
-        format!("YT{:05}", record.id.max(1))
+    let ma_tiep_nhan = if !d.ma_lk.trim().is_empty() {
+        d.ma_lk.trim()
+    } else if !d.ma_y_te.trim().is_empty() {
+        d.ma_y_te.trim()
     } else {
-        d.ma_y_te.clone()
+        &format!("LK{:06}", record.id.max(1))
     };
 
-    let qr_png = generate_qr_png_bytes(&ma_y_te, &d.so_cccd, &d.ho_ten)?;
+    let barcode_png = generate_barcode_png_bytes(ma_tiep_nhan)?;
 
     let src_file = File::open(template_path).map_err(|e| e.to_string())?;
     let mut archive = ZipArchive::new(src_file).map_err(|e| e.to_string())?;
@@ -173,27 +223,66 @@ pub fn export_record_to_mau03_docx(
                     "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\"><Default Extension=\"png\" ContentType=\"image/png\"/>",
                 );
             }
+            if !s.contains("PartName=\"/word/header1.xml\"") {
+                s = s.replace(
+                    "</Types>",
+                    "<Override PartName=\"/word/header1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml\"/></Types>",
+                );
+            }
             writer.write_all(s.as_bytes()).map_err(|e| e.to_string())?;
         } else if name == "word/_rels/document.xml.rels" {
             let mut s = String::from_utf8_lossy(&buf).to_string();
-            if !s.contains("Id=\"rIdQrCode\"") {
+            if !s.contains("Target=\"header1.xml\"") {
                 s = s.replace(
                     "</Relationships>",
-                    "<Relationship Id=\"rIdQrCode\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" Target=\"media/qr_ksk.png\"/></Relationships>",
+                    "<Relationship Id=\"rIdHeader1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/header\" Target=\"header1.xml\"/></Relationships>",
                 );
             }
             writer.write_all(s.as_bytes()).map_err(|e| e.to_string())?;
         } else if name == "word/document.xml" {
             let s = String::from_utf8_lossy(&buf).to_string();
-            let merged = merge_document_xml(&s, record, &ma_y_te, config, pre_exam_only);
+            let merged = merge_document_xml(&s, record, ma_tiep_nhan, config, pre_exam_only);
             writer.write_all(merged.as_bytes()).map_err(|e| e.to_string())?;
         } else {
             writer.write_all(&buf).map_err(|e| e.to_string())?;
         }
     }
 
-    writer.start_file("word/media/qr_ksk.png", options).map_err(|e| e.to_string())?;
-    writer.write_all(&qr_png).map_err(|e| e.to_string())?;
+    // 1. Ghi ảnh Barcode 1D Code 128
+    writer.start_file("word/media/barcode_tiepnhan.png", options).map_err(|e| e.to_string())?;
+    writer.write_all(&barcode_png).map_err(|e| e.to_string())?;
+
+    // 2. Ghi relationship cho Header
+    writer.start_file("word/_rels/header1.xml.rels", options).map_err(|e| e.to_string())?;
+    let header_rels = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\
+<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">\
+<Relationship Id=\"rIdBarcode\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" Target=\"media/barcode_tiepnhan.png\"/>\
+</Relationships>";
+    writer.write_all(header_rels.as_bytes()).map_err(|e| e.to_string())?;
+
+    // 3. Ghi file word/header1.xml (Barcode 1D + Mã tiếp nhận căn phải)
+    writer.start_file("word/header1.xml", options).map_err(|e| e.to_string())?;
+    let header_xml = format!(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\
+<w:hdr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" \
+xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" \
+xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\">\
+<w:p><w:pPr><w:pStyle w:val=\"Header\"/><w:spacing w:before=\"0\" w:after=\"0\"/><w:jc w:val=\"right\"/></w:pPr>\
+<w:r><w:drawing><wp:inline xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\">\
+<wp:extent cx=\"1645920\" cy=\"320040\"/>\
+<wp:docPr id=\"1\" name=\"Barcode\"/>\
+<wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect=\"1\"/></wp:cNvGraphicFramePr>\
+<a:graphic><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/picture\">\
+<pic:pic><pic:nvPicPr><pic:cNvPr id=\"0\" name=\"barcode.png\"/><pic:cNvPicPr/></pic:nvPicPr>\
+<pic:blipFill><a:blip r:embed=\"rIdBarcode\"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>\
+<pic:spPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"1645920\" cy=\"320040\"/></a:xfrm><a:prstGeom prst=\"rect\"/></pic:spPr>\
+</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>\
+<w:p><w:pPr><w:spacing w:before=\"0\" w:after=\"0\"/><w:jc w:val=\"right\"/></w:pPr>\
+<w:r><w:rPr><w:rFonts w:ascii=\"Times New Roman\" w:hAnsi=\"Times New Roman\"/><w:sz w:val=\"17\"/><w:szCs w:val=\"17\"/></w:rPr>\
+<w:t xml:space=\"preserve\">Mã tiếp nhận: {}</w:t></w:r></w:p></w:hdr>",
+        xml_escape(ma_tiep_nhan)
+    );
+    writer.write_all(header_xml.as_bytes()).map_err(|e| e.to_string())?;
 
     writer.finish().map_err(|e| e.to_string())?;
     Ok(())
@@ -202,24 +291,32 @@ pub fn export_record_to_mau03_docx(
 fn merge_document_xml(
     doc_xml: &str,
     record: &RecordItem,
-    ma_y_te: &str,
+    _ma_tiep_nhan: &str,
     config: &AppConfig,
     pre_exam_only: bool,
 ) -> String {
     let d = &record.data;
     let mut xml = doc_xml.to_string();
 
-    // 0. Dòng Số lưu trữ + Mã QR (paraId="56EA532B")
+    // Đảm bảo sectPr trỏ đến Header chứa Barcode tiếp nhận
+    if let Some(pos) = xml.rfind("<w:sectPr") {
+        if let Some(open_rel) = xml[pos..].find('>') {
+            let open_end = pos + open_rel + 1;
+            if !xml.contains("w:headerReference") {
+                xml.insert_str(open_end, "<w:headerReference w:type=\"default\" r:id=\"rIdHeader1\"/>");
+            }
+        }
+    }
+
+    // 0. Dòng Số lưu trữ (paraId="56EA532B") - Căn chỉnh chuẩn công văn, không bị chèn hình QR méo dòng
     let so_gksk_txt = if pre_exam_only || d.so_luu_tru.trim().is_empty() {
         format!("Số: ……………/{}", config.archive_suffix)
     } else {
         format!("Số: {}", d.so_luu_tru)
     };
     let header_no_runs = format!(
-        "<w:r><w:tab/></w:r>{}{}{}",
-        run_text(&format!("{}   ", so_gksk_txt), true),
-        inline_qr_drawing_xml("rIdQrCode"),
-        run_text(&format!("  [Mã YT: {}]", ma_y_te), true)
+        "<w:r><w:tab/></w:r>{}",
+        run_text(&so_gksk_txt, true)
     );
     xml = replace_para_by_id(&xml, "56EA532B", &header_no_runs);
 
@@ -234,13 +331,12 @@ fn merge_document_xml(
 
     // 2. Giới tính (7A1D182C)
     let p2 = format!(
-        "{}{}{}{}{}{}",
+        "{}{}{}{}{}",
         run_text("2. Giới tính: ", true),
         run_checkbox(d.gioi_tinh == 1),
         run_text(" Nam     ", false),
         run_checkbox(d.gioi_tinh == 2),
-        run_text(" Nữ     (Mã Y Tế: ", false),
-        run_text(&format!("{})", ma_y_te), true),
+        run_text(" Nữ", false),
     );
     xml = replace_para_by_id(&xml, "7A1D182C", &p2);
 
@@ -469,3 +565,4 @@ fn merge_document_xml(
 
     xml
 }
+
