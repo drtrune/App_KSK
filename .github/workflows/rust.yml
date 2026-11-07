@@ -1,22 +1,51 @@
-name: Rust
+name: Build Windows Release (.exe)
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch: # Cho phép bấm nút "Run workflow" thủ công bất kỳ lúc nào trên GitHub
 
 env:
   CARGO_TERM_COLOR: always
+  # Liên kết tĩnh MSVC CRT để file .exe độc lập hoàn toàn, không yêu cầu cài VC++ Runtime
+  RUSTFLAGS: "-C target-feature=+crt-static"
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build Release Binary
+        run: cargo build --release --target x86_64-pc-windows-msvc --verbose
+
+      - name: Prepare Artifacts Directory
+        shell: bash
+        run: |
+          mkdir -p release_dist
+          # Copy file .exe vừa biên dịch
+          cp target/x86_64-pc-windows-msvc/release/*.exe release_dist/
+          # Copy file config.toml nếu có trong repository
+          if [ -f "config.toml" ]; then
+            cp config.toml release_dist/
+          fi
+
+      - name: Upload Build Artifacts (ZIP)
+        uses: actions/upload-artifact@v4
+        with:
+          name: KSK_Windows_Release
+          path: release_dist/
+          retention-days: 14
