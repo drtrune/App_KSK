@@ -38,3 +38,15 @@ pub fn calculate_age(ngay_sinh: &str) -> u32 {
     30 // Mặc định 30 nếu chưa nhập ngày sinh
 }
 
+pub fn calc_age(ngay_sinh: &str) -> Option<u32> {
+    use chrono::Datelike;
+    if let Some((_, _, y)) = parse_dmy(ngay_sinh) {
+        let cur_year = chrono::Local::now().year() as u32;
+        if cur_year >= y {
+            return Some(cur_year - y);
+        }
+    }
+    None
+}
+
+

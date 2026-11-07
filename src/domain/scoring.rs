@@ -1,5 +1,16 @@
 use crate::models::QdClassification;
 
+pub fn calc_bmi(chieu_cao_cm: &str, can_nang_kg: &str) -> Option<f64> {
+    let h: f64 = chieu_cao_cm.trim().replace(',', ".").parse().ok()?;
+    let w: f64 = can_nang_kg.trim().replace(',', ".").parse().ok()?;
+    if h > 30.0 && w > 5.0 {
+        let hm = h / 100.0;
+        Some(w / (hm * hm))
+    } else {
+        None
+    }
+}
+
 // TÁCH VÀ PHÂN TÍCH HUYẾT ÁP (SYSTOLIC / DIASTOLIC)
 pub fn parse_blood_pressure(s: &str) -> (f64, f64) {
     let cleaned = s.replace(' ', "");

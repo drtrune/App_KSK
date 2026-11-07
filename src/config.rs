@@ -13,15 +13,27 @@ pub struct AppConfig {
     pub default_province_code: String,
     #[serde(default = "default_ward")]
     pub default_ward_code: String,
+    #[serde(default = "default_hospital_name")]
+    pub hospital_name: String,
+    #[serde(default = "default_governing_body")]
+    pub governing_body: String,
+    #[serde(default = "default_archive_suffix")]
+    pub archive_suffix: String,
+    #[serde(default = "default_next_archive_seq")]
+    pub next_archive_seq: i64,
     #[serde(default)]
     pub dark_mode: bool,
 }
 
 fn default_db_path() -> String { "ksk_qd3176.db".to_string() }
-fn default_cskcb() -> String { "77005".to_string() }
+fn default_cskcb() -> String { "52208".to_string() }
 fn default_gtin() -> String { "8934286053806".to_string() }
-fn default_province() -> String { "64".to_string() }
-fn default_ward() -> String { "23992".to_string() }
+fn default_province() -> String { "52".to_string() }
+fn default_ward() -> String { "21550".to_string() }
+fn default_hospital_name() -> String { "BỆNH VIỆN BÌNH ĐỊNH".to_string() }
+fn default_governing_body() -> String { "BỘ Y TẾ".to_string() }
+fn default_archive_suffix() -> String { "GKSK-52208/26".to_string() }
+fn default_next_archive_seq() -> i64 { 1 }
 
 impl Default for AppConfig {
     fn default() -> Self {
@@ -31,6 +43,10 @@ impl Default for AppConfig {
             default_gtin_cskcb: default_gtin(),
             default_province_code: default_province(),
             default_ward_code: default_ward(),
+            hospital_name: default_hospital_name(),
+            governing_body: default_governing_body(),
+            archive_suffix: default_archive_suffix(),
+            next_archive_seq: default_next_archive_seq(),
             dark_mode: false,
         }
     }

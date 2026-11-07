@@ -5,6 +5,7 @@ use crate::models::user::UserRecord;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AppPage {
     Records,
+    Companies,
     RecordEdit,
     AdminCatalogs,
     AdminQd1613,
@@ -16,6 +17,7 @@ pub enum AppPage {
 pub struct Sidebar;
 
 impl Sidebar {
+    #[allow(clippy::too_many_arguments)]
     pub fn show(
         ui: &mut Ui,
         current_page: &mut AppPage,
@@ -27,9 +29,9 @@ impl Sidebar {
         on_new_record: &mut bool,
     ) {
         let bg = if *dark_mode {
-            Color32::from_rgb(15, 23, 42) // Slate 900
+            Color32::from_rgb(15, 23, 42)
         } else {
-            Color32::from_rgb(248, 250, 252) // Slate 50
+            Color32::from_rgb(248, 250, 252)
         };
 
         let width = if *collapsed { 64.0 } else { 230.0 };
@@ -43,12 +45,12 @@ impl Sidebar {
 
                 // 1. Header: Logo & App Title
                 ui.horizontal(|ui| {
-                    let logo_color = Color32::from_rgb(14, 165, 233); // Sky 500
+                    let logo_color = Color32::from_rgb(14, 165, 233);
                     ui.label(RichText::new("⚕").size(22.0).strong().color(logo_color));
                     if !*collapsed {
                         ui.vertical(|ui| {
-                            ui.label(RichText::new("KSK ĐỊNH KỲ").size(14.0).strong());
-                            ui.label(RichText::new("QĐ 3176 & 1613").size(10.5).color(Color32::from_rgb(100, 116, 139)));
+                            ui.label(RichText::new("SIÊU APP KSK").size(14.0).strong());
+                            ui.label(RichText::new("Đoàn & Lẻ • QĐ 3176").size(10.5).color(Color32::from_rgb(100, 116, 139)));
                         });
                     }
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -66,7 +68,7 @@ impl Sidebar {
                 // Quick Action: Tạo hồ sơ mới
                 let can_create = user_perms.contains(&Perm::RecordCreate);
                 if can_create {
-                    let btn_text = if *collapsed { "➕" } else { "➕  Tạo hồ sơ mới" };
+                    let btn_text = if *collapsed { "➕" } else { "➕  Tạo hồ sơ lẻ mới" };
                     let btn = egui::Button::new(RichText::new(btn_text).strong().size(12.5).color(Color32::WHITE))
                         .fill(Color32::from_rgb(14, 165, 233))
                         .rounding(6.0)
@@ -115,12 +117,13 @@ impl Sidebar {
                     ui.add_space(2.0);
                 };
 
-                // Section: Hồ sơ
+                // Section: Hồ sơ & Đoàn khám
                 if !*collapsed {
-                    ui.label(RichText::new("HỒ SƠ KHÁM").size(10.0).color(Color32::from_rgb(148, 163, 184)).strong());
+                    ui.label(RichText::new("NGHIỆP VỤ KHÁM").size(10.0).color(Color32::from_rgb(148, 163, 184)).strong());
                     ui.add_space(2.0);
                 }
-                nav_item(ui, AppPage::Records, "📋", "Danh sách hồ sơ", current_page, *collapsed);
+                nav_item(ui, AppPage::Records, "📋", "Danh sách & Quét QR", current_page, *collapsed);
+                nav_item(ui, AppPage::Companies, "🏢", "Khám Đoàn & Hợp đồng", current_page, *collapsed);
 
                 ui.add_space(10.0);
 
@@ -155,7 +158,6 @@ impl Sidebar {
                 ui.with_layout(egui::Layout::bottom_up(egui::Align::Min), |ui| {
                     ui.add_space(6.0);
 
-                    // Logout Button
                     let logout_txt = if *collapsed { "🚪" } else { "🚪  Đăng xuất" };
                     let logout_btn = egui::Button::new(RichText::new(logout_txt).size(12.0).color(Color32::from_rgb(239, 68, 68)))
                         .fill(Color32::TRANSPARENT)
@@ -166,7 +168,6 @@ impl Sidebar {
 
                     ui.add_space(4.0);
 
-                    // Dark / Light toggle
                     let theme_txt = if *collapsed {
                         if *dark_mode { "☀" } else { "🌙" }
                     } else if *dark_mode {
@@ -185,7 +186,6 @@ impl Sidebar {
                     ui.separator();
                     ui.add_space(6.0);
 
-                    // User Profile Snippet
                     if !*collapsed {
                         ui.horizontal(|ui| {
                             let avatar_bg = Color32::from_rgb(224, 242, 254);
