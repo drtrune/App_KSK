@@ -113,4 +113,47 @@ mod tests {
         export_to_xlsm_file(&[rec], &test_xlsm).expect("xlsm export");
         assert!(test_xlsm.exists());
     }
+
+    #[test]
+    fn test_date_auto_slash() {
+        use crate::ui::widgets::date_picker::format_date_input_auto_slash;
+        // Gõ 2 số ngày -> tự chèn /
+        assert_eq!(format_date_input_auto_slash("1", "15"), "15/");
+        // Người dùng tự bấm nút / khi đang có 15/ -> không tự chèn thêm //
+        assert_eq!(format_date_input_auto_slash("15/", "15//"), "15/");
+        // Gõ tiếp tháng
+        assert_eq!(format_date_input_auto_slash("15/", "15/0"), "15/0");
+        assert_eq!(format_date_input_auto_slash("15/0", "15/08"), "15/08/");
+        // Người dùng tự bấm nút / khi đang có 15/08/ -> không nhân đôi
+        assert_eq!(format_date_input_auto_slash("15/08/", "15/08//"), "15/08/");
+        // Gõ năm
+        assert_eq!(format_date_input_auto_slash("15/08/", "15/08/1990"), "15/08/1990");
+        // Backspace xóa lùi -> không ép chèn lại
+        assert_eq!(format_date_input_auto_slash("15/", "15"), "15");
+        assert_eq!(format_date_input_auto_slash("15", "1"), "1");
+    }
+
+    #[test]
+    fn test_catalog_ward_filter() {
+        use crate::models::catalog::CatalogRecord;
+
+        let cats = vec![
+            CatalogRecord { id: 1, cat_type: "province".into(), code: "52".into(), name: "52 - Tỉnh Bình Định".into(), parent_code: "".into(), sort_order: 1, is_active: true },
+            CatalogRecord { id: 2, cat_type: "province".into(), code: "64".into(), name: "64 - Tỉnh Gia Lai".into(), parent_code: "".into(), sort_order: 2, is_active: true },
+            CatalogRecord { id: 3, cat_type: "ward".into(), code: "21517".into(), name: "21517 - Phường Lê Lợi".into(), parent_code: "52".into(), sort_order: 1, is_active: true },
+            CatalogRecord { id: 4, cat_type: "ward".into(), code: "23992".into(), name: "23992 - Phường Hoa Lư".into(), parent_code: "64".into(), sort_order: 1, is_active: true },
+        ];
+
+        // Lọc khi truyền "52"
+        let w_52: Vec<_> = cats.iter().filter(|c| c.cat_type == "ward" && c.parent_code == "52").collect();
+        assert_eq!(w_52.len(), 1);
+        assert_eq!(w_52[0].code, "21517");
+
+        // Lọc khi truyền "64 - Tỉnh Gia Lai"
+        let p_str = "64 - Tỉnh Gia Lai";
+        let clean_p = if let Some(idx) = p_str.find(" - ") { &p_str[..idx] } else { p_str };
+        let w_64: Vec<_> = cats.iter().filter(|c| c.cat_type == "ward" && c.parent_code == clean_p).collect();
+        assert_eq!(w_64.len(), 1);
+        assert_eq!(w_64[0].code, "23992");
+    }
 }

@@ -343,24 +343,36 @@ fn replace_para_by_id(doc_xml: &str, para_id: &str, new_runs_xml: &str) -> Strin
 }
 
 fn run_text(text: &str, bold: bool) -> String {
-    if bold {
-        format!(
-            "<w:r><w:rPr><w:b/><w:bCs/></w:rPr><w:t xml:space=\"preserve\">{}</w:t></w:r>",
-            xml_escape(text)
-        )
+    run_text_sz(text, bold, None)
+}
+
+fn run_text_sz(text: &str, bold: bool, half_pts: Option<u32>) -> String {
+    let sz_xml = if let Some(sz) = half_pts {
+        format!("<w:sz w:val=\"{}\"/><w:szCs w:val=\"{}\"/>", sz, sz)
     } else {
-        format!(
-            "<w:r><w:t xml:space=\"preserve\">{}</w:t></w:r>",
-            xml_escape(text)
-        )
-    }
+        String::new()
+    };
+    let bold_xml = if bold { "<w:b/><w:bCs/>" } else { "" };
+    format!(
+        "<w:r><w:rPr>{}{}</w:rPr><w:t xml:space=\"preserve\">{}</w:t></w:r>",
+        bold_xml, sz_xml, xml_escape(text)
+    )
 }
 
 fn run_checkbox(checked: bool) -> String {
+    run_checkbox_sz(checked, None)
+}
+
+fn run_checkbox_sz(checked: bool, half_pts: Option<u32>) -> String {
     let sym = if checked { "☑" } else { "☐" };
+    let sz_xml = if let Some(sz) = half_pts {
+        format!("<w:sz w:val=\"{}\"/><w:szCs w:val=\"{}\"/>", sz, sz)
+    } else {
+        String::new()
+    };
     format!(
-        "<w:r><w:rPr><w:rFonts w:ascii=\"Segoe UI Symbol\" w:hAnsi=\"Segoe UI Symbol\" w:cs=\"Segoe UI Symbol\"/></w:rPr><w:t>{}</w:t></w:r>",
-        sym
+        "<w:r><w:rPr><w:rFonts w:ascii=\"Segoe UI Symbol\" w:hAnsi=\"Segoe UI Symbol\" w:cs=\"Segoe UI Symbol\"/>{}</w:rPr><w:t>{}</w:t></w:r>",
+        sz_xml, sym
     )
 }
 
@@ -393,19 +405,20 @@ fn parse_vision_val(s: &str) -> Option<i32> {
 }
 
 /// Sinh dãy 11 ô tick OMR Thị lực: 0, 1, 2, ..., 10 (/10)
+/// Đặt cỡ chữ 10pt (w:sz=20) để lề gọn gàng, nằm trọn trên 1 dòng duy nhất không bị rớt dòng
 fn run_omr_vision_boxes(label: &str, selected: Option<i32>, is_pre_exam: bool) -> String {
     let mut out = String::new();
-    out.push_str(&run_text(label, true));
+    out.push_str(&run_text_sz(label, true, Some(20)));
     for v in 0..=10 {
         let checked = if is_pre_exam {
             false
         } else {
             selected == Some(v)
         };
-        out.push_str(&run_checkbox(checked));
-        out.push_str(&run_text(&format!("{} ", v), false));
+        out.push_str(&run_checkbox_sz(checked, Some(20)));
+        out.push_str(&run_text_sz(&format!("{} ", v), false, Some(19)));
     }
-    out.push_str(&run_text("/10", true));
+    out.push_str(&run_text_sz("/10", true, Some(20)));
     out
 }
 
@@ -447,7 +460,7 @@ fn is_hearing_tham_match(val: &str, target_idx: usize) -> bool {
     }
 }
 
-/// Sinh dãy 9 ô tick OMR Thính lực nói thường: >5m, 5m, 4m, 3m, 2m, 1m, 0.5m, Sát tai, Điếc
+/// Sinh dãy 9 ô tick OMR Thính lực nói thường: >5m, 5m, 4m, 3m, 2m, 1m, 0.5m, Sát tai, Điếc (cỡ chữ 9.5pt)
 fn run_omr_hearing_thuong_boxes(val: &str, is_pre_exam: bool) -> String {
     let labels = [">5m", "5m", "4m", "3m", "2m", "1m", "0.5m", "Sát tai", "Điếc"];
     let mut out = String::new();
@@ -457,13 +470,13 @@ fn run_omr_hearing_thuong_boxes(val: &str, is_pre_exam: bool) -> String {
         } else {
             is_hearing_thuong_match(val, i)
         };
-        out.push_str(&run_checkbox(checked));
-        out.push_str(&run_text(&format!("{} ", lbl), false));
+        out.push_str(&run_checkbox_sz(checked, Some(19)));
+        out.push_str(&run_text_sz(&format!("{} ", lbl), false, Some(19)));
     }
     out
 }
 
-/// Sinh dãy 9 ô tick OMR Thính lực nói thầm: >0.5m, 0.5m, 0.4m, 0.3m, 0.2m, 0.1m, 0.05m, Sát tai, Điếc
+/// Sinh dãy 9 ô tick OMR Thính lực nói thầm: >0.5m, 0.5m, 0.4m, 0.3m, 0.2m, 0.1m, 0.05m, Sát tai, Điếc (cỡ chữ 9.5pt)
 fn run_omr_hearing_tham_boxes(val: &str, is_pre_exam: bool) -> String {
     let labels = [">0.5m", "0.5m", "0.4m", "0.3m", "0.2m", "0.1m", "0.05m", "Sát tai", "Điếc"];
     let mut out = String::new();
@@ -473,8 +486,8 @@ fn run_omr_hearing_tham_boxes(val: &str, is_pre_exam: bool) -> String {
         } else {
             is_hearing_tham_match(val, i)
         };
-        out.push_str(&run_checkbox(checked));
-        out.push_str(&run_text(&format!("{} ", lbl), false));
+        out.push_str(&run_checkbox_sz(checked, Some(19)));
+        out.push_str(&run_text_sz(&format!("{} ", lbl), false, Some(19)));
     }
     out
 }
@@ -489,8 +502,8 @@ fn run_omr_classification_boxes(score: i32, is_pre_exam: bool) -> String {
         } else {
             score == (i as i32 + 1)
         };
-        out.push_str(&run_checkbox(checked));
-        out.push_str(&run_text(&format!(" {}   ", lbl), true));
+        out.push_str(&run_checkbox_sz(checked, Some(22)));
+        out.push_str(&run_text_sz(&format!(" {}   ", lbl), true, Some(22)));
     }
     out
 }
@@ -908,14 +921,14 @@ fn merge_document_xml(
         );
     }
 
-    // Khám lâm sàng - Thị lực (11 ô OMR: 0..=10/10)
+    // Khám lâm sàng - Thị lực (11 ô OMR: 0..=10/10) - Đẩy lề sát, dùng nhãn gọn MP / MT
     let p_khong_kinh = format!(
         "{}{}{}{}{}",
         run_text("Kết quả khám thị lực:  Không kính: ", true),
         run_br(),
         run_omr_vision_boxes("  Mắt phải: ", parse_vision_val(&d.khong_kinh_mat_phai), pre_exam_only),
         run_br(),
-        run_omr_vision_boxes("  Mắt trái:  ", parse_vision_val(&d.khong_kinh_mat_trai), pre_exam_only),
+        run_omr_vision_boxes("  Mắt trái: ", parse_vision_val(&d.khong_kinh_mat_trai), pre_exam_only),
     );
     xml = replace_para_by_id(&xml, "67E0EE1A", &p_khong_kinh);
 
@@ -925,7 +938,7 @@ fn merge_document_xml(
         run_br(),
         run_omr_vision_boxes("  Mắt phải: ", parse_vision_val(&d.co_kinh_mat_phai), pre_exam_only),
         run_br(),
-        run_omr_vision_boxes("  Mắt trái:  ", parse_vision_val(&d.co_kinh_mat_trai), pre_exam_only),
+        run_omr_vision_boxes("  Mắt trái: ", parse_vision_val(&d.co_kinh_mat_trai), pre_exam_only),
     );
     xml = replace_para_by_id(&xml, "3B1B5834", &p_co_kinh);
 
@@ -949,15 +962,15 @@ fn merge_document_xml(
     );
     xml = replace_para_by_id(&xml, "1344604A", &p_pl_mat);
 
-    // Khám lâm sàng - Thính lực (Nói thường 9 mức, Nói thầm 9 mức OMR)
+    // Khám lâm sàng - Thính lực (Nói thường 9 mức, Nói thầm 9 mức OMR) - Đẩy lề sát, nhãn căn thẳng
     let p_tai_trai = format!(
         "{}{}{}{}",
-        run_text("Tai trái:   - Nói thường: ", true),
+        run_text("Tai trái: - Thường: ", true),
         run_omr_hearing_thuong_boxes(&d.tai_trai_noi_thuong, pre_exam_only),
         run_br(),
         format!(
             "{}{}",
-            run_text("                - Nói thầm:    ", true),
+            run_text("          - Thầm:     ", true),
             run_omr_hearing_tham_boxes(&d.tai_trai_noi_tham, pre_exam_only)
         ),
     );
@@ -965,12 +978,12 @@ fn merge_document_xml(
 
     let p_tai_phai = format!(
         "{}{}{}{}",
-        run_text("Tai phải:  - Nói thường: ", true),
+        run_text("Tai phải: - Thường: ", true),
         run_omr_hearing_thuong_boxes(&d.tai_phai_noi_thuong, pre_exam_only),
         run_br(),
         format!(
             "{}{}",
-            run_text("                - Nói thầm:    ", true),
+            run_text("          - Thầm:     ", true),
             run_omr_hearing_tham_boxes(&d.tai_phai_noi_tham, pre_exam_only)
         ),
     );

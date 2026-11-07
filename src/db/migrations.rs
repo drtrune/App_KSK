@@ -128,5 +128,11 @@ pub fn run_migrations(conn: &Connection) -> Result<(), rusqlite::Error> {
         let _ = conn.execute("ALTER TABLE records ADD COLUMN so_luu_tru TEXT DEFAULT ''", []);
     }
 
+    if version < 3 {
+        // Cập nhật bổ sung đầy đủ 63 Tỉnh/TP và Xã/Phường chuẩn Việt Nam
+        crate::db::seed::seed_catalogs(conn)?;
+        conn.execute("PRAGMA user_version = 3;", [])?;
+    }
+
     Ok(())
 }
