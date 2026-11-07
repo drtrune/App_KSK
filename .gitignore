@@ -17,3 +17,6 @@ crash_log.txt
 
 # Antigravity artifacts
 .antigravity/
+
+# Backup files
+*_backup_*
